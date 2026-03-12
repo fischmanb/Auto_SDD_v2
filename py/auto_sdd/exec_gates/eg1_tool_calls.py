@@ -129,9 +129,17 @@ ALLOWED_BASE_COMMANDS: tuple[str, ...] = (
 BLOCKED_PATHS: tuple[str, ...] = (
     "/etc/", "/usr/", "/bin/", "/sbin/", "/var/",
     "/System/", "/Library/", "/tmp/",
-    ".env", ".env.local",
     ".git/",
 )
+
+# Paths blocked by exact filename match (not prefix).
+# These are project-level sensitive files the agent must not overwrite.
+BLOCKED_EXACT_FILENAMES: frozenset[str] = frozenset({
+    ".env", ".env.local", ".env.production", ".env.staging",
+    ".npmrc",  # Could inject registry URLs or auth tokens
+    ".yarnrc", ".yarnrc.yml",  # Same risk as .npmrc
+    ".netrc",  # Network credentials
+})
 
 
 def _is_path_within_project(path_str: str, project_root: Path) -> bool:
@@ -160,11 +168,27 @@ def _extract_first_token(command: str) -> str:
 
 def _validate_path(path_str: str, project_root: Path) -> None:
     """Validate a file path against restrictions. Raises ToolCallBlocked."""
+    # Prefix-based blocks (system directories)
     for blocked in BLOCKED_PATHS:
         if path_str.startswith(blocked) or f"/{blocked}" in path_str:
             raise ToolCallBlocked(
                 f"Path '{path_str}' matches blocked pattern '{blocked}'"
             )
+
+    # Exact filename blocks (sensitive project files)
+    filename = Path(path_str).name
+    if filename in BLOCKED_EXACT_FILENAMES:
+        raise ToolCallBlocked(
+            f"Path '{path_str}' targets protected file '{filename}'"
+        )
+
+    # Build cache tampering
+    if "node_modules/.cache" in path_str:
+        raise ToolCallBlocked(
+            f"Path '{path_str}' targets build cache (node_modules/.cache)"
+        )
+
+    # Containment check for absolute paths or parent traversal
     if path_str.startswith("/") or ".." in path_str:
         if not _is_path_within_project(path_str, project_root):
             raise ToolCallBlocked(
@@ -256,6 +280,78 @@ def detect_project_runtimes(project_root: Path) -> set[str]:
     return detected
 
 
+# ── Command argument containment ─────────────────────────────────────────────
+
+# Commands whose arguments should be checked for path containment.
+# If the agent runs `cat /etc/passwd` or `grep -r secret ~/other-project/`,
+# the path arguments must resolve within project_root.
+_PATH_ARGUMENT_COMMANDS: frozenset[str] = frozenset({
+    "cat", "ls", "find", "grep", "head", "tail", "wc",
+    "cp", "mv", "mkdir", "touch",
+})
+
+
+def _validate_command_arguments(
+    command: str, project_root: Path
+) -> None:
+    """Check that file path arguments in commands stay within project_root.
+
+    Extracts non-flag arguments from commands that operate on files
+    and validates each against project containment. This prevents the
+    agent from using allowed commands (cat, grep, etc.) to read or
+    manipulate files outside the project.
+
+    Raises ToolCallBlocked if any argument resolves outside project_root.
+    """
+    parts = command.strip().split()
+    if not parts:
+        return
+
+    first_token = parts[0].lower()
+    if first_token not in _PATH_ARGUMENT_COMMANDS:
+        return
+
+    for arg in parts[1:]:
+        # Skip flags
+        if arg.startswith("-"):
+            continue
+
+        # Skip glob patterns (the shell expands them relative to cwd,
+        # which is project_root, so they're contained)
+        if "*" in arg or "?" in arg:
+            continue
+
+        # Check if this looks like a path that could escape
+        is_suspicious = (
+            arg.startswith("/")
+            or arg.startswith("~")
+            or ".." in arg
+            or arg.startswith("$")  # Variable expansion
+        )
+
+        if not is_suspicious:
+            continue
+
+        # Resolve and check containment
+        if arg.startswith("~"):
+            # Expand ~ to actual home dir for checking
+            expanded = Path(arg).expanduser()
+        else:
+            expanded = Path(arg)
+
+        # Resolve relative to project_root
+        if not expanded.is_absolute():
+            expanded = project_root / expanded
+
+        try:
+            expanded.resolve().relative_to(project_root.resolve())
+        except (ValueError, OSError):
+            raise ToolCallBlocked(
+                f"Command argument '{arg}' resolves outside project root. "
+                f"All file operations must stay within '{project_root}'."
+            )
+
+
 # ── Command validation (layered) ─────────────────────────────────────────────
 
 
@@ -265,6 +361,7 @@ def _validate_command_layers(
     allowed_npm_scripts: frozenset[str],
     allowed_npx_packages: frozenset[str],
     allowed_branch: str,
+    project_root: Path,
 ) -> None:
     """Validate a shell command against all restriction layers.
 
@@ -273,10 +370,11 @@ def _validate_command_layers(
         2. rm -r / rm -rf pattern
         3. Shell injection / metacharacter patterns
         4. Blocked-anywhere tokens (chmod, chown, chgrp)
-        5. Git subcommand + branch validation
-        6. npm/npx scope validation
-        7. Runtime command validation
-        8. Base command allowlist (fallback)
+        5. Command argument path containment
+        6. Git subcommand + branch validation
+        7. npm/npx scope validation
+        8. Runtime command validation
+        9. Base command allowlist (fallback)
 
     Raises ToolCallBlocked on any violation.
     """
@@ -314,12 +412,17 @@ def _validate_command_layers(
                 f"Command contains blocked operation: '{token}'."
             )
 
-    # Layer 5: Git command validation
+    # Layer 5: Command argument path containment
+    # Prevents using allowed commands (cat, grep, etc.) to access
+    # files outside the project root.
+    _validate_command_arguments(cmd_stripped, project_root)
+
+    # Layer 6: Git command validation
     if first_token == "git":
         _validate_git_command(cmd_stripped, allowed_branch)
         return  # Git commands don't need further allowlist checks
 
-    # Layer 6: npm / npx scope validation
+    # Layer 7: npm / npx scope validation
     # Only reachable if "node" runtime is active (npm/npx are node tools).
     node_tokens = RUNTIME_COMMAND_TOKENS.get("node", frozenset())
     if first_token == "npm" and "npm" in allowed_runtime_tokens:
@@ -329,11 +432,11 @@ def _validate_command_layers(
         _validate_npx_command(cmd_stripped, allowed_npx_packages)
         return
 
-    # Layer 7: Runtime command validation
+    # Layer 8: Runtime command validation
     if first_token in allowed_runtime_tokens:
         return  # Allowed runtime command
 
-    # Layer 8: Base command allowlist (filesystem utilities)
+    # Layer 9: Base command allowlist (filesystem utilities)
     allowed = any(
         cmd_stripped.startswith(prefix) or cmd_stripped == prefix.strip()
         for prefix in ALLOWED_BASE_COMMANDS
@@ -643,6 +746,7 @@ class BuildAgentExecutor:
             self._allowed_npm_scripts,
             self._allowed_npx_packages,
             self.allowed_branch,
+            self.project_root,
         )
 
         try:
