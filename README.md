@@ -15,7 +15,10 @@ Auto_SDD_v2/
 │   │   ├── lib/             ← Core library modules
 │   │   │   ├── model_config.py  ← [Step 1] ModelConfig dataclass
 │   │   │   └── local_agent.py   ← [Step 1] Completion loop + EG1 boundary
-│   │   ├── exec_gates/      ← [Step 5] EG implementations
+│   │   ├── exec_gates/      ← [Step 5a] EG implementations
+│   │   │   ├── eg1_tool_calls.py    ← Path/command validation + execution
+│   │   │   ├── eg2_signal_parse.py  ← Mechanical signal extraction
+│   │   │   └── eg3_commit_auth.py   ← Final commit authorization checks
 │   │   └── scripts/         ← [Step 4] build_loop_v2.py entry point
 │   └── tests/               ← [Step 6] Test suite
 ├── scripts/
@@ -32,9 +35,11 @@ Auto_SDD_v2/
 | 1    | ✅ Done | Model config contract + local agent client |
 | 2    | ✅ Done | Tool-call validation script (test LM Studio + GPT-OSS) |
 | 3    | ✅ Done | Module map (classify current build_loop.py: core vs extension) |
-| 4    | ⬜ Next | Skeleton (stripped four-step loop: SELECT→BUILD→GATE→ADVANCE) |
-| 5    | ⬜      | ExecGate implementations (EG1: tool calls, EG2: signal parse, EG3: commit auth) |
-| 6    | ⬜      | Tests (adapted from existing suite, covering core loop only) |
+| 4    | ⬜      | Skeleton (stripped four-step loop: SELECT→BUILD→GATE→ADVANCE) |
+| 5a   | ✅ Done | ExecGate implementations (EG1: tool calls, EG2: signal parse, EG3: commit auth) |
+| 5b   | ⬜      | Wire EGs into skeleton (after Step 4) |
+| 6a   | ⬜ Next | Unit tests for EGs + model_config + local_agent |
+| 6b   | ⬜      | Integration tests (after Step 4) |
 
 ## Core Loop: SELECT → BUILD → GATE → ADVANCE
 
