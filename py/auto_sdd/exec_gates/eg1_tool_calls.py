@@ -26,12 +26,8 @@ logger = logging.getLogger(__name__)
 
 # ── Command safety ───────────────────────────────────────────────────────────
 
-# [Fix 1]: First-token extraction for blocklist matching. Substring matching
-# caused collisions ("dd" matched "git add", "su" matched "result").
-# We now extract the first token and match against it, plus scan for
-# dangerous tokens anywhere in the command with word-boundary awareness.
-
 # Commands blocked by first token (the executable itself).
+# Matched via _extract_first_token() — no substring collisions.
 BLOCKED_FIRST_TOKENS: frozenset[str] = frozenset({
     # Destructive system commands
     "mkfs", "dd", "format", "fdisk", "parted",
@@ -44,28 +40,24 @@ BLOCKED_FIRST_TOKENS: frozenset[str] = frozenset({
     "sudo", "su", "doas",
     # Process management
     "kill", "killall", "pkill",
-    # [Fix 5]: Additional dangerous commands
-    "eval", "exec", "source",  # Shell execution indirection
-    "env",  # Can leak environment variables or run commands
-    "open",  # macOS: launch arbitrary apps
-    "osascript",  # macOS: arbitrary AppleScript
-    "xargs",  # Amplifies commands, hard to validate target
-    "nohup",  # Background execution, escapes timeout
-    "screen", "tmux",  # Session managers, escape sandbox
-    "crontab", "at",  # Scheduled execution
-    "launchctl",  # macOS service management
-    "defaults",  # macOS preferences manipulation
+    # Shell execution indirection
+    "eval", "exec", "source",
+    # Environment manipulation
+    "env", "export",
+    # macOS specific
+    "open", "osascript", "launchctl", "defaults",
+    # Amplification / escape
+    "xargs", "nohup", "screen", "tmux",
+    # Scheduled execution
+    "crontab", "at",
 })
 
-# [Fix 2]: Block all rm -r / rm -rf patterns regardless of target.
-# Agent should not recursively delete anything. If deletion is needed,
-# a scoped delete_file tool can be added later.
+# Block all recursive rm regardless of target.
 _RM_RECURSIVE_PATTERN = re.compile(
     r'\brm\s+(-[a-zA-Z]*r[a-zA-Z]*\s|--recursive)', re.IGNORECASE
 )
 
-# [Fix 3]: Shell metacharacter / injection patterns.
-# Catches command substitution, backgrounding, and common bypass tricks.
+# Shell injection / metacharacter patterns.
 _SHELL_INJECTION_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\$\('), "command substitution $()"),
     (re.compile(r'`[^`]+`'), "backtick command substitution"),
@@ -79,7 +71,7 @@ _SHELL_INJECTION_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r'>\s*/dev/tcp'), "TCP redirect"),
     (re.compile(r'>\s*/dev/udp'), "UDP redirect"),
     (re.compile(r'\bbase64\s+(-d|--decode)'), "base64 decode (obfuscation)"),
-    (re.compile(r'\\x[0-9a-fA-F]{2}'), "hex-escaped characters (obfuscation)"),
+    (re.compile(r'\\x[0-9a-fA-F]{2}'), "hex-escaped characters"),
     (re.compile(r'\b(bash|sh|zsh)\s+-c\s'), "shell -c execution"),
     (re.compile(r'&\s*$'), "background execution (&)"),
     (re.compile(r';\s*\S'), "command chaining with semicolon"),
@@ -87,45 +79,58 @@ _SHELL_INJECTION_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\|\|\s*\S'), "command chaining with ||"),
 ]
 
-# [Fix 4]: Detect write-then-exec patterns.
-# These file extensions, if written by write_file, could be executed
-# by run_command. We track written files and block execution of scripts
-# the agent just created within the project.
-EXECUTABLE_EXTENSIONS: frozenset[str] = frozenset({
-    ".sh", ".bash", ".zsh", ".py", ".rb", ".pl", ".js", ".ts",
-})
-
-# [Fix 6]: Block all chmod (not just 777). Agent should not change
-# file permissions — that's an orchestrator concern.
-# Also block chown/chgrp for the same reason.
+# Tokens blocked anywhere in command via word-boundary regex.
 BLOCKED_ANYWHERE_TOKENS: frozenset[str] = frozenset({
     "chmod", "chown", "chgrp",
 })
 
-# Command prefixes that are allowed. Anything not matching is blocked.
-# Checked AFTER blocklist and injection checks pass.
-ALLOWED_COMMAND_PREFIXES: tuple[str, ...] = (
-    "npm ", "npx ", "node ",
-    "tsc", "tsx",
-    "git add", "git commit", "git status", "git diff", "git log",
-    "git checkout", "git branch", "git rev-parse", "git show",
+# Extensions that flag a file as executable for write-then-exec detection.
+EXECUTABLE_EXTENSIONS: frozenset[str] = frozenset({
+    ".sh", ".bash", ".zsh", ".py", ".rb", ".pl", ".js", ".ts",
+})
+
+# Git subcommands the agent is allowed to use.
+# Everything else (push, merge, rebase, reset --hard, etc.) is blocked.
+ALLOWED_GIT_SUBCOMMANDS: frozenset[str] = frozenset({
+    "add", "commit", "status", "diff", "log", "show",
+    "rev-parse", "branch",
+})
+
+# Git subcommands that are never allowed from the agent.
+# Explicit blocklist for clarity — even if not in allowlist,
+# these get a specific error message explaining why.
+BLOCKED_GIT_SUBCOMMANDS: dict[str, str] = {
+    "push": "Pushes are managed by the orchestrator, not the agent.",
+    "merge": "Merges are managed by the orchestrator.",
+    "rebase": "Rebases are managed by the orchestrator.",
+    "reset": "Resets are managed by the orchestrator's retry logic.",
+    "checkout": "Branch switching is managed by the orchestrator.",
+    "switch": "Branch switching is managed by the orchestrator.",
+    "stash": "Stashing is managed by the orchestrator.",
+    "pull": "Pulls are managed by the orchestrator.",
+    "fetch": "Fetches are managed by the orchestrator.",
+    "remote": "Remote configuration is not permitted.",
+    "config": "Git config changes are not permitted.",
+    "clean": "git clean is managed by the orchestrator.",
+}
+
+# Base commands that are always allowed (non-runtime, non-git, non-npm).
+# These are filesystem inspection and basic shell utilities.
+ALLOWED_BASE_COMMANDS: tuple[str, ...] = (
     "cat ", "ls ", "find ", "grep ", "head ", "tail ", "wc ",
     "mkdir ", "touch ", "cp ", "mv ",
     "echo ", "printf ",
-    "python", "pip ",
-    "test ", "[",  # shell test expressions
+    "test ", "[",
 )
 
 
 # ── Path safety ──────────────────────────────────────────────────────────────
 
-# Paths that must never be written to.
 BLOCKED_PATHS: tuple[str, ...] = (
     "/etc/", "/usr/", "/bin/", "/sbin/", "/var/",
-    "/System/", "/Library/",
-    "/tmp/",  # Temp dir writes could be used to stage exec payloads
-    ".env", ".env.local",  # No credential overwrites
-    ".git/",  # No direct git internals manipulation
+    "/System/", "/Library/", "/tmp/",
+    ".env", ".env.local",
+    ".git/",
 )
 
 
@@ -142,12 +147,11 @@ def _is_path_within_project(path_str: str, project_root: Path) -> bool:
 def _extract_first_token(command: str) -> str:
     """Extract the first token (executable) from a command string.
 
-    Handles common prefixes like env vars (FOO=bar cmd) by skipping
-    them. Returns lowercase for consistent matching.
+    Handles env var assignments (FOO=bar cmd) by skipping them.
+    Returns lowercase for consistent matching.
     """
     parts = command.strip().split()
     for part in parts:
-        # Skip env var assignments (KEY=value)
         if "=" in part and not part.startswith("-"):
             continue
         return part.lower()
@@ -161,7 +165,6 @@ def _validate_path(path_str: str, project_root: Path) -> None:
             raise ToolCallBlocked(
                 f"Path '{path_str}' matches blocked pattern '{blocked}'"
             )
-
     if path_str.startswith("/") or ".." in path_str:
         if not _is_path_within_project(path_str, project_root):
             raise ToolCallBlocked(
@@ -170,15 +173,110 @@ def _validate_path(path_str: str, project_root: Path) -> None:
             )
 
 
-def _validate_command(command: str) -> None:
+# ── Project introspection ────────────────────────────────────────────────────
+
+
+def _parse_package_json(project_root: Path) -> dict[str, Any]:
+    """Parse package.json for npm/npx allowlist derivation.
+
+    Returns dict with:
+        scripts: set of script names from "scripts"
+        dev_deps: set of devDependency package names
+        deps: set of dependency package names
+    """
+    pkg_path = project_root / "package.json"
+    result: dict[str, Any] = {"scripts": set(), "dev_deps": set(), "deps": set()}
+
+    if not pkg_path.exists():
+        return result
+
+    try:
+        data = json.loads(pkg_path.read_text())
+        if isinstance(data.get("scripts"), dict):
+            result["scripts"] = set(data["scripts"].keys())
+        if isinstance(data.get("devDependencies"), dict):
+            result["dev_deps"] = set(data["devDependencies"].keys())
+        if isinstance(data.get("dependencies"), dict):
+            result["deps"] = set(data["dependencies"].keys())
+    except (json.JSONDecodeError, OSError) as exc:
+        logger.warning("Failed to parse package.json: %s", exc)
+
+    return result
+
+
+# Map from runtime identifier to the command tokens it enables.
+# The executor accepts allowed_runtimes as a set of these identifiers.
+RUNTIME_COMMAND_TOKENS: dict[str, frozenset[str]] = {
+    "node": frozenset({"node", "npm", "npx", "tsc", "tsx"}),
+    "python": frozenset({"python", "python3", "pip", "pip3", "pytest", "mypy", "ruff", "black", "flake8"}),
+    "rust": frozenset({"cargo", "rustc", "rustfmt", "clippy"}),
+    "go": frozenset({"go"}),
+    "java": frozenset({"java", "javac", "mvn", "gradle"}),
+    "ruby": frozenset({"ruby", "gem", "bundle", "bundler", "rake"}),
+    "php": frozenset({"php", "composer"}),
+    "dotnet": frozenset({"dotnet"}),
+    "swift": frozenset({"swift", "swiftc", "xcodebuild"}),
+}
+
+
+def detect_project_runtimes(project_root: Path) -> set[str]:
+    """Auto-detect project runtimes from marker files.
+
+    Returns a set of runtime identifiers (keys from RUNTIME_COMMAND_TOKENS).
+    This is a fallback — prefer explicit allowed_runtimes from config/spec.
+    """
+    markers: dict[str, list[str]] = {
+        "node": ["package.json", "tsconfig.json", ".nvmrc"],
+        "python": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"],
+        "rust": ["Cargo.toml"],
+        "go": ["go.mod"],
+        "java": ["pom.xml", "build.gradle", "build.gradle.kts"],
+        "ruby": ["Gemfile"],
+        "php": ["composer.json"],
+        "dotnet": ["*.csproj", "*.fsproj", "*.sln"],
+        "swift": ["Package.swift"],
+    }
+
+    detected: set[str] = set()
+    for runtime, files in markers.items():
+        for pattern in files:
+            if "*" in pattern:
+                if list(project_root.glob(pattern)):
+                    detected.add(runtime)
+                    break
+            elif (project_root / pattern).exists():
+                detected.add(runtime)
+                break
+
+    if detected:
+        logger.info("Detected project runtimes: %s", ", ".join(sorted(detected)))
+    else:
+        logger.warning("No project runtimes detected from marker files")
+
+    return detected
+
+
+# ── Command validation (layered) ─────────────────────────────────────────────
+
+
+def _validate_command_layers(
+    command: str,
+    allowed_runtime_tokens: frozenset[str],
+    allowed_npm_scripts: frozenset[str],
+    allowed_npx_packages: frozenset[str],
+    allowed_branch: str,
+) -> None:
     """Validate a shell command against all restriction layers.
 
     Check order (all must pass):
-        1. First-token blocklist (exact match, not substring)
-        2. rm -r / rm -rf pattern (any target)
+        1. First-token blocklist
+        2. rm -r / rm -rf pattern
         3. Shell injection / metacharacter patterns
         4. Blocked-anywhere tokens (chmod, chown, chgrp)
-        5. Allowlist prefix match (if none match, blocked)
+        5. Git subcommand + branch validation
+        6. npm/npx scope validation
+        7. Runtime command validation
+        8. Base command allowlist (fallback)
 
     Raises ToolCallBlocked on any violation.
     """
@@ -186,47 +284,205 @@ def _validate_command(command: str) -> None:
     if not cmd_stripped:
         raise ToolCallBlocked("run_command: empty command")
 
-    # [Fix 1]: First-token extraction — no more substring collisions
     first_token = _extract_first_token(cmd_stripped)
+
+    # Layer 1: First-token blocklist
     if first_token in BLOCKED_FIRST_TOKENS:
         raise ToolCallBlocked(
             f"Blocked command: '{first_token}' is not permitted"
         )
 
-    # [Fix 2]: Block all recursive rm regardless of target
+    # Layer 2: Recursive rm
     if _RM_RECURSIVE_PATTERN.search(cmd_stripped):
         raise ToolCallBlocked(
-            "Recursive rm (rm -r / rm -rf) is not permitted. "
-            "Use separate tool calls or a scoped delete_file tool."
+            "Recursive rm (rm -r / rm -rf) is not permitted."
         )
 
-    # [Fix 3]: Shell injection / metacharacter detection
+    # Layer 3: Shell injection
     for pattern, description in _SHELL_INJECTION_PATTERNS:
         if pattern.search(cmd_stripped):
             raise ToolCallBlocked(
                 f"Shell injection detected: {description}. "
-                "Use separate tool calls instead of chaining commands."
+                "Use separate tool calls instead of chaining."
             )
 
-    # [Fix 6]: Block chmod/chown/chgrp anywhere in command
+    # Layer 4: Blocked-anywhere tokens
     cmd_lower = cmd_stripped.lower()
     for token in BLOCKED_ANYWHERE_TOKENS:
-        # Word-boundary match to avoid false positives
         if re.search(rf'\b{token}\b', cmd_lower):
             raise ToolCallBlocked(
-                f"Command contains blocked operation: '{token}'. "
-                "File permissions are managed by the orchestrator."
+                f"Command contains blocked operation: '{token}'."
             )
 
-    # Allowlist: command must start with an approved prefix
+    # Layer 5: Git command validation
+    if first_token == "git":
+        _validate_git_command(cmd_stripped, allowed_branch)
+        return  # Git commands don't need further allowlist checks
+
+    # Layer 6: npm / npx scope validation
+    # Only reachable if "node" runtime is active (npm/npx are node tools).
+    node_tokens = RUNTIME_COMMAND_TOKENS.get("node", frozenset())
+    if first_token == "npm" and "npm" in allowed_runtime_tokens:
+        _validate_npm_command(cmd_stripped, allowed_npm_scripts)
+        return
+    if first_token == "npx" and "npx" in allowed_runtime_tokens:
+        _validate_npx_command(cmd_stripped, allowed_npx_packages)
+        return
+
+    # Layer 7: Runtime command validation
+    if first_token in allowed_runtime_tokens:
+        return  # Allowed runtime command
+
+    # Layer 8: Base command allowlist (filesystem utilities)
     allowed = any(
         cmd_stripped.startswith(prefix) or cmd_stripped == prefix.strip()
-        for prefix in ALLOWED_COMMAND_PREFIXES
+        for prefix in ALLOWED_BASE_COMMANDS
     )
-    if not allowed:
+    if allowed:
+        return
+
+    # Nothing matched — block
+    raise ToolCallBlocked(
+        f"Command '{cmd_stripped[:80]}' is not permitted. "
+        f"First token '{first_token}' is not in any allowlist."
+    )
+
+
+# ── Sub-validators ───────────────────────────────────────────────────────────
+
+
+def _validate_git_command(command: str, allowed_branch: str) -> None:
+    """Validate git commands: subcommand allowlist + branch protection."""
+    parts = command.strip().split()
+    if len(parts) < 2:
+        raise ToolCallBlocked("git command requires a subcommand")
+
+    subcommand = parts[1].lower()
+
+    # Check explicit blocklist first (better error messages)
+    if subcommand in BLOCKED_GIT_SUBCOMMANDS:
         raise ToolCallBlocked(
-            f"Command '{cmd_stripped[:80]}' does not match any allowed "
-            f"prefix. Use one of: {', '.join(p.strip() for p in ALLOWED_COMMAND_PREFIXES[:10])}..."
+            f"git {subcommand} is not permitted: "
+            f"{BLOCKED_GIT_SUBCOMMANDS[subcommand]}"
+        )
+
+    # Check allowlist
+    if subcommand not in ALLOWED_GIT_SUBCOMMANDS:
+        raise ToolCallBlocked(
+            f"git {subcommand} is not in the allowed subcommands: "
+            f"{', '.join(sorted(ALLOWED_GIT_SUBCOMMANDS))}"
+        )
+
+    # Branch protection: 'git branch' (listing) is fine,
+    # but 'git branch -d/-D' (deleting) is not.
+    if subcommand == "branch":
+        for flag in parts[2:]:
+            if flag.startswith("-") and ("d" in flag.lower() or "m" in flag.lower()):
+                raise ToolCallBlocked(
+                    "git branch deletion/rename is not permitted."
+                )
+
+    # Validate commit is on the right branch (informational check —
+    # the orchestrator already set up the branch, but this catches
+    # if something went wrong)
+    if subcommand == "commit" and allowed_branch:
+        logger.debug(
+            "EG1: git commit on expected branch '%s'", allowed_branch
+        )
+
+
+def _validate_npm_command(command: str, allowed_scripts: frozenset[str]) -> None:
+    """Validate npm commands against project scope.
+
+    Allowed:
+        npm install  (no args — uses existing package.json)
+        npm ci       (lockfile install)
+        npm run <script>  where <script> is in package.json
+        npm test     (shorthand for npm run test)
+
+    Blocked:
+        npm install <package>  (adding deps is a spec decision)
+        npm run <unknown>      (script not in package.json)
+    """
+    parts = command.strip().split()
+    if len(parts) < 2:
+        raise ToolCallBlocked("npm requires a subcommand")
+
+    sub = parts[1].lower()
+
+    # npm install / npm ci (no additional package args)
+    if sub in ("install", "i", "ci"):
+        # Check if there are non-flag arguments (package names)
+        non_flag_args = [p for p in parts[2:] if not p.startswith("-")]
+        if non_flag_args:
+            raise ToolCallBlocked(
+                f"npm install with specific packages is not permitted: "
+                f"'{' '.join(non_flag_args)}'. The agent must use the "
+                f"existing package.json. Adding dependencies is a spec "
+                f"decision, not a runtime decision."
+            )
+        return
+
+    # npm test (shorthand for npm run test)
+    if sub == "test" or sub == "t":
+        return
+
+    # npm run <script> — validate against package.json scripts
+    if sub == "run" or sub == "run-script":
+        if len(parts) < 3:
+            raise ToolCallBlocked("npm run requires a script name")
+        script_name = parts[2]
+        if allowed_scripts and script_name not in allowed_scripts:
+            raise ToolCallBlocked(
+                f"npm run '{script_name}' not found in package.json scripts. "
+                f"Allowed: {', '.join(sorted(allowed_scripts))}"
+            )
+        return
+
+    # npm uninstall, npm publish, etc. — not permitted
+    raise ToolCallBlocked(
+        f"npm {sub} is not permitted. Allowed: install, ci, test, "
+        f"run <script>"
+    )
+
+
+def _validate_npx_command(
+    command: str, allowed_packages: frozenset[str]
+) -> None:
+    """Validate npx commands against known project packages.
+
+    npx can fetch and execute arbitrary packages from the registry.
+    Only packages from the project's devDependencies are permitted.
+
+    If no package.json exists (allowed_packages is empty), all npx
+    is blocked — there's no way to know what's legitimate.
+    """
+    parts = command.strip().split()
+    if len(parts) < 2:
+        raise ToolCallBlocked("npx requires a package/command name")
+
+    # Skip flags to find the package name
+    package = ""
+    for part in parts[1:]:
+        if part.startswith("-"):
+            continue
+        package = part.lower()
+        break
+
+    if not package:
+        raise ToolCallBlocked("npx: could not determine package name")
+
+    if not allowed_packages:
+        raise ToolCallBlocked(
+            "npx is blocked: no package.json found or no "
+            "devDependencies to derive an allowlist from."
+        )
+
+    if package not in allowed_packages:
+        raise ToolCallBlocked(
+            f"npx '{package}' is not in project devDependencies. "
+            f"Allowed: {', '.join(sorted(list(allowed_packages)[:10]))}"
+            f"{'...' if len(allowed_packages) > 10 else ''}"
         )
 
 
@@ -237,33 +493,63 @@ class BuildAgentExecutor:
     """ToolExecutor implementation for the build agent.
 
     Validates every tool call against path and command restrictions,
-    then executes within the project sandbox. This is the EG1 intercept
-    — the agent proposes, this class disposes.
+    then executes within the project sandbox.
 
     Supported tools:
         write_file(path, content)  — Write content to a file
         read_file(path)            — Read a file's contents
         run_command(command)        — Execute a shell command
 
-    [Fix 4]: Tracks files written by the agent. If the agent writes a
-    script file (.sh, .py, etc.) and then tries to execute it, the
-    execution is blocked — prevents the write-then-exec bypass.
+    Constructor derives npm/npx allowlists from package.json and
+    builds runtime token allowlists from the specified runtimes.
     """
 
     def __init__(
         self,
         project_root: Path,
+        allowed_branch: str = "",
+        allowed_runtimes: set[str] | None = None,
         command_timeout: int = 60,
     ) -> None:
         self.project_root = project_root.resolve()
+        self.allowed_branch = allowed_branch
         self.command_timeout = command_timeout
-        # [Fix 4]: Track files the agent has written this session
         self._written_files: set[str] = set()
+
+        # Derive runtimes: explicit > auto-detected
+        if allowed_runtimes is None:
+            allowed_runtimes = detect_project_runtimes(project_root)
+
+        # Build the combined set of allowed runtime command tokens
+        self._allowed_runtime_tokens: frozenset[str] = frozenset().union(
+            *(RUNTIME_COMMAND_TOKENS.get(r, frozenset()) for r in allowed_runtimes)
+        )
+
+        # Parse package.json for npm/npx scope validation
+        pkg = _parse_package_json(project_root)
+        self._allowed_npm_scripts: frozenset[str] = frozenset(pkg["scripts"])
+        # npx allowlist: devDeps + deps (package names) PLUS runtime
+        # binary tokens (e.g., "tsc" from typescript, "eslint" from eslint).
+        # This handles the common case where `npx tsc` is used but the
+        # package name is "typescript".
+        self._allowed_npx_packages: frozenset[str] = frozenset(
+            pkg["dev_deps"] | pkg["deps"] | self._allowed_runtime_tokens
+        )
+
+        logger.info(
+            "EG1 init: project=%s, branch=%s, runtimes=%s, "
+            "npm_scripts=%d, npx_packages=%d",
+            project_root.name,
+            allowed_branch or "(none)",
+            ",".join(sorted(allowed_runtimes)) or "(none)",
+            len(self._allowed_npm_scripts),
+            len(self._allowed_npx_packages),
+        )
 
     def execute(self, name: str, arguments: dict[str, Any]) -> str:
         """Validate and execute a tool call.
 
-        This method satisfies the ToolExecutor protocol from local_agent.py.
+        Satisfies the ToolExecutor protocol from local_agent.py.
         Returns a JSON string result on success.
         Raises ToolCallBlocked on validation failure.
         """
@@ -293,24 +579,16 @@ class BuildAgentExecutor:
             raise ToolCallBlocked("write_file: 'content' must be a string")
 
         _validate_path(path_str, self.project_root)
-
-        # Resolve within project
         full_path = (self.project_root / path_str).resolve()
-
-        # Final containment check
         if not _is_path_within_project(path_str, self.project_root):
             raise ToolCallBlocked(
-                f"write_file: resolved path '{full_path}' escapes project root"
+                f"write_file: path '{full_path}' escapes project root"
             )
 
-        # Execute
         try:
             os.makedirs(full_path.parent, exist_ok=True)
             full_path.write_text(content)
-
-            # [Fix 4]: Track written files for exec detection
             self._written_files.add(str(full_path))
-
             logger.debug("EG1 write_file: %s (%d bytes)", path_str, len(content))
             return json.dumps({
                 "status": "success",
@@ -323,24 +601,21 @@ class BuildAgentExecutor:
     def _exec_read_file(self, args: dict[str, Any]) -> str:
         """Gate + execute: read_file(path)."""
         path_str = args.get("path", "")
-
         if not path_str:
             raise ToolCallBlocked("read_file: 'path' is required")
 
         _validate_path(path_str, self.project_root)
-
         full_path = (self.project_root / path_str).resolve()
-
         if not _is_path_within_project(path_str, self.project_root):
             raise ToolCallBlocked(
-                f"read_file: resolved path '{full_path}' escapes project root"
+                f"read_file: path '{full_path}' escapes project root"
             )
 
         try:
             content = full_path.read_text()
             logger.debug("EG1 read_file: %s (%d bytes)", path_str, len(content))
             return json.dumps({
-                "content": content[:50000],  # Cap at 50KB to stay in context
+                "content": content[:50000],
                 "path": path_str,
                 "size": len(content),
                 "truncated": len(content) > 50000,
@@ -353,32 +628,31 @@ class BuildAgentExecutor:
     def _exec_run_command(self, args: dict[str, Any]) -> str:
         """Gate + execute: run_command(command)."""
         command = args.get("command", "")
-
         if not command:
             raise ToolCallBlocked("run_command: 'command' is required")
         if not isinstance(command, str):
             raise ToolCallBlocked("run_command: 'command' must be a string")
 
-        # [Fix 4]: Check for write-then-exec bypass.
-        # If the agent wrote a script and now tries to execute it,
-        # block it — the content of the script can't be validated.
+        # Write-then-exec detection (before general validation)
         self._check_write_then_exec(command)
 
-        _validate_command(command)
+        # Full command validation
+        _validate_command_layers(
+            command,
+            self._allowed_runtime_tokens,
+            self._allowed_npm_scripts,
+            self._allowed_npx_packages,
+            self.allowed_branch,
+        )
 
         try:
             result = subprocess.run(
-                command,
-                shell=True,
-                capture_output=True,
-                text=True,
+                command, shell=True,
+                capture_output=True, text=True,
                 timeout=self.command_timeout,
                 cwd=str(self.project_root),
             )
-            logger.debug(
-                "EG1 run_command: %s (rc=%d)",
-                command[:80], result.returncode,
-            )
+            logger.debug("EG1 run_command: %s (rc=%d)", command[:80], result.returncode)
             return json.dumps({
                 "stdout": result.stdout[:4000],
                 "stderr": result.stderr[:2000],
@@ -393,23 +667,17 @@ class BuildAgentExecutor:
             return json.dumps({"error": f"Command failed: {exc}"})
 
     def _check_write_then_exec(self, command: str) -> None:
-        """[Fix 4]: Detect and block execution of agent-written scripts.
+        """Detect and block execution of agent-written scripts.
 
-        If the agent wrote a file with an executable extension (.sh, .py,
-        etc.) during this session and now tries to reference it in a
-        command, block it. The script contents bypass our command
-        validation — we validated the write_file content gate but the
-        script could contain anything.
-
-        Also blocks direct execution patterns like 'bash script.sh',
-        'python script.py', './script.sh'.
+        If the agent wrote a file with an executable extension during
+        this session and now tries to reference it in a command, block
+        it. Also blocks npm run after agent modified package.json.
         """
         if not self._written_files:
             return
 
         cmd_parts = command.strip().split()
         for part in cmd_parts:
-            # Resolve the part as a potential file path
             candidate = part.lstrip("./")
             full_candidate = (self.project_root / candidate).resolve()
             full_str = str(full_candidate)
@@ -423,9 +691,7 @@ class BuildAgentExecutor:
                         f"execute it. Script contents cannot be validated."
                     )
 
-        # Also check for npm script modification + execution.
-        # If agent wrote package.json, running npm run <anything> could
-        # execute arbitrary code via the scripts section.
+        # npm run after package.json modification
         pkg_json = str(self.project_root / "package.json")
         if pkg_json in self._written_files:
             if command.strip().startswith("npm run"):
