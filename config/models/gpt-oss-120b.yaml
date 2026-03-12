@@ -1,0 +1,53 @@
+# GPT-OSS-120B — Primary build agent
+#
+# Served locally via LM Studio (MLX/GGUF) on Mac Studio 256GB.
+# Uses OpenAI Chat Completions API at /v1/chat/completions.
+#
+# To switch models: copy this file, change model/name, point
+# build_loop_v2.py at the new config. No code changes needed.
+
+name: gpt-oss-120b
+
+# ── Connection ───────────────────────────────────────────────
+# LM Studio default port. Adjust if running on a different port.
+base_url: "http://localhost:1234/v1"
+model: "gpt-oss-120b"
+api_key: "lm-studio"
+
+# ── Generation ───────────────────────────────────────────────
+# OpenAI official recommendation: temperature=1.0, top_p=1.0.
+# Reasoning effort "high" recommended for complex code generation.
+max_tokens: 8192
+temperature: 1.0
+top_p: 1.0
+reasoning_effort: "high"
+
+# ── Context management ───────────────────────────────────────
+# Strip reasoning traces from older turns to prevent context bloat.
+# Required per GPT-OSS model card for multi-turn conversations.
+strip_reasoning_older_turns: true
+
+# ── Loop limits ──────────────────────────────────────────────
+# Max tool-call round trips before the agent is considered stuck.
+# 20 is generous for a single-feature build. Adjust down if agent
+# enters loops; adjust up for complex multi-file features.
+max_turns: 20
+
+# Per-completion HTTP timeout in seconds. Local inference on 120B
+# can be slow — 600s (10 min) gives breathing room.
+timeout_seconds: 600
+
+# ── Role mapping ─────────────────────────────────────────────
+# GPT-OSS Harmony format uses "developer" role for instructions.
+# LM Studio should support this; set to false if it maps to "system".
+use_developer_role: true
+
+# ── Optional overrides ───────────────────────────────────────
+# EOS token fix for parallel calling bug. May not be needed when
+# served through LM Studio (which handles Harmony tokens), but
+# listed here for documentation. Empty list = use server defaults.
+eos_token_ids: []
+
+# Extra params passed directly to the completions.create() call.
+# Use this for server-specific parameters without changing code.
+extra_params: {}
