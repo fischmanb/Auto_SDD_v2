@@ -20,7 +20,8 @@ Auto_SDD_v2/
 │   └── tests/               ← [Step 6] Test suite
 ├── scripts/
 │   └── validate_tool_calling.py ← [Step 2] LM Studio + GPT-OSS tool-call validation
-├── docs/                    ← Architecture notes, module map
+├── docs/
+│   └── module-map.md        ← [Step 3] Core vs extension classification
 └── .venv/                   ← Python virtual env (openai, pyyaml)
 ```
 
@@ -30,8 +31,8 @@ Auto_SDD_v2/
 |------|--------|-------------|
 | 1    | ✅ Done | Model config contract + local agent client |
 | 2    | ✅ Done | Tool-call validation script (test LM Studio + GPT-OSS) |
-| 3    | ⬜ Next | Module map (classify current build_loop.py: core vs extension) |
-| 4    | ⬜      | Skeleton (stripped four-step loop: SELECT→BUILD→GATE→ADVANCE) |
+| 3    | ✅ Done | Module map (classify current build_loop.py: core vs extension) |
+| 4    | ⬜ Next | Skeleton (stripped four-step loop: SELECT→BUILD→GATE→ADVANCE) |
 | 5    | ⬜      | ExecGate implementations (EG1: tool calls, EG2: signal parse, EG3: commit auth) |
 | 6    | ⬜      | Tests (adapted from existing suite, covering core loop only) |
 
