@@ -38,9 +38,14 @@ Auto_SDD_v2/
 | 3    | ✅ Done | Module map (classify current build_loop.py: core vs extension) |
 | 4    | ✅ Done | Skeleton (stripped four-step loop: SELECT→BUILD→GATE→ADVANCE) |
 | 5a   | ✅ Done | ExecGate implementations (EG1: tool calls, EG2: signal parse, EG3: commit auth) |
-| 5b   | ⬜      | Wire EGs into skeleton (after Step 4) |
+| 5b   | ✅ Done | EGs wired into skeleton in Step 4 |
 | 6a   | ⬜ Next | Unit tests for EGs + model_config + local_agent |
-| 6b   | ⬜      | Integration tests (after Step 4) |
+| 6b   | ⬜      | Integration tests |
+| 7a   | ⬜      | v1 port: reliability.py (true topo sort, resume state, locking) |
+| 7b   | ⬜      | v1 port: branch_manager.py (feature branches, cleanup) |
+| 7c   | ⬜      | v1 port: build_gates.py (structured results, framework detection) |
+| 7d   | ⬜      | v1 port: prompt_builder.py (codebase summary, learnings, fix/retry) |
+| 7e   | ⬜      | v1 port: codebase_summary.py (agent-generated summary, git tree cache) |
 
 ## Core Loop: SELECT → BUILD → GATE → ADVANCE
 
@@ -127,3 +132,31 @@ is a config value, not a code change.
 Copy an existing config, change `model` and `name`, point the loop at it.
 No code changes. The `base_url` can also change if running a different
 server (Ollama defaults to `:11434`, llama.cpp to `:8080`).
+
+## Step 7: v1 Library Ports
+
+The Step 4 skeleton has working minimal implementations for roadmap parsing,
+prompt construction, and build/test checks. Step 7 replaces these with the
+full v1 modules, adding robustness and edge case handling. The skeleton runs
+end-to-end without these — they make it production-grade.
+
+**Priority order** (each substep is independently useful):
+
+| Substep | v1 Module | Lines | What it adds over the skeleton |
+|---------|-----------|-------|-------------------------------|
+| 7a | `reliability.py` | ~600 | True topological sort (handles diamond deps), resume state (crash recovery), file locking (prevents concurrent runs), cycle detection |
+| 7b | `branch_manager.py` | ~200 | Feature branch creation/cleanup, worktree management. Without this the agent commits to main. |
+| 7c | `build_gates.py` | ~730 | Structured result types, auto-detection of build/test commands across frameworks, dependency health check. Replaces inline subprocess calls. |
+| 7d | `prompt_builder.py` | ~575 | Codebase summary injection, learnings injection, filesystem boundary constraints, fix/retry prompt variants, context budget estimation. This is what makes the Nth feature smarter than the first. |
+| 7e | `codebase_summary.py` | ~240 | Agent-generated project summary cached by git tree hash, injected into prompts. Depends on 7d. |
+
+**What gets stripped during port** (per P6 — extensions deleted, not commented):
+- `reliability.py`: DriftPair, run_parallel_drift_checks
+- `build_gates.py`: check_dead_exports, check_lint (re-add as optional later)
+- `branch_manager.py`: independent/sequential strategies (start with chained only)
+- `prompt_builder.py`: eval sidecar feedback injection, pattern analysis context
+
+**What gets adapted** (interface changes for V2):
+- `claude_wrapper.py` references → `local_agent.py` (already done in skeleton)
+- Prompt format: Claude CLI instructions → tool-use agent instructions
+- Build gates: agent-reported results → orchestrator-executed results (P1)

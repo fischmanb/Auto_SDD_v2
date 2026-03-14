@@ -188,13 +188,29 @@ Four checks to walk through:
 | Step | Status | Files |
 |------|--------|-------|
 | 1 | ✅ Done | model_config.py, local_agent.py, YAML configs |
-| 2 | ✅ Done | validate_tool_calling.py (run on Studio machine to validate LM Studio) |
+| 2 | ✅ Done | validate_tool_calling.py (validated on Studio — 14/15 pass) |
 | 3 | ✅ Done | docs/module-map.md |
-| 4 | ✅ Done | Skeleton (747 lines) — SELECT→BUILD→GATE→ADVANCE with EGs wired |
+| 4 | ✅ Done | build_loop_v2.py (747 lines) — SELECT→BUILD→GATE→ADVANCE with EGs wired |
 | 5a | ✅ Done (review in progress) | eg1 (806 lines), eg2 (171 lines), eg3 (207 lines) |
 | 5b | ✅ Done | EGs wired into skeleton in Step 4 |
 | 6a | ⬜ Next | Unit tests for EGs + model_config + local_agent |
-| 6b | ⬜ Blocked | Integration tests (after Step 4) |
+| 6b | ⬜ | Integration tests |
+| 7a | ⬜ | v1 port: reliability.py (true topo sort, resume state, locking) |
+| 7b | ⬜ | v1 port: branch_manager.py (feature branches, cleanup) |
+| 7c | ⬜ | v1 port: build_gates.py (structured results, framework detection) |
+| 7d | ⬜ | v1 port: prompt_builder.py (codebase summary, learnings, fix/retry) |
+| 7e | ⬜ | v1 port: codebase_summary.py (agent summary, git tree cache) |
+
+### Step 7 context:
+
+The skeleton (Step 4) has working minimal implementations — not stubs.
+It can run end-to-end. Step 7 replaces these with the full v1 modules
+for production robustness. Each substep is independently useful. See
+README for priority ordering and what gets stripped/adapted per P6.
+
+Key adaptation: all v1 modules that referenced `claude_wrapper.py` or
+agent-reported results must be adapted for V2's architecture (P1: tests
+run by orchestrator, P4: tool calls through EG1, not Claude CLI).
 
 ### To resume the EG review:
 1. Read this file
