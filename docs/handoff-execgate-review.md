@@ -190,9 +190,9 @@ Four checks to walk through:
 | 1 | ✅ Done | model_config.py, local_agent.py, YAML configs |
 | 2 | ✅ Done | validate_tool_calling.py (run on Studio machine to validate LM Studio) |
 | 3 | ✅ Done | docs/module-map.md |
-| 4 | ⬜ Blocked | Skeleton — blocked on Step 2 validation results |
+| 4 | ✅ Done | Skeleton (747 lines) — SELECT→BUILD→GATE→ADVANCE with EGs wired |
 | 5a | ✅ Done (review in progress) | eg1 (806 lines), eg2 (171 lines), eg3 (207 lines) |
-| 5b | ⬜ Blocked | Wire EGs into skeleton (after Step 4) |
+| 5b | ✅ Done | EGs wired into skeleton in Step 4 |
 | 6a | ⬜ Next | Unit tests for EGs + model_config + local_agent |
 | 6b | ⬜ Blocked | Integration tests (after Step 4) |
 
