@@ -132,3 +132,80 @@ check, code review, CIS vectors, pattern analysis, auto-QA) are
 deleted from the V2 codebase, not commented out. They can be
 re-added when needed, behind feature flags, through the extension
 interface. Commented-out code is dead code that misleads readers.
+
+
+---
+
+## DP-1: No manual intervention
+
+The system must be autonomous end-to-end. Manual steps in the critical
+path (writing gate files per feature, reviewing intermediate outputs,
+approving transitions between phases) are design failures, not safety
+features. If a step requires a human, the system isn't automated —
+it's a tool with a human bottleneck.
+
+This does not mean humans are absent. Humans author specs, configure
+the system, review campaign results, and improve the process. But the
+loop itself — from "next pending feature" to "feature committed" —
+runs without human intervention.
+
+---
+
+## DP-2: No LLM judgment in verification
+
+Verification and gating must be deterministic Python. LLM judgment
+in the verification path reintroduces the compliance band problem
+(36% OctoCodingBench ceiling) at the point where reliability matters
+most. If a gate uses an LLM to decide pass/fail, the gate itself has
+a ~36% chance of being wrong on production-like constraints.
+
+This applies to all verification, regardless of where in the pipeline
+it occurs: post-build drift checks, pre-build gate generation, spec
+preprocessing that produces enforcement rules — if an LLM decides
+whether the implementation is correct, it's a DP-2 violation.
+
+---
+
+## P7: LLM judgment is irreducible in implementation
+
+Someone must decide what code to write. That decision is inherently
+LLM judgment (or human judgment, which violates DP-1). This is not
+a problem to solve — it's a boundary to accept.
+
+The deterministic gates (EG1, EG2, EG3, build checks, test checks)
+catch everything that can be caught mechanically:
+
+- Agent didn't commit → EG3
+- Agent broke existing tests → EG3 regression check
+- Agent touched forbidden files → EG1 path gate
+- Agent ran forbidden commands → EG1 command gate
+- Agent didn't emit signals → EG2
+- Code doesn't compile → orchestrator build check
+- Existing tests fail → orchestrator test check
+
+The gap between "compiles and passes tests" and "actually implements
+the spec correctly" requires judgment. That judgment lives in the
+build agent — the one place where LLM judgment is irreducible.
+
+**Spreading judgment across phases does not reduce risk.** If a
+pre-build phase uses LLM judgment to generate verification criteria,
+and the build phase uses LLM judgment to implement, the two
+interpretations can disagree. The disagreement manifests as false
+build failures (valid implementation rejected by misaligned gates)
+or as a new failure class: cross-phase drift. This is worse than
+the original problem because it's harder to diagnose.
+
+**The correct response to the Class C gap** ("agent built something
+that compiles but isn't what the spec intended") is:
+
+1. Write better specs (clearer intent = better agent output)
+2. Write better project tests (acceptance criteria in the test suite
+   itself, not in orchestrator gates)
+3. Accept that no automated system can verify natural-language intent
+   with 100% reliability
+
+The orchestrator's job is to enforce the mechanical boundary. The
+spec author's job is to make intent unambiguous. The test suite's
+job is to encode acceptance criteria. These are separate concerns
+and mixing them (by having the orchestrator generate or evaluate
+acceptance criteria) violates both DP-2 and separation of concerns.
