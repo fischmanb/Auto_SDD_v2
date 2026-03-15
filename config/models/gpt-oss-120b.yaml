@@ -31,7 +31,7 @@ strip_reasoning_older_turns: true
 # Max tool-call round trips before the agent is considered stuck.
 # 20 is generous for a single-feature build. Adjust down if agent
 # enters loops; adjust up for complex multi-file features.
-max_turns: 20
+max_turns: 40
 
 # Per-completion HTTP timeout in seconds. Local inference on 120B
 # can be slow — 600s (10 min) gives breathing room.

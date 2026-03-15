@@ -1,0 +1,34 @@
+# Qwen3-Coder-Next — Fallback build agent
+#
+# Stronger coding benchmarks than GPT-OSS-120B. No Harmony instruction
+# hierarchy. Use as fallback when GPT-OSS fails a build gate twice,
+# or as primary if empirical data shows GPT-OSS can't follow tool schemas.
+#
+# Load in LM Studio before use. Model ID will depend on quantization.
+
+name: qwen3-coder-next
+
+# ── Connection ───────────────────────────────────────────────
+base_url: "http://localhost:1234/v1"
+model: "qwen3-coder-next"  # Update to actual LM Studio model ID after loading
+api_key: "lm-studio"
+
+# ── Generation ───────────────────────────────────────────────
+max_tokens: 8192
+temperature: 0.7
+top_p: 0.9
+
+# ── Context management ───────────────────────────────────────
+strip_reasoning_older_turns: false
+
+# ── Loop limits ──────────────────────────────────────────────
+max_turns: 40
+timeout_seconds: 600
+
+# ── Role mapping ─────────────────────────────────────────────
+# No Harmony hierarchy. Standard system/user/assistant roles.
+use_developer_role: false
+
+# ── Optional overrides ───────────────────────────────────────
+eos_token_ids: []
+extra_params: {}
