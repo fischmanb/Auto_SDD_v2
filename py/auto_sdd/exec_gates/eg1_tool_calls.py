@@ -901,12 +901,14 @@ class BuildAgentExecutor:
 
         try:
             content = full_path.read_text()
-            # Cap at 8KB to prevent context window bloat.
-            # 8 reads × 8KB = 64KB — fits in 32K token context
-            # with room for system prompt and output.
-            max_chars = 8000
+            # Return full content up to 50KB. Context management is handled
+            # by _trim_old_tool_results in local_agent.py — old results get
+            # compressed so accumulated history doesn't fill the window.
+            # Capping individual reads causes re-reads (model sees truncated
+            # and loops back), making the problem worse.
+            max_chars = 50000
             truncated = len(content) > max_chars
-            logger.debug("EG1 read_file: %s (%d bytes, truncated=%s)", path_str, len(content), truncated)
+            logger.debug("EG1 read_file: %s (%d bytes)", path_str, len(content))
             return json.dumps({
                 "content": content[:max_chars],
                 "path": path_str,

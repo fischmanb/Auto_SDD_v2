@@ -268,8 +268,10 @@ def run_local_agent(
 
         # ── Context management: trim old tool results ────────────────
         # Tool results (file contents, ls output) bloat context fast.
-        # Keep last 4 tool results full, truncate older ones to summary.
-        _trim_old_tool_results(messages, keep_recent=4)
+        # Keep last 2 tool results full, truncate older ones to summary.
+        # This is where context management actually happens — individual
+        # reads return full content so the model doesn't re-read.
+        _trim_old_tool_results(messages, keep_recent=2)
 
     else:
         # for/else: exhausted max_turns without break
