@@ -628,6 +628,12 @@ class BuildAgentExecutor:
         self.command_timeout = command_timeout
         self._written_files: set[str] = set()
 
+        # Track blocked command patterns for cross-feature learning.
+        # After each feature, the build loop reads these and injects
+        # them into the next feature's system prompt so the agent
+        # doesn't repeat the same mistakes.
+        self.blocked_patterns: list[str] = []
+
         # Paths the agent cannot write to (e.g. test files).
         # Resolved at construction so matching is exact.
         if protected_paths:
@@ -689,8 +695,20 @@ class BuildAgentExecutor:
 
         Satisfies the ToolExecutor protocol from local_agent.py.
         Returns a JSON string result on success.
-        Raises ToolCallBlocked on validation failure.
+        Raises ToolCallBlocked on validation failure, recording the
+        pattern for cross-feature learning.
         """
+        try:
+            return self._dispatch(name, arguments)
+        except ToolCallBlocked as exc:
+            # Record the rejection pattern for prompt injection
+            pattern = f"{name}: {str(exc)[:120]}"
+            if pattern not in self.blocked_patterns:
+                self.blocked_patterns.append(pattern)
+            raise
+
+    def _dispatch(self, name: str, arguments: dict[str, Any]) -> str:
+        """Inner dispatch — separated so execute() can catch blocks."""
         if "_parse_error" in arguments:
             raise ToolCallBlocked(
                 f"Cannot execute {name}: malformed arguments — "

@@ -408,7 +408,11 @@ def _parse_roadmap(project_dir: Path) -> list[Feature]:
 # ── Build prompt construction ────────────────────────────────────────────────
 
 
-def _build_system_prompt(feature: Feature, project_dir: Path) -> str:
+def _build_system_prompt(
+    feature: Feature,
+    project_dir: Path,
+    blocked_patterns: list[str] | None = None,
+) -> str:
     """Build the system prompt for the build agent.
 
     This is the minimal prompt that tells the agent what to do.
@@ -437,6 +441,27 @@ def _build_system_prompt(feature: Feature, project_dir: Path) -> str:
         "- Do NOT use git push, git merge, git rebase, or git checkout\n"
         f"\nProject root: {project_dir}\n"
     )
+
+    if blocked_patterns:
+        # Deduplicate and cap at 10 most recent
+        seen: set[str] = set()
+        unique: list[str] = []
+        for p in reversed(blocked_patterns):
+            if p not in seen:
+                seen.add(p)
+                unique.append(p)
+            if len(unique) >= 10:
+                break
+        unique.reverse()
+
+        prompt += (
+            "\nIMPORTANT — these tool calls were rejected in previous builds. "
+            "Do NOT repeat them:\n"
+        )
+        for p in unique:
+            prompt += f"- {p}\n"
+
+    return prompt
 
 
 def _build_user_prompt(
@@ -498,6 +523,7 @@ class BuildLoopV2:
         self.main_branch = main_branch
         self.auto_approve = auto_approve
         self._codebase_summary: str = ""
+        self._campaign_blocked: list[str] = []  # cross-feature EG1 rejections
 
         # Results tracking
         self.records: list[FeatureRecord] = []
@@ -717,7 +743,9 @@ class BuildLoopV2:
             baseline_test_count = baseline_test_result.test_count
 
             # Build prompts
-            system_prompt = _build_system_prompt(feature, self.project_dir)
+            system_prompt = _build_system_prompt(
+                feature, self.project_dir, self._campaign_blocked,
+            )
             user_prompt = _build_user_prompt(
                 feature, self.project_dir, self._codebase_summary,
             )
@@ -745,6 +773,17 @@ class BuildLoopV2:
                 tools=BUILD_AGENT_TOOLS,
                 executor=executor,
             )
+
+            # Collect blocked patterns for cross-feature learning
+            if executor.blocked_patterns:
+                for p in executor.blocked_patterns:
+                    if p not in self._campaign_blocked:
+                        self._campaign_blocked.append(p)
+                logger.info(
+                    "EG1 blocked %d pattern(s) this attempt, %d campaign total",
+                    len(executor.blocked_patterns),
+                    len(self._campaign_blocked),
+                )
 
             if not agent_result.success:
                 logger.warning(
