@@ -151,6 +151,13 @@ def run_local_agent(
     result = AgentResult()
     start_time = time.monotonic()
 
+    # Track consecutive turns without write_file to detect exploration loops.
+    # After _READ_ONLY_NUDGE_THRESHOLD turns of reads with no writes,
+    # inject a user message forcing the model to start implementing.
+    _READ_ONLY_NUDGE_THRESHOLD = 8
+    turns_since_write = 0
+    has_written = False
+
     for turn in range(config.max_turns):
         result.turn_count = turn + 1
 
@@ -208,6 +215,28 @@ def run_local_agent(
                 messages=messages,
                 result=result,
             )
+
+            # Track write_file calls to detect exploration loops
+            wrote_this_turn = any(
+                tc.function.name == "write_file"
+                for tc in assistant_msg.tool_calls
+            )
+            if wrote_this_turn:
+                turns_since_write = 0
+                has_written = True
+            else:
+                turns_since_write += 1
+
+            # Nudge: if stuck reading without writing, inject a redirect
+            if turns_since_write >= _READ_ONLY_NUDGE_THRESHOLD and not has_written:
+                nudge = (
+                    "You have spent several turns reading files without writing any code. "
+                    "You have enough context. Start implementing NOW by using write_file "
+                    "to create the source files for this feature. Do not read any more files."
+                )
+                messages.append({"role": "user", "content": nudge})
+                logger.info("Nudge injected at turn %d (no writes in %d turns)", turn, turns_since_write)
+                turns_since_write = 0  # reset so we don't spam
 
         elif choice.finish_reason == "length":
             result.finish_reason = "length"
