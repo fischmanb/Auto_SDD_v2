@@ -69,6 +69,73 @@
 - `bf257ad` System prompt + EG1 redirect hints
 - `10b2e1b` EG1 runtime re-detection
 
+### First live campaign — model evaluations
+Three local models tested against cre-pulse (7 features). None completed a feature without architectural intervention.
+
+**GPT-OSS-120B**: Failed. Repeatedly used `sed`, `cat`, `grep` via run_command despite system prompt explicitly saying "use read_file." EG1 blocked every bad call. Model never adapted within 20-turn sessions. Conclusion: Harmony instruction hierarchy does not help when the model ignores instructions entirely.
+
+**Qwen3-Coder-Next** (80B MoE, 3B active, MLX 8-bit): Failed. Different pattern — invented tool names (`listdir`, `list_dir`, `list_directory`), used `cd /path && command` chaining. Faster inference (~2s/turn vs ~10s for GPT-OSS). Still couldn't follow 3-tool schema.
+
+**GLM-4.7-flash**: Partially succeeded with translation layer. Read files correctly after translation, got nudged at turn 8, started writing code. Wrote `core/data-loader/index.ts` but failed at commit stage (write-then-exec false positive blocked `git add file.ts`, `&&` chaining blocked `git add && git commit`). After fixes: completed 12 turns, wrote files, but stopped without FEATURE_BUILT signals → EG2 failed.
+
+### Cross-feature learning (`5566826`)
+- `BuildAgentExecutor.blocked_patterns`: list of rejection summaries collected in execute().
+- `BuildLoopV2._campaign_blocked`: accumulated across features.
+- `_build_system_prompt`: appends "IMPORTANT — these tool calls were rejected in previous builds" section with up to 10 recent patterns.
+- Feature 1 burns turns learning. Feature 2+ starts pre-warned.
+
+### max_turns bump + model configs (`978f2b5`, `6e5e72f`, `afbfaa6`)
+- `gpt-oss-120b.yaml`: max_turns 20→40. GPT-OSS wastes ~8 turns per feature on blocked calls.
+- `qwen3-coder-next.yaml`: created. Model ID: `qwen3-coder-next-mlx`. 80B MoE, MLX 8-bit, tool-use capable.
+- `glm-4.7-flash.yaml`: created. Model ID: `glm-4.7-flash-mlx`.
+
+### cd prefix stripping (`8f7978a`, P8)
+- `_strip_cd_prefix()`: strips `cd <project_dir> && command` → `command`. Models write this habitually; run_command already has cwd=project_root.
+- Only strips when cd target resolves to project_root or within it. cd to outside paths left intact.
+- 6 new tests.
+
+### Tool call translation (`95525c3`, P8)
+Three models failed at tool-use compliance — not because they lacked intent but because they couldn't map intent to the 3-tool schema. Translation layer in execute() before dispatch:
+- `listdir`/`list_dir`/`list_directory`/`ls`/`dir` → `run_command(ls -la)`
+- `cat`/`view`/`view_file`/`get_file`/`read` → `read_file(path)`
+- `read_file(command='cat X')` → `read_file(path=X)`
+- `run_command(sed/cat/head/tail/less)` → `read_file(extracted path)`
+- `run_command(python -c open('X'))` → `read_file(X)`
+- `run_command(ls -la X 2>/dev/null || echo)` → `run_command(ls -la X)`
+- Security unchanged — translated calls pass through full EG1 validation.
+- 11 new tests.
+
+### Read-only nudge mechanism (`e01d752`)
+- Models read specs and project files for 40 turns without writing code.
+- After 8 consecutive turns with no write_file call, inject a user message: "Start implementing NOW by using write_file."
+- Deterministic enforcement of forward progress.
+
+### Turn-level logging (`0f91208`)
+- Every turn: finish_reason, has_text, has_tools.
+- Every tool call: name and argument summary (path or command preview).
+- Agent completion: output length.
+
+### Git chain handling + write-then-exec exemption + auto-complete (`d65cc8c`)
+**Write-then-exec git exemption**: `git add file.ts` stages a file, doesn't execute it. All `git` commands now bypass write-then-exec detection.
+
+**Git chain handling**: `git add -A && git commit -m '...'` split into sequential commands, each validated individually through full 7-layer validation. Non-git chaining still blocked.
+
+**Auto-complete**: When agent writes files and stops without committing or emitting FEATURE_BUILT signals, Python auto-commits and injects signals from executor state (written files, feature name, spec path).
+
+9 new tests (6 git chain, 3 write-then-exec exemption). 420 tests total.
+
+### Commits (session 7 continued)
+- `10148a9` SESSION-STATE + CHANGELOG update
+- `5566826` Cross-feature learning
+- `978f2b5` max_turns 20→40 + qwen3 config
+- `8f7978a` cd prefix stripping
+- `6e5e72f` qwen3 model ID
+- `afbfaa6` GLM config
+- `95525c3` Tool call translation
+- `e01d752` Read-only nudge
+- `0f91208` Turn-level logging
+- `d65cc8c` Git chain + write-then-exec exemption + auto-complete
+
 ---
 
 ## 2026-03-15 (session 6)

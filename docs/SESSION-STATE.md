@@ -105,7 +105,7 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 ### Unit test coverage
 | Test file | Module | Tests |
 |---|---|---|
-| test_eg1.py | eg1_tool_calls.py | 88 |
+| test_eg1.py | eg1_tool_calls.py | 110 |
 | test_eg2.py | eg2_signal_parse.py | 24 |
 | test_eg3.py | eg3_build_check.py | 24 |
 | test_eg4.py | eg4_test_check.py | 31 |
@@ -133,6 +133,13 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 - Orchestrator skip logic is inverted readability: `validate_X()` returning empty list means valid/skip. Could confuse a reader.
 - `prompts.py` templates are first-draft. Need tuning once an agent runs against them in real inference.
 - No tests for `runner.py`, `orchestrator.py`, or phase 1-5 wrappers. All depend on `run_local_agent` which needs the OpenAI client mock (pattern now established in `test_local_agent.py`).
+- **BUG**: `codebase_summary.py` passes `max_turns=1` to `run_local_agent` but the function doesn't accept that keyword arg. Fails silently (caught exception, returns empty summary). Fix: use config.max_turns or remove the kwarg.
+
+### Live campaign issues discovered
+- EG4 test check fails with exit code 127 on every feature (vitest not in PATH or not configured). Tests never run.
+- `vision-input.txt` deleted by a failed branch cleanup — `cat` fails silently, pre-build skips vision phase because output already exists.
+- Auto-complete needs testing against real EG2/EG3/EG4 pipeline — signals are injected but downstream gates may still fail.
+- Translation layer `cat file | head -100` extracts path as `file | head -100` (includes pipe). Needs pipe stripping.
 
 ### V1 port steps remaining
 | Step | What | Notes |
@@ -170,17 +177,26 @@ V1 port items must account for:
 - Gherkin/RED cycle restored from Adrian's auto-sdd. Implemented in `phase_red.py` (deterministic generator, no agent).
 - Structured error types (`GateError`) adopted for all new code; existing EG migration deferred.
 - EG1 tool set: hardcoded {write_file, read_file, run_command}. New tools require new EG1 code, not config.
-- Agent model: gpt-oss-120b via LM Studio (localhost:1234). Harmony format, `developer` role for orchestrator instructions. Re-evaluate Qwen3-Coder-Next after first campaign with empirical data.
-- Agent prompt: reveal boundaries (writable paths, allowed commands), conceal mechanism (EG1 internals).
+- Agent model: GLM-4.7-flash via LM Studio (localhost:1234) as current candidate. GPT-OSS-120B and Qwen3-Coder-Next both failed at tool-use compliance in live campaign. Harmony hierarchy provides no value when models ignore instructions. Re-evaluate as new open-weight models ship.
+- Agent prompt: reveal boundaries (writable paths, allowed commands), conceal mechanism (EG1 internals). Few-shot examples attempted via explicit tool documentation in system prompt.
 - P8: fixes must generalize. Every bug fix evaluated against "will this class of failure recur?" Instance fixes are incomplete.
+- EG1 tool call translation: meet models where they are. When model intent is clear but tool name/schema is wrong, translate to correct call rather than blocking. Security unchanged — translated calls pass through full validation.
+- EG1 cd prefix stripping: `cd <project> && cmd` → `cmd`. Models write this habitually. run_command already has cwd.
+- EG1 git chain handling: `git add && git commit` split and executed sequentially. Each command validated individually.
+- EG1 write-then-exec git exemption: `git add file.ts` stages, doesn't execute. Git commands bypass write-then-exec detection.
+- Read-only nudge: after 8 consecutive turns without write_file, inject "Start implementing NOW" message.
+- Auto-complete: when agent writes files but doesn't commit/signal, Python auto-commits and injects FEATURE_BUILT signals.
+- Cross-feature learning: EG1 blocked patterns accumulated across features, injected into next feature's system prompt.
 - Gherkin parser: format-agnostic keyword extraction. No assumptions about LLM formatting.
 - Roadmap dep matching: 3-tier fuzzy resolution (exact → normalized → token subset). Models don't write dep names precisely.
 - EG1 runtime re-detection: writing a marker file (package.json, pyproject.toml, etc.) triggers re-scan. Handles project bootstrapping.
 - 7d (prompt_builder.py) deferred: current inline prompts sufficient for first campaign. Tune fix/retry variants after real failure data.
+- Model configs: `config/models/` now has gpt-oss-120b.yaml, qwen3-coder-next.yaml, glm-4.7-flash.yaml. Model is a YAML config swap.
+- 420 tests total (110 EG1, 30 phase_red, 23 codebase_summary, 20 reliability, 16 branch_manager + others).
 
 ## References
 - `docs/architectural-inventory.md` — 12-phase pipeline
-- `docs/architecture-principles.md` — P1–P7, DP-1, DP-2
+- `docs/architecture-principles.md` — P1–P8, DP-1, DP-2
 - `docs/module-map.md` — v1 function classification
 - `docs/system-inventory.md` — codebase metrics
 - `docs/CHANGELOG.md` — decision lineage and change history
