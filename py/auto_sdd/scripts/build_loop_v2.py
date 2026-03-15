@@ -470,12 +470,14 @@ def _build_user_prompt(
     """Build the user prompt with the feature spec and context."""
     spec_dir = project_dir / ".specs" / "features"
     spec_content = ""
+    spec_path = ""
 
     # Find the spec file for this feature
     if spec_dir.is_dir():
         for p in spec_dir.rglob("*.md"):
             if feature.name.lower().replace(" ", "-") in p.stem.lower():
                 spec_content = p.read_text()
+                spec_path = str(p.relative_to(project_dir))
                 break
 
     if not spec_content:
@@ -484,7 +486,8 @@ def _build_user_prompt(
     parts = [
         f"Implement the following feature:\n\n"
         f"Feature: {feature.name}\n"
-        f"Complexity: {feature.complexity}\n\n"
+        f"Complexity: {feature.complexity}\n"
+        f"Spec file: {spec_path}\n\n"
         f"Specification:\n{spec_content}\n",
     ]
 
