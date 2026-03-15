@@ -513,7 +513,7 @@ class BuildLoopV2:
         build_cmd: str = "",
         test_cmd: str = "",
         max_features: int | None = None,
-        max_retries: int = 1,
+        max_retries: int = 2,
         main_branch: str = "main",
         auto_approve: bool = False,
     ) -> None:
@@ -730,6 +730,7 @@ class BuildLoopV2:
 
         branch_name = branch_result.branch_name
 
+        last_gate_error: str = ""
         for attempt in range(self.max_retries + 1):
             if attempt > 0:
                 logger.info(
@@ -752,6 +753,17 @@ class BuildLoopV2:
             user_prompt = _build_user_prompt(
                 feature, self.project_dir, self._codebase_summary,
             )
+
+            # Inject previous failure context so agent can self-correct
+            if last_gate_error and attempt > 0:
+                user_prompt += (
+                    f"\n\n## PREVIOUS ATTEMPT FAILED\n"
+                    f"Your previous implementation failed verification:\n"
+                    f"{last_gate_error[:2000]}\n\n"
+                    f"Fix these errors in your implementation. Read the files "
+                    f"you wrote previously to understand what went wrong, then "
+                    f"write corrected versions.\n"
+                )
 
             # Create executor (EG1 gate) scoped to this feature
             protected = _discover_test_files(self.project_dir, self.test_cmd)
@@ -795,6 +807,7 @@ class BuildLoopV2:
                     agent_result.turn_count,
                     agent_result.finish_reason,
                 )
+                last_gate_error = f"BUILD: {agent_result.error}"
                 self._record(feature, "failed", attempt,
                              error=agent_result.error)
                 if attempt < self.max_retries:
@@ -826,8 +839,9 @@ class BuildLoopV2:
                 logger.warning(
                     "GATE FAILED at %s: %s", gate.failed_gate, gate.error,
                 )
+                last_gate_error = f"{gate.failed_gate}: {gate.error}"
                 self._record(feature, "failed", attempt,
-                             error=f"{gate.failed_gate}: {gate.error}")
+                             error=last_gate_error)
                 if attempt < self.max_retries:
                     if attempt >= 1:
                         self._git_reset(head_before)
