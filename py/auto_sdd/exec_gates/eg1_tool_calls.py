@@ -444,10 +444,18 @@ def _validate_command_layers(
     if allowed:
         return
 
-    # Nothing matched — block
+    # Nothing matched — block with redirect hint
+    _FILE_READ_CMDS = frozenset({
+        "cat", "sed", "head", "tail", "less", "more", "awk",
+        "grep", "python", "python3", "node",
+    })
+    hint = ""
+    if first_token in _FILE_READ_CMDS:
+        hint = " Use the read_file tool to read files instead."
+
     raise ToolCallBlocked(
         f"Command '{cmd_stripped[:80]}' is not permitted. "
-        f"First token '{first_token}' is not in any allowlist."
+        f"First token '{first_token}' is not in any allowlist.{hint}"
     )
 
 
