@@ -2,7 +2,7 @@
 
 > The single mandatory read for every new session.
 > Overwritten each session to reflect current truth.
-> Last updated: 2026-03-15 (session 5)
+> Last updated: 2026-03-15 (session 7)
 
 ## Read order
 
@@ -14,12 +14,16 @@ Read code files only when working on them. Don't front-load 2000 lines of Python
 
 ## What exists and works
 
-### Build loop (`py/auto_sdd/scripts/build_loop_v2.py`, ~863 lines)
+### Build loop (`py/auto_sdd/scripts/build_loop_v2.py`, ~970 lines)
 - SELECT → BUILD → GATE → ADVANCE, end-to-end functional
 - Roadmap parser now uses shared `_parse_roadmap_table()` from `validators.py`, then does its own topo sort
 - Unified `_run_gate()` with `GateResult` dataclass, short-circuits on first failure
 - Retry logic: attempt 0 = fix-in-place, attempt 1+ = git reset
-- CLI: `--pre-build` runs phases 1-6 before the build loop, `--vision-input` provides Phase 1 input
+- Campaign locking (fcntl.flock + PID stale detection) and resume state (skip completed features on crash recovery)
+- Feature branches: setup from main, merge on success, delete on failure, post-campaign cleanup
+- Codebase summary generated once per campaign, injected into all feature prompts
+- Preflight summary printed to terminal, `--auto-approve` flag (default: require confirmation)
+- CLI: `--pre-build`, `--vision-input`, `--auto-approve` / `AUTO_APPROVE`
 
 ### Pre-build phases (`py/auto_sdd/pre_build/`, new)
 | Module | Phase | Lines | What it does |
@@ -36,6 +40,15 @@ Read code files only when working on them. Don't front-load 2000 lines of Python
 | `orchestrator.py` | all | 101 | Runs phases 1→6 sequentially, skips valid outputs (resume) |
 
 ### Shared types (`py/auto_sdd/lib/types.py`, new)
+
+### Operational infrastructure (`py/auto_sdd/lib/`, new)
+| Module | Lines | What it does |
+|---|---|---|
+| `reliability.py` | 202 | Campaign locking (fcntl.flock + PID stale detection), ResumeState persistence (atomic write via tempfile+rename), read/write/clean state, new_campaign_id |
+| `branch_manager.py` | 173 | Feature branch setup from main, merge (--no-ff) on success, force-delete on failure, cleanup_merged_branches post-campaign |
+| `codebase_summary.py` | 265 | File tree generation (excluded dirs per L-00227), git tree hash cache, agent-generated structural summary, recent learnings reader |
+
+### Shared types (`py/auto_sdd/lib/types.py`)
 - `GateError(code, detail)` — structured error type. Tests assert on `code` (stable contract), `detail` is free-form.
 - `PhaseResult(phase, passed, errors, artifacts)` — result type for pre-build phases.
 - Existing EG modules still use `list[str]` for errors — migration is separate work (~25 call sites, ~15 test assertions).
@@ -102,6 +115,9 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 | test_phase_red.py | pre_build/phase_red.py | 20 |
 | test_local_agent.py | local_agent.py | 31 |
 | test_integration.py | cross-module integration | 41 |
+| test_reliability.py | reliability.py | 20 |
+| test_branch_manager.py | branch_manager.py | 16 |
+| test_codebase_summary.py | codebase_summary.py | 23 |
 
 ## Open items
 
@@ -123,11 +139,11 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 |---|---|---|
 | 6a | Unit tests for EGs + model_config + local_agent | **Done**. EG1–EG5 + model_config + local_agent all covered. 284 tests total. |
 | 6b | Integration tests | **Done**. 41 tests: BuildLoopV2 end-to-end (9), gate pipeline short-circuit (4), EG1 executor (5), roadmap parsing (5), test file discovery (3), EG2 disk validation (3), EG3/EG4 subprocess (5), EG5 git state (3), config/limits (4). 325 tests total. |
-| 7a | reliability.py — resume state, locking | Topo sort done; resume + lock remain |
-| 7b | branch_manager.py — feature branches, cleanup | `allowed_branch=""` TODO in code |
+| 7a | reliability.py — resume state, locking | **Done**. fcntl.flock + PID stale detection, ResumeState, atomic write. Wired into build loop (lock/resume/clean). 20 tests. |
+| 7b | branch_manager.py — feature branches, cleanup | **Done**. setup_feature_branch, merge_feature_branch, delete, cleanup_merged. allowed_branch wired to EG1. 16 tests. |
 | 7c | build_gates.py → EG3/EG4 | **Done**: detect_build_cmd, detect_test_cmd ported; _parse_test_count expanded (mocha, cargo, go); build loop stubs removed. 24+31 tests. |
-| 7d | prompt_builder.py — codebase summary, learnings, fix/retry variants | |
-| 7e | codebase_summary.py — agent summary, git tree cache | |
+| 7d | prompt_builder.py — fix/retry variants | Deferred. Current inline prompts sufficient for first campaign. Tune after real run. |
+| 7e | codebase_summary.py — agent summary, git tree cache | **Done**. File tree + cache + learnings + agent call. Preflight summary with --auto-approve. 23 tests. |
 
 All v1 modules that referenced `claude_wrapper.py` or agent-reported results need adaptation for V2 architecture (P1: orchestrator runs tests, P4: tool calls through EG1).
 
