@@ -307,3 +307,55 @@ class TestBuildAgentExecutor:
         )
         ex.execute("write_file", {"path": "src/app.ts", "content": "code"})
         assert (tmp_project / "src/app.ts").read_text() == "code"
+
+
+# ── Runtime re-detection (P8: fixes must generalize) ─────────────────────────
+
+
+class TestRuntimeRedetection:
+    """EG1 re-derives runtimes when write_file creates a marker file."""
+
+    def test_npm_blocked_without_package_json(self, tmp_path: Path) -> None:
+        """Project with no marker files blocks npm."""
+        ex = BuildAgentExecutor(tmp_path)
+        with pytest.raises(ToolCallBlocked):
+            ex.execute("run_command", {"command": "npm install"})
+
+    def test_npm_allowed_after_writing_package_json(self, tmp_path: Path) -> None:
+        """Writing package.json triggers re-detection, unblocking npm."""
+        ex = BuildAgentExecutor(tmp_path)
+        # npm blocked before
+        with pytest.raises(ToolCallBlocked):
+            ex.execute("run_command", {"command": "npm install"})
+        # Write package.json
+        ex.execute("write_file", {
+            "path": "package.json",
+            "content": json.dumps({"scripts": {"build": "tsc"}, "dependencies": {}}),
+        })
+        # npm install (no args) allowed after — EG1 permits it
+        # (note: npm run is separately blocked after write_file per script injection guard)
+        result = ex.execute("run_command", {"command": "npm install"})
+        assert isinstance(result, str)  # got a response, not blocked
+
+    def test_python_allowed_after_writing_pyproject(self, tmp_path: Path) -> None:
+        """Writing pyproject.toml triggers re-detection for python runtime."""
+        ex = BuildAgentExecutor(tmp_path)
+        # python blocked before
+        with pytest.raises(ToolCallBlocked):
+            ex.execute("run_command", {"command": "python3 --version"})
+        # Write pyproject.toml
+        ex.execute("write_file", {
+            "path": "pyproject.toml",
+            "content": "[project]\nname = 'test'\n",
+        })
+        # python allowed after
+        result = ex.execute("run_command", {"command": "python3 --version"})
+        assert isinstance(result, str)
+
+    def test_non_marker_file_does_not_retrigger(self, tmp_path: Path) -> None:
+        """Writing a regular file doesn't change runtimes."""
+        ex = BuildAgentExecutor(tmp_path)
+        ex.execute("write_file", {"path": "README.md", "content": "# readme"})
+        # Still no runtimes
+        with pytest.raises(ToolCallBlocked):
+            ex.execute("run_command", {"command": "npm install"})

@@ -639,33 +639,49 @@ class BuildAgentExecutor:
             self._protected_paths = frozenset()
 
         # Derive runtimes: explicit > auto-detected
-        if allowed_runtimes is None:
-            allowed_runtimes = detect_project_runtimes(project_root)
-
-        # Build the combined set of allowed runtime command tokens
-        self._allowed_runtime_tokens: frozenset[str] = frozenset().union(
-            *(RUNTIME_COMMAND_TOKENS.get(r, frozenset()) for r in allowed_runtimes)
-        )
-
-        # Parse package.json for npm/npx scope validation
-        pkg = _parse_package_json(project_root)
-        self._allowed_npm_scripts: frozenset[str] = frozenset(pkg["scripts"])
-        # npx allowlist: devDeps + deps (package names) PLUS runtime
-        # binary tokens (e.g., "tsc" from typescript, "eslint" from eslint).
-        # This handles the common case where `npx tsc` is used but the
-        # package name is "typescript".
-        self._allowed_npx_packages: frozenset[str] = frozenset(
-            pkg["dev_deps"] | pkg["deps"] | self._allowed_runtime_tokens
-        )
+        self._explicit_runtimes = allowed_runtimes
+        self._refresh_runtimes()
 
         logger.info(
             "EG1 init: project=%s, branch=%s, runtimes=%s, "
             "npm_scripts=%d, npx_packages=%d",
             project_root.name,
             allowed_branch or "(none)",
-            ",".join(sorted(allowed_runtimes)) or "(none)",
+            ",".join(sorted(self._current_runtimes)) or "(none)",
             len(self._allowed_npm_scripts),
             len(self._allowed_npx_packages),
+        )
+
+    # ── Runtime marker files that trigger re-detection (P8) ────────
+    # When write_file creates one of these, runtime allowlists are
+    # re-derived. This handles project bootstrapping — the agent can
+    # create package.json and then use npm commands in the same session.
+    _RUNTIME_MARKERS: frozenset[str] = frozenset({
+        "package.json", "tsconfig.json", ".nvmrc",
+        "pyproject.toml", "requirements.txt", "setup.py", "Pipfile",
+        "Cargo.toml", "go.mod", "pom.xml", "build.gradle",
+        "Gemfile", "composer.json", "Package.swift",
+    })
+
+    def _refresh_runtimes(self) -> None:
+        """Re-derive runtime allowlists from current disk state.
+
+        Called at construction and after write_file creates a marker file.
+        """
+        if self._explicit_runtimes is not None:
+            runtimes = self._explicit_runtimes
+        else:
+            runtimes = detect_project_runtimes(self.project_root)
+
+        self._current_runtimes = runtimes
+        self._allowed_runtime_tokens = frozenset().union(
+            *(RUNTIME_COMMAND_TOKENS.get(r, frozenset()) for r in runtimes)
+        )
+
+        pkg = _parse_package_json(self.project_root)
+        self._allowed_npm_scripts = frozenset(pkg["scripts"])
+        self._allowed_npx_packages = frozenset(
+            pkg["dev_deps"] | pkg["deps"] | self._allowed_runtime_tokens
         )
 
     def execute(self, name: str, arguments: dict[str, Any]) -> str:
@@ -720,6 +736,19 @@ class BuildAgentExecutor:
             full_path.write_text(content)
             self._written_files.add(str(full_path))
             logger.debug("EG1 write_file: %s (%d bytes)", path_str, len(content))
+
+            # Re-detect runtimes if a marker file was created/modified (P8)
+            basename = Path(path_str).name
+            if basename in self._RUNTIME_MARKERS:
+                old_runtimes = self._current_runtimes.copy()
+                self._refresh_runtimes()
+                new_runtimes = self._current_runtimes - old_runtimes
+                if new_runtimes:
+                    logger.info(
+                        "EG1: runtime re-detected after %s: +%s",
+                        basename, ",".join(sorted(new_runtimes)),
+                    )
+
             return json.dumps({
                 "status": "success",
                 "path": path_str,
