@@ -633,7 +633,7 @@ def _run_anthropic_agent(
         if response.stop_reason == "end_turn":
             result.output = "\n".join(text_parts)
             result.finish_reason = "stop"
-            result.success = True
+            result.finish_reason = "stop"
             logger.info(
                 "Agent completed in %d turns (%.1fs). Output length: %d chars",
                 result.turn_count,
