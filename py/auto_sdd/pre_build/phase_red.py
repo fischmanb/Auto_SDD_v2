@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # ── Gherkin parser ───────────────────────────────────────────────────────────
 
 SCENARIO_HEADER = re.compile(
-    r"^###?\s*Scenario:\s*(.+)", re.MULTILINE,
+    r"^(?:###?\s*)?Scenario:\s*(.+)", re.MULTILINE,
 )
 GHERKIN_STEP = re.compile(
     r"^\s*(Given|When|Then|And|But)\s+(.+)", re.MULTILINE,
