@@ -812,6 +812,11 @@ class BuildAgentExecutor:
         if not isinstance(command, str):
             raise ToolCallBlocked("run_command: 'command' must be a string")
 
+        # Strip redundant cd <project_dir> && prefix (P8: generalizable).
+        # Models habitually prepend cd to commands. Since cwd is already
+        # project_root, strip it and validate the actual command.
+        command = self._strip_cd_prefix(command)
+
         # Write-then-exec detection (before general validation)
         self._check_write_then_exec(command)
 
@@ -845,6 +850,46 @@ class BuildAgentExecutor:
             })
         except OSError as exc:
             return json.dumps({"error": f"Command failed: {exc}"})
+
+    def _strip_cd_prefix(self, command: str) -> str:
+        """Strip redundant cd <path> && prefix from commands.
+
+        Models habitually write 'cd /project && actual_command'. Since
+        run_command already executes with cwd=project_root, the cd is
+        a no-op. Strip it so the actual command passes validation.
+
+        Only strips if the cd target resolves to project_root or is
+        '.' or a relative path within the project. cd to paths outside
+        the project are left intact (will be caught by other checks).
+        """
+        # Match: cd <path> && <rest>  (with optional whitespace)
+        cd_match = re.match(
+            r'^cd\s+(\S+)\s*&&\s*(.+)$', command.strip(), re.DOTALL,
+        )
+        if not cd_match:
+            return command
+
+        cd_target = cd_match.group(1).strip("'\"")
+        rest = cd_match.group(2).strip()
+
+        # Check if cd target is the project root or within it
+        try:
+            target_path = Path(cd_target).resolve()
+        except (OSError, ValueError):
+            return command
+
+        project_str = str(self.project_root)
+        if (
+            cd_target == "."
+            or str(target_path) == project_str
+            or str(target_path).startswith(project_str + "/")
+        ):
+            logger.debug(
+                "EG1: stripped redundant 'cd %s &&' prefix", cd_target,
+            )
+            return rest
+
+        return command
 
     def _check_write_then_exec(self, command: str) -> None:
         """Detect and block execution of agent-written scripts.

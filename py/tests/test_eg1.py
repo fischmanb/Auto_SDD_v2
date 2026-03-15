@@ -359,3 +359,54 @@ class TestRuntimeRedetection:
         # Still no runtimes
         with pytest.raises(ToolCallBlocked):
             ex.execute("run_command", {"command": "npm install"})
+
+
+# ── cd prefix stripping (P8: generalizable) ──────────────────────────────────
+
+
+class TestCdPrefixStripping:
+    """EG1 strips redundant cd <project> && prefix from commands."""
+
+    def test_cd_project_dir_stripped(self, tmp_project: Path) -> None:
+        """cd <project_root> && command → command runs without block."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("run_command", {
+            "command": f"cd {tmp_project} && git status",
+        })
+        assert isinstance(result, str)  # not blocked
+
+    def test_cd_dot_stripped(self, tmp_project: Path) -> None:
+        """cd . && command → command runs."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("run_command", {
+            "command": "cd . && git status",
+        })
+        assert isinstance(result, str)
+
+    def test_cd_subdir_stripped(self, tmp_project: Path) -> None:
+        """cd <project>/src && command → stripped (within project)."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("run_command", {
+            "command": f"cd {tmp_project}/src && git status",
+        })
+        assert isinstance(result, str)
+
+    def test_cd_outside_project_not_stripped(self, tmp_project: Path) -> None:
+        """cd /etc && command → NOT stripped, still blocked."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        with pytest.raises(ToolCallBlocked, match="command chaining"):
+            ex.execute("run_command", {"command": "cd /etc && ls"})
+
+    def test_no_cd_prefix_unchanged(self, tmp_project: Path) -> None:
+        """Regular commands pass through unchanged."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("run_command", {"command": "git status"})
+        assert isinstance(result, str)
+
+    def test_real_chaining_still_blocked(self, tmp_project: Path) -> None:
+        """Non-cd chaining is still blocked."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        with pytest.raises(ToolCallBlocked, match="command chaining"):
+            ex.execute("run_command", {
+                "command": "git status && git log",
+            })
