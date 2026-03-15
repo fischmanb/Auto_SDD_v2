@@ -196,14 +196,21 @@ def run_local_agent(
         messages.append(msg_dict)
 
         # ── Route on finish_reason ───────────────────────────────────
+        has_text = bool(assistant_msg.content and assistant_msg.content.strip())
+        has_tools = bool(assistant_msg.tool_calls)
+        logger.info(
+            "Turn %d: finish_reason=%s, has_text=%s, has_tools=%s",
+            turn, choice.finish_reason, has_text, has_tools,
+        )
 
         if choice.finish_reason == "stop":
             result.output = assistant_msg.content or ""
             result.finish_reason = "stop"
             logger.info(
-                "Agent completed in %d turns (%.1fs)",
+                "Agent completed in %d turns (%.1fs). Output length: %d chars",
                 result.turn_count,
                 time.monotonic() - start_time,
+                len(result.output),
             )
             break
 
@@ -330,6 +337,18 @@ def _handle_tool_calls(
     for tool_call in tool_calls:
         fn_name = tool_call.function.name
         fn_args = _parse_tool_arguments(fn_name, tool_call.function.arguments)
+
+        # Log every tool call at INFO so we can see the model's behavior
+        arg_summary = ""
+        if fn_name == "read_file":
+            arg_summary = fn_args.get("path", fn_args.get("command", "?"))
+        elif fn_name == "write_file":
+            arg_summary = fn_args.get("path", "?")
+        elif fn_name == "run_command":
+            arg_summary = fn_args.get("command", "?")[:60]
+        else:
+            arg_summary = str(list(fn_args.keys()))[:60]
+        logger.info("Turn %d: %s(%s)", turn, fn_name, arg_summary)
 
         record = ToolCallRecord(
             turn=turn,
