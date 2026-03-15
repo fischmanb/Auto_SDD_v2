@@ -152,5 +152,5 @@ py/auto_sdd/exec_gates/
 ├── __init__.py
 ├── eg1_tool_calls.py      ← ToolExecutor impl: path restrictions, cmd allowlist
 ├── eg2_signal_parse.py    ← Mechanical signal extraction + validation
-└── eg3_commit_auth.py     ← Final check: test regression, scope violation
+└── eg5_commit_auth.py     ← Final check: test regression, scope violation
 ```

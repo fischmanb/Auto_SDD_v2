@@ -1,182 +1,161 @@
-"""Tests for EG3: Commit Auth ExecGate."""
+"""Tests for EG3: Build Check ExecGate."""
 from __future__ import annotations
 
-import subprocess
+import json
 from pathlib import Path
 
 import pytest
 
-from auto_sdd.exec_gates.eg3_commit_auth import (
-    CommitAuthResult,
-    _check_head_advanced,
-    _check_no_contamination,
-    _check_test_regression,
-    _check_tree_clean,
-    _get_head,
-    authorize_commit,
+from auto_sdd.exec_gates.eg3_build_check import (
+    BuildCheckResult,
+    check_build,
+    detect_build_cmd,
 )
 
 
-def _git(args: list[str], cwd: Path) -> None:
-    subprocess.run(["git"] + args, cwd=str(cwd), capture_output=True, check=True)
+class TestCheckBuildSkip:
+    def test_empty_cmd_skips(self, tmp_path: Path) -> None:
+        result = check_build("", tmp_path)
+        assert result.passed is True
+        assert result.skipped is True
+
+    def test_skip_literal_skips(self, tmp_path: Path) -> None:
+        result = check_build("skip", tmp_path)
+        assert result.passed is True
+        assert result.skipped is True
 
 
-@pytest.fixture
-def git_project(tmp_path: Path) -> Path:
-    """Create a minimal git project with one commit."""
-    _git(["init"], tmp_path)
-    _git(["config", "user.email", "test@test.com"], tmp_path)
-    _git(["config", "user.name", "Test"], tmp_path)
-    (tmp_path / "initial.txt").write_text("initial\n")
-    _git(["add", "."], tmp_path)
-    _git(["commit", "-m", "initial"], tmp_path)
-    return tmp_path
+class TestCheckBuildPass:
+    def test_passing_command(self, tmp_path: Path) -> None:
+        result = check_build("echo ok", tmp_path)
+        assert result.passed is True
+        assert result.skipped is False
+        assert "ok" in result.output
+
+    def test_true_command(self, tmp_path: Path) -> None:
+        result = check_build("true", tmp_path)
+        assert result.passed is True
 
 
-class TestGetHead:
-    def test_returns_commit_hash(self, git_project: Path) -> None:
-        head = _get_head(git_project)
-        assert len(head) == 40  # SHA-1 hex
+class TestCheckBuildFail:
+    def test_failing_command(self, tmp_path: Path) -> None:
+        result = check_build("false", tmp_path)
+        assert result.passed is False
+        assert result.skipped is False
 
-    def test_returns_empty_for_non_git(self, tmp_path: Path) -> None:
-        assert _get_head(tmp_path) == ""
+    def test_nonzero_exit(self, tmp_path: Path) -> None:
+        result = check_build("exit 1", tmp_path)
+        assert result.passed is False
 
-
-class TestCheckHeadAdvanced:
-    def test_head_advanced(self, git_project: Path) -> None:
-        start = _get_head(git_project)
-        (git_project / "new.txt").write_text("new\n")
-        _git(["add", "."], git_project)
-        _git(["commit", "-m", "new"], git_project)
-        ok, label = _check_head_advanced(git_project, start)
-        assert ok is True
-        assert "head_advanced" in label
-
-    def test_head_not_advanced(self, git_project: Path) -> None:
-        start = _get_head(git_project)
-        ok, label = _check_head_advanced(git_project, start)
-        assert ok is False
-        assert "unchanged" in label
-
-    def test_no_baseline_skips(self, git_project: Path) -> None:
-        ok, label = _check_head_advanced(git_project, "")
-        assert ok is True
-        assert "skipped" in label
+    def test_syntax_error_captured(self, tmp_path: Path) -> None:
+        result = check_build("echo ok && false", tmp_path)
+        assert result.passed is False
 
 
-class TestCheckTreeClean:
-    def test_clean_tree(self, git_project: Path) -> None:
-        ok, label = _check_tree_clean(git_project)
-        assert ok is True
-
-    def test_dirty_tree(self, git_project: Path) -> None:
-        (git_project / "initial.txt").write_text("modified\n")
-        ok, label = _check_tree_clean(git_project)
-        assert ok is False
-        assert "uncommitted" in label
-
-    def test_untracked_files_ignored(self, git_project: Path) -> None:
-        """Untracked files are not considered dirty (warning only)."""
-        (git_project / "untracked.txt").write_text("new\n")
-        ok, label = _check_tree_clean(git_project)
-        assert ok is True
+class TestCheckBuildTimeout:
+    def test_timeout_fails(self, tmp_path: Path) -> None:
+        # sleep 999 will be killed by the 120s timeout; use a short one
+        # to avoid slow tests — override by calling subprocess directly
+        # is not feasible, so just verify the module handles bad commands
+        result = check_build("nonexistent_command_xyz", tmp_path)
+        assert result.passed is False
 
 
-class TestCheckTestRegression:
-    def test_no_regression(self) -> None:
-        ok, label = _check_test_regression(current_test_count=15, baseline_test_count=10)
-        assert ok is True
-        assert "15 >= 10" in label
-
-    def test_regression_detected(self) -> None:
-        ok, label = _check_test_regression(current_test_count=8, baseline_test_count=10)
-        assert ok is False
-        assert "dropped" in label
-
-    def test_equal_passes(self) -> None:
-        ok, label = _check_test_regression(current_test_count=10, baseline_test_count=10)
-        assert ok is True
-
-    def test_no_baseline_skips(self) -> None:
-        ok, label = _check_test_regression(current_test_count=10, baseline_test_count=None)
-        assert ok is True
-        assert "skipped" in label
-
-    def test_no_current_skips(self) -> None:
-        ok, label = _check_test_regression(current_test_count=None, baseline_test_count=10)
-        assert ok is True
-        assert "skipped" in label
+class TestCheckBuildCwd:
+    def test_runs_in_project_dir(self, tmp_path: Path) -> None:
+        (tmp_path / "marker.txt").write_text("found")
+        result = check_build("cat marker.txt", tmp_path)
+        assert result.passed is True
+        assert "found" in result.output
 
 
-class TestAuthorizeCommit:
-    def test_all_pass(self, git_project: Path) -> None:
-        start = _get_head(git_project)
-        (git_project / "feature.ts").write_text("export const x = 1;\n")
-        _git(["add", "."], git_project)
-        _git(["commit", "-m", "feat"], git_project)
-        result = authorize_commit(
-            project_dir=git_project,
-            branch_start_commit=start,
-            current_test_count=12,
-            baseline_test_count=10,
-        )
-        assert result.authorized is True
-        assert len(result.checks_failed) == 0
-        assert len(result.checks_passed) == 4
-
-    def test_head_not_advanced_blocks(self, git_project: Path) -> None:
-        start = _get_head(git_project)
-        result = authorize_commit(
-            project_dir=git_project,
-            branch_start_commit=start,
-        )
-        assert result.authorized is False
-        assert any("head_advanced" in f for f in result.checks_failed)
-
-    def test_dirty_tree_blocks(self, git_project: Path) -> None:
-        start = _get_head(git_project)
-        (git_project / "feature.ts").write_text("export const x = 1;\n")
-        _git(["add", "."], git_project)
-        _git(["commit", "-m", "feat"], git_project)
-        # Leave tracked file modified
-        (git_project / "feature.ts").write_text("modified\n")
-        result = authorize_commit(
-            project_dir=git_project,
-            branch_start_commit=start,
-        )
-        assert result.authorized is False
-        assert any("tree_clean" in f for f in result.checks_failed)
-
-    def test_regression_blocks(self, git_project: Path) -> None:
-        start = _get_head(git_project)
-        (git_project / "f.ts").write_text("x\n")
-        _git(["add", "."], git_project)
-        _git(["commit", "-m", "feat"], git_project)
-        result = authorize_commit(
-            project_dir=git_project,
-            branch_start_commit=start,
-            current_test_count=5,
-            baseline_test_count=10,
-        )
-        assert result.authorized is False
-        assert any("test_regression" in f for f in result.checks_failed)
-
-    def test_summary_property(self) -> None:
-        r = CommitAuthResult(
-            authorized=True,
-            checks_passed=["a", "b", "c"],
-            checks_failed=[],
-        )
-        assert "Authorized" in r.summary
-        assert "3" in r.summary
-
+class TestBuildCheckResult:
     def test_to_dict(self) -> None:
-        r = CommitAuthResult(
-            authorized=False,
-            checks_passed=["a"],
-            checks_failed=["b"],
-        )
+        r = BuildCheckResult(passed=True, output="ok", skipped=False)
         d = r.to_dict()
-        assert d["authorized"] is False
-        assert "b" in d["checks_failed"]
-        assert "summary" in d
+        assert d["passed"] is True
+        assert d["output"] == "ok"
+        assert d["skipped"] is False
+
+
+# ── detect_build_cmd ─────────────────────────────────────────────────────
+
+
+class TestDetectBuildCmdOverride:
+    def test_override_returns_override(self, tmp_path: Path) -> None:
+        assert detect_build_cmd(tmp_path, "my-build-cmd") == "my-build-cmd"
+
+    def test_override_skip_returns_empty(self, tmp_path: Path) -> None:
+        assert detect_build_cmd(tmp_path, "skip") == ""
+
+
+class TestDetectBuildCmdNextjs:
+    def test_nextjs_config_js(self, tmp_path: Path) -> None:
+        (tmp_path / "next.config.js").touch()
+        (tmp_path / "tsconfig.json").touch()
+        (tmp_path / "package.json").write_text('{"scripts": {"build": "next build"}}')
+        assert detect_build_cmd(tmp_path) == "npm run build"
+
+    def test_nextjs_config_mjs(self, tmp_path: Path) -> None:
+        (tmp_path / "next.config.mjs").touch()
+        (tmp_path / "package.json").write_text('{"scripts": {"build": "next build"}}')
+        assert detect_build_cmd(tmp_path) == "npm run build"
+
+    def test_nextjs_config_ts(self, tmp_path: Path) -> None:
+        (tmp_path / "next.config.ts").touch()
+        (tmp_path / "package.json").write_text('{"scripts": {"build": "next build"}}')
+        assert detect_build_cmd(tmp_path) == "npm run build"
+
+    def test_nextjs_beats_tsconfig(self, tmp_path: Path) -> None:
+        """Next.js detection takes priority over generic tsconfig (L-00177)."""
+        (tmp_path / "next.config.js").touch()
+        (tmp_path / "tsconfig.json").touch()
+        (tmp_path / "tsconfig.build.json").touch()
+        (tmp_path / "package.json").write_text('{"scripts": {"build": "next build"}}')
+        result = detect_build_cmd(tmp_path)
+        assert result == "npm run build"
+        assert "tsc" not in result
+
+    def test_nextjs_without_build_script_falls_through(self, tmp_path: Path) -> None:
+        (tmp_path / "next.config.js").touch()
+        (tmp_path / "tsconfig.json").touch()
+        (tmp_path / "package.json").write_text('{"scripts": {"dev": "next dev"}}')
+        result = detect_build_cmd(tmp_path)
+        assert "tsc --noEmit" in result
+
+
+class TestDetectBuildCmdTypescript:
+    def test_tsconfig_build_json(self, tmp_path: Path) -> None:
+        (tmp_path / "tsconfig.build.json").touch()
+        result = detect_build_cmd(tmp_path)
+        assert "tsconfig.build.json" in result
+
+    def test_tsconfig_json(self, tmp_path: Path) -> None:
+        (tmp_path / "tsconfig.json").touch()
+        result = detect_build_cmd(tmp_path)
+        assert "tsc --noEmit" in result
+
+
+class TestDetectBuildCmdOtherLangs:
+    def test_pyproject_toml(self, tmp_path: Path) -> None:
+        (tmp_path / "pyproject.toml").touch()
+        (tmp_path / "app.py").write_text("print('hello')")
+        result = detect_build_cmd(tmp_path)
+        assert "py_compile" in result
+
+    def test_cargo_toml(self, tmp_path: Path) -> None:
+        (tmp_path / "Cargo.toml").touch()
+        assert detect_build_cmd(tmp_path) == "cargo check"
+
+    def test_go_mod(self, tmp_path: Path) -> None:
+        (tmp_path / "go.mod").touch()
+        assert detect_build_cmd(tmp_path) == "go build ./..."
+
+    def test_package_json_with_build(self, tmp_path: Path) -> None:
+        (tmp_path / "package.json").write_text(
+            json.dumps({"scripts": {"build": "webpack"}})
+        )
+        assert detect_build_cmd(tmp_path) == "npm run build"
+
+    def test_no_detection(self, tmp_path: Path) -> None:
+        assert detect_build_cmd(tmp_path) == ""

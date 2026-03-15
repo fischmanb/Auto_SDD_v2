@@ -68,6 +68,9 @@ def parse_signals(agent_output: str) -> ParsedSignals:
         SPEC_FILE: <path to spec file>
         SOURCE_FILES: <comma-separated file paths>
 
+    Lines inside fenced code blocks (``` ... ```) are skipped to avoid
+    false positives from agent explanations that mention signal names.
+
     If a signal appears multiple times, the LAST occurrence wins
     (agent may emit intermediate signals before the final one).
 
@@ -75,9 +78,18 @@ def parse_signals(agent_output: str) -> ParsedSignals:
     to check whether the signals are sufficient and files exist.
     """
     result = ParsedSignals()
+    in_code_block = False
 
     for line in agent_output.splitlines():
         stripped = line.strip()
+
+        # Track fenced code block state
+        if stripped.startswith("```"):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block:
+            continue
+
         for prefix, attr in _SIGNAL_PREFIXES.items():
             signal_prefix = f"{prefix}:"
             if stripped.startswith(signal_prefix):
@@ -107,8 +119,9 @@ def validate_signals(
 
     Checks:
         1. FEATURE_BUILT is present and non-empty
-        2. SPEC_FILE is present and exists on disk
-        3. SPEC_FILE resolves within project_dir (not outside)
+        2. SPEC_FILE is present, exists on disk, within project_dir
+        3. SPEC_FILE has substantive content (>25 characters)
+        4. SOURCE_FILES all exist on disk within project_dir
 
     Mutates signals.valid and signals.errors, then returns signals
     for chaining.
@@ -119,7 +132,7 @@ def validate_signals(
     if not signals.feature_name:
         errors.append("Missing required signal: FEATURE_BUILT")
 
-    # 2. SPEC_FILE is required
+    # 2. SPEC_FILE is required, must exist, must be contained
     if not signals.spec_file:
         errors.append("Missing required signal: SPEC_FILE")
     else:
@@ -141,6 +154,37 @@ def validate_signals(
                 errors.append(
                     f"SPEC_FILE resolves outside project: {spec_path}"
                 )
+
+            # 3. Check spec has substantive content
+            try:
+                content = spec_path.read_text()
+                if len(content.strip()) <= 25:
+                    errors.append(
+                        f"SPEC_FILE has insufficient content "
+                        f"({len(content.strip())} chars, minimum 25): "
+                        f"{signals.spec_file}"
+                    )
+            except OSError as exc:
+                errors.append(f"SPEC_FILE unreadable: {exc}")
+
+    # 4. SOURCE_FILES must all exist on disk within project_dir
+    if signals.source_files:
+        resolved_root = project_dir.resolve()
+        for src in signals.source_files:
+            src_path = Path(src)
+            if not src_path.is_absolute():
+                src_path = project_dir / src_path
+            if not src_path.exists():
+                errors.append(
+                    f"SOURCE_FILES: '{src}' does not exist on disk"
+                )
+            else:
+                try:
+                    src_path.resolve().relative_to(resolved_root)
+                except ValueError:
+                    errors.append(
+                        f"SOURCE_FILES: '{src}' resolves outside project"
+                    )
 
     signals.errors = errors
     signals.valid = len(errors) == 0

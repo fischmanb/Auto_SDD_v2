@@ -37,7 +37,9 @@ from auto_sdd.lib.model_config import ModelConfig
 from auto_sdd.lib.local_agent import AgentResult, run_local_agent
 from auto_sdd.exec_gates.eg1_tool_calls import BuildAgentExecutor
 from auto_sdd.exec_gates.eg2_signal_parse import extract_and_validate, ParsedSignals
-from auto_sdd.exec_gates.eg3_commit_auth import authorize_commit, CommitAuthResult
+from auto_sdd.exec_gates.eg3_build_check import check_build, detect_build_cmd, BuildCheckResult
+from auto_sdd.exec_gates.eg4_test_check import check_tests, detect_test_cmd, TestCheckResult
+from auto_sdd.exec_gates.eg5_commit_auth import authorize_commit, CommitAuthResult
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +122,73 @@ class FeatureRecord:
     timestamp: str = ""
 
 
+@dataclass
+class GateResult:
+    """Aggregate result of all GATE checks (EG2–EG5).
+
+    Checks run in order and short-circuit on first failure.
+    Fields for checks that didn't run (due to short-circuit) stay None.
+
+    EG2: Signal parse — agent emitted required signals, files exist
+    EG3: Build check — project compiles
+    EG4: Test check — all tests pass
+    EG5: Commit auth — HEAD advanced, tree clean, no contamination, no regression
+    EG6: Spec adherence — reserved, not yet implemented
+    """
+
+    passed: bool = False
+    failed_gate: str = ""  # e.g., "EG2", "EG3", "EG4", "EG5"
+    error: str = ""
+
+    # Per-check results (None = didn't run due to short-circuit)
+    eg2_signals: ParsedSignals | None = None
+    eg3_build: BuildCheckResult | None = None
+    eg4_tests: TestCheckResult | None = None
+    eg5_commit: CommitAuthResult | None = None
+    # eg6_spec_adherence: reserved
+
+
 # ── Helpers ──────────────────────────────────────────────────────────────────
+
+
+def _discover_test_files(project_dir: Path, test_cmd: str) -> set[str]:
+    """Discover existing test files to protect from agent writes.
+
+    Returns a set of paths relative to project_dir. These are passed
+    to BuildAgentExecutor.protected_paths so the agent cannot modify,
+    delete, or overwrite test files (enforced at EG1 layer).
+
+    Discovery uses glob patterns based on the detected test framework.
+    Only files that exist on disk at call time are returned.
+    """
+    patterns: list[str] = []
+
+    # Pytest patterns
+    if "pytest" in test_cmd or (project_dir / "pyproject.toml").exists():
+        patterns += ["**/test_*.py", "**/*_test.py", "**/conftest.py"]
+
+    # Jest / Vitest / Mocha patterns (JS/TS test ecosystem)
+    if (project_dir / "package.json").exists():
+        patterns += [
+            "**/*.test.ts", "**/*.test.tsx",
+            "**/*.test.js", "**/*.test.jsx",
+            "**/*.spec.ts", "**/*.spec.tsx",
+            "**/*.spec.js", "**/*.spec.jsx",
+            "**/__tests__/**",
+        ]
+
+    found: set[str] = set()
+    for pattern in patterns:
+        for path in project_dir.glob(pattern):
+            if path.is_file() and "node_modules" not in path.parts:
+                found.add(str(path.relative_to(project_dir)))
+
+    if found:
+        logger.info("Protected test files: %d found", len(found))
+    else:
+        logger.warning("No test files discovered — nothing to protect")
+
+    return found
 
 
 def _get_head(project_dir: Path) -> str:
@@ -147,122 +215,109 @@ def _format_duration(seconds: int) -> str:
     return f"{s}s"
 
 
-def _run_build_check(build_cmd: str, project_dir: Path) -> tuple[bool, str]:
-    """Run the project build command (orchestrator-side, per P1).
-
-    Returns (success, output).
-    """
-    if not build_cmd or build_cmd == "skip":
-        return True, "(build check skipped)"
-
-    try:
-        result = subprocess.run(
-            build_cmd, shell=True,
-            capture_output=True, text=True,
-            cwd=str(project_dir), timeout=120,
-        )
-        output = result.stdout[-2000:] + result.stderr[-2000:]
-        return result.returncode == 0, output
-    except subprocess.TimeoutExpired:
-        return False, "Build check timed out after 120s"
-    except OSError as exc:
-        return False, f"Build check failed: {exc}"
-
-
-def _run_test_check(test_cmd: str, project_dir: Path) -> tuple[bool, int | None, str]:
-    """Run the project test command (orchestrator-side, per P1).
-
-    Returns (success, test_count_or_none, output).
-    """
-    if not test_cmd or test_cmd == "skip":
-        return True, None, "(test check skipped)"
-
-    try:
-        result = subprocess.run(
-            test_cmd, shell=True,
-            capture_output=True, text=True,
-            cwd=str(project_dir), timeout=300,
-        )
-        output = result.stdout[-3000:] + result.stderr[-2000:]
-
-        # Parse test count from common frameworks
-        import re
-        test_count = None
-        # Jest/Vitest: "Tests: X passed"
-        m = re.search(r'Tests:\s+(\d+)\s+passed', output)
-        if m:
-            test_count = int(m.group(1))
-        # Pytest: "X passed"
-        if test_count is None:
-            m = re.search(r'(\d+)\s+passed', output)
-            if m:
-                test_count = int(m.group(1))
-
-        return result.returncode == 0, test_count, output
-    except subprocess.TimeoutExpired:
-        return False, None, "Test check timed out after 300s"
-    except OSError as exc:
-        return False, None, f"Test check failed: {exc}"
-
-
 def _parse_roadmap(project_dir: Path) -> list[Feature]:
     """Parse .specs/roadmap.md and return pending features in topo order.
 
-    Expects markdown table rows with format:
-        | ID | Name | Domain | Deps | Complexity | Notes | Status |
+    Uses shared table parser from validators, then filters pending features
+    and topologically sorts by dependency.
 
-    Status column: ⬜ = pending, ✅ = done, 🔄 = in progress, ⏸️ = blocked
-
-    Returns only ⬜ (pending) features whose dependencies are all ✅.
+    Returns ⬜ (pending) features topologically sorted by dependency.
+    Features whose deps include names not in the roadmap (done or pending)
+    are skipped with a warning. Cycles are detected and raise ValueError.
     """
+    from auto_sdd.pre_build.validators import _parse_roadmap_table
+
     roadmap_path = project_dir / ".specs" / "roadmap.md"
     if not roadmap_path.exists():
         logger.error("Roadmap not found: %s", roadmap_path)
         return []
 
     text = roadmap_path.read_text()
-    features: list[Feature] = []
+    all_features, parse_errors = _parse_roadmap_table(text)
+
+    if parse_errors:
+        for err in parse_errors:
+            logger.warning("Roadmap parse: %s: %s", err.code, err.detail)
+
+    if not all_features:
+        logger.warning("No parseable features in roadmap")
+        return []
+
+    # Separate pending vs done
+    pending: dict[str, Feature] = {}
     done_names: set[str] = set()
 
-    import re
-    for line in text.splitlines():
-        line = line.strip()
-        if not line.startswith("|"):
-            continue
-        cells = [c.strip() for c in line.split("|")]
-        cells = [c for c in cells if c]  # Remove empty from leading/trailing |
-        if len(cells) < 7:
-            continue
-
-        # Skip header rows
-        try:
-            fid = int(cells[0])
-        except (ValueError, IndexError):
-            continue
-
-        name = cells[1].strip()
-        deps_str = cells[3].strip()
-        complexity = cells[4].strip() or "M"
-        status_cell = cells[6].strip()
-
-        deps = [d.strip() for d in deps_str.split(",") if d.strip() and d.strip() != "-"]
-
-        if "✅" in status_cell:
+    for name, data in all_features.items():
+        if "✅" in data["status"]:
             done_names.add(name)
-        elif "⬜" in status_cell:
-            features.append(Feature(
-                id=fid, name=name, complexity=complexity,
-                deps=deps, status="pending",
-            ))
+        elif "⬜" in data["status"]:
+            pending[name] = Feature(
+                id=data["id"],
+                name=name,
+                complexity=data["complexity"],
+                deps=data["deps"],
+                status="pending",
+            )
 
-    # Filter to features whose deps are all done
-    buildable = [f for f in features if all(d in done_names for d in f.deps)]
+    # ── Kahn's algorithm: topological sort with cycle detection ──
+    # In-degree counts only pending→pending edges.
+    # Deps that point to done_names are already satisfied.
+    # Deps that point to unknown names (not done, not pending) → skip feature.
+    in_degree: dict[str, int] = {name: 0 for name in pending}
+    dependents: dict[str, list[str]] = {name: [] for name in pending}
+
+    skipped_names: set[str] = set()
+    for name, feat in pending.items():
+        for dep in feat.deps:
+            if dep in done_names:
+                continue  # already satisfied
+            if dep not in pending:
+                logger.warning(
+                    "Feature %r depends on %r which is not in roadmap — skipping",
+                    name, dep,
+                )
+                skipped_names.add(name)
+                break
+            in_degree[name] += 1
+            dependents[dep].append(name)
+
+    # Remove skipped features from the graph
+    for name in skipped_names:
+        del in_degree[name]
+        del dependents[name]
+
+    # Seed queue with features that have zero in-degree
+    from collections import deque
+    queue: deque[str] = deque(
+        name for name, deg in in_degree.items() if deg == 0
+    )
+    ordered: list[Feature] = []
+
+    while queue:
+        name = queue.popleft()
+        ordered.append(pending[name])
+        for dependent in dependents.get(name, []):
+            if dependent in in_degree:
+                in_degree[dependent] -= 1
+                if in_degree[dependent] == 0:
+                    queue.append(dependent)
+
+    # Cycle detection: if we didn't process all features, there's a cycle
+    remaining = {
+        name for name, deg in in_degree.items()
+        if deg > 0 and name not in skipped_names
+    }
+    if remaining:
+        raise ValueError(
+            f"Dependency cycle detected in roadmap among: "
+            f"{', '.join(sorted(remaining))}"
+        )
 
     logger.info(
-        "Roadmap: %d pending, %d buildable, %d done",
-        len(features), len(buildable), len(done_names),
+        "Roadmap: %d pending, %d buildable (topo-sorted), %d done, %d skipped",
+        len(pending), len(ordered), len(done_names), len(skipped_names),
     )
-    return buildable
+    return ordered
 
 
 # ── Build prompt construction ────────────────────────────────────────────────
@@ -334,8 +389,8 @@ class BuildLoopV2:
     ) -> None:
         self.config = model_config
         self.project_dir = project_dir.resolve()
-        self.build_cmd = build_cmd or self._detect_build_cmd()
-        self.test_cmd = test_cmd or self._detect_test_cmd()
+        self.build_cmd = build_cmd or detect_build_cmd(self.project_dir)
+        self.test_cmd = test_cmd or detect_test_cmd(self.project_dir)
         self.max_features = max_features
         self.max_retries = max_retries
 
@@ -352,32 +407,6 @@ class BuildLoopV2:
             self.build_cmd or "(none)",
             self.test_cmd or "(none)",
         )
-
-    def _detect_build_cmd(self) -> str:
-        """Auto-detect the build command from project files."""
-        if (self.project_dir / "tsconfig.json").exists():
-            return "npx tsc --noEmit"
-        if (self.project_dir / "package.json").exists():
-            try:
-                pkg = json.loads((self.project_dir / "package.json").read_text())
-                if "build" in pkg.get("scripts", {}):
-                    return "npm run build"
-            except (json.JSONDecodeError, OSError):
-                pass
-        return ""
-
-    def _detect_test_cmd(self) -> str:
-        """Auto-detect the test command from project files."""
-        if (self.project_dir / "package.json").exists():
-            try:
-                pkg = json.loads((self.project_dir / "package.json").read_text())
-                if "test" in pkg.get("scripts", {}):
-                    return "npm test"
-            except (json.JSONDecodeError, OSError):
-                pass
-        if (self.project_dir / "pyproject.toml").exists():
-            return "pytest"
-        return ""
 
     # ── Entry point ──────────────────────────────────────────────────
 
@@ -453,19 +482,22 @@ class BuildLoopV2:
             # ── SELECT ───────────────────────────────────────────────
             # Capture baseline state before agent runs
             head_before = _get_head(self.project_dir)
-            baseline_test_ok, baseline_test_count, _ = _run_test_check(
+            baseline_test_result = check_tests(
                 self.test_cmd, self.project_dir,
             )
+            baseline_test_count = baseline_test_result.test_count
 
             # Build prompts
             system_prompt = _build_system_prompt(feature, self.project_dir)
             user_prompt = _build_user_prompt(feature, self.project_dir)
 
             # Create executor (EG1 gate) scoped to this feature
+            protected = _discover_test_files(self.project_dir, self.test_cmd)
             executor = BuildAgentExecutor(
                 project_root=self.project_dir,
                 allowed_branch="",  # TODO: wire branch manager
                 command_timeout=60,
+                protected_paths=protected,
             )
 
             logger.info("SELECT: prompt built, baseline captured (tests=%s)",
@@ -493,90 +525,36 @@ class BuildLoopV2:
                 self._record(feature, "failed", attempt,
                              error=agent_result.error)
                 if attempt < self.max_retries:
-                    # Reset for retry — agent's uncommitted changes are
-                    # left in place for attempt 1 (fix-in-place),
-                    # git reset for attempt 2+ (clean retry)
                     if attempt >= 1:
                         self._git_reset(head_before)
                     continue
                 return False
 
-            # ── EG2: Signal parse ────────────────────────────────────
-            # Mechanical extraction — no agent self-assessment accepted
-            signals: ParsedSignals = extract_and_validate(
-                agent_result.output, self.project_dir,
-            )
-
-            if not signals.valid:
-                logger.warning(
-                    "EG2 FAILED: %s", "; ".join(signals.errors),
-                )
-                self._record(feature, "failed", attempt,
-                             error=f"EG2: {'; '.join(signals.errors)}")
-                if attempt < self.max_retries:
-                    if attempt >= 1:
-                        self._git_reset(head_before)
-                    continue
-                return False
-
-            logger.info(
-                "EG2: signals valid (feature=%s, spec=%s, sources=%d)",
-                signals.feature_name, signals.spec_file,
-                len(signals.source_files),
-            )
-
-            # ── GATE: Mechanical checks (orchestrator-side, per P1) ──
-            # Build check
-            build_ok, build_output = _run_build_check(
-                self.build_cmd, self.project_dir,
-            )
-            if not build_ok:
-                logger.warning("GATE: build check failed")
-                self._record(feature, "failed", attempt,
-                             error=f"Build failed: {build_output[-200:]}")
-                if attempt < self.max_retries:
-                    if attempt >= 1:
-                        self._git_reset(head_before)
-                    continue
-                return False
-
-            # Test check (orchestrator runs tests, not agent)
-            test_ok, current_test_count, test_output = _run_test_check(
-                self.test_cmd, self.project_dir,
-            )
-            if not test_ok:
-                logger.warning("GATE: test check failed")
-                self._record(feature, "failed", attempt,
-                             error=f"Tests failed: {test_output[-200:]}")
-                if attempt < self.max_retries:
-                    if attempt >= 1:
-                        self._git_reset(head_before)
-                    continue
-                return False
-
-            # ── EG3: Commit authorization ────────────────────────────
-            # Final deterministic check before state advances
-            commit_auth: CommitAuthResult = authorize_commit(
-                project_dir=self.project_dir,
-                branch_start_commit=head_before,
-                current_test_count=current_test_count,
+            # ── GATE (EG2 → EG3 → EG4 → EG5) ───────────────────────
+            # All checks deterministic, orchestrator-side, short-circuit
+            gate = self._run_gate(
+                agent_result=agent_result,
+                head_before=head_before,
                 baseline_test_count=baseline_test_count,
             )
 
-            if not commit_auth.authorized:
-                logger.warning("EG3 BLOCKED: %s", commit_auth.summary)
+            if not gate.passed:
+                logger.warning(
+                    "GATE FAILED at %s: %s", gate.failed_gate, gate.error,
+                )
                 self._record(feature, "failed", attempt,
-                             error=f"EG3: {commit_auth.summary}")
+                             error=f"{gate.failed_gate}: {gate.error}")
                 if attempt < self.max_retries:
                     if attempt >= 1:
                         self._git_reset(head_before)
                     continue
                 return False
 
-            logger.info("GATE: all checks passed (%s)", commit_auth.summary)
-
             # ── ADVANCE ──────────────────────────────────────────────
             # All gates passed — record success and move to next feature
+            current_test_count = (
+                gate.eg4_tests.test_count if gate.eg4_tests else None
+            )
             self._record(
                 feature, "built", attempt,
                 test_count=current_test_count,
@@ -585,6 +563,87 @@ class BuildLoopV2:
 
         # Exhausted all retries
         return False
+
+    # ── GATE: deterministic ExecGate checks (EG2–EG5) ─────────────
+
+    def _run_gate(
+        self,
+        agent_result: AgentResult,
+        head_before: str,
+        baseline_test_count: int | None,
+    ) -> GateResult:
+        """Run all GATE checks in sequence. Short-circuits on first failure.
+
+        Execution order (AgentSpec lineage — all deterministic, agent-opaque):
+            EG2: Signal parse — agent emitted required signals, files exist
+            EG3: Build check — project compiles (orchestrator subprocess)
+            EG4: Test check — all tests pass (orchestrator subprocess)
+            EG5: Commit auth — HEAD advanced, tree clean, no contamination,
+                 no test regression
+            EG6: Spec adherence — reserved, not yet implemented
+
+        Returns GateResult with per-check results. Fields for checks that
+        didn't run (due to short-circuit) remain None.
+        """
+        gate = GateResult()
+
+        # ── EG2: Signal parse ────────────────────────────────────
+        signals = extract_and_validate(
+            agent_result.output, self.project_dir,
+        )
+        gate.eg2_signals = signals
+
+        if not signals.valid:
+            gate.failed_gate = "EG2"
+            gate.error = "; ".join(signals.errors)
+            return gate
+
+        logger.info(
+            "EG2: signals valid (feature=%s, spec=%s, sources=%d)",
+            signals.feature_name, signals.spec_file,
+            len(signals.source_files),
+        )
+
+        # ── EG3: Build check ─────────────────────────────────────
+        build_result = check_build(self.build_cmd, self.project_dir)
+        gate.eg3_build = build_result
+
+        if not build_result.passed:
+            gate.failed_gate = "EG3"
+            gate.error = f"Build failed: {build_result.output[-200:]}"
+            return gate
+
+        # ── EG4: Test check ──────────────────────────────────────
+        test_result = check_tests(self.test_cmd, self.project_dir)
+        gate.eg4_tests = test_result
+
+        if not test_result.passed:
+            gate.failed_gate = "EG4"
+            gate.error = f"Tests failed: {test_result.output[-200:]}"
+            return gate
+
+        # ── EG5: Commit authorization ────────────────────────────
+        commit_result = authorize_commit(
+            project_dir=self.project_dir,
+            branch_start_commit=head_before,
+            current_test_count=test_result.test_count,
+            baseline_test_count=baseline_test_count,
+        )
+        gate.eg5_commit = commit_result
+
+        if not commit_result.authorized:
+            gate.failed_gate = "EG5"
+            gate.error = commit_result.summary
+            return gate
+
+        # ── EG6: Spec adherence (reserved) ───────────────────────
+        # Not yet implemented. Will be deterministic diff-based
+        # static analysis when added.
+
+        # All checks passed
+        gate.passed = True
+        logger.info("GATE: all checks passed (%s)", commit_result.summary)
+        return gate
 
     # ── Helper methods ───────────────────────────────────────────────
 
@@ -702,6 +761,17 @@ def main() -> None:
         default=int(os.environ.get("MAX_RETRIES", "1")),
         help="Max retries per feature (default: 1)",
     )
+    parser.add_argument(
+        "--pre-build",
+        action="store_true",
+        default=False,
+        help="Run pre-build phases (1-6) before the build loop",
+    )
+    parser.add_argument(
+        "--vision-input",
+        default=os.environ.get("VISION_INPUT", ""),
+        help="User input for Phase 1 (VISION). Required if --pre-build and no .specs/vision.md",
+    )
     args = parser.parse_args()
 
     # Validate project dir
@@ -728,6 +798,26 @@ def main() -> None:
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         datefmt="%H:%M:%S",
     )
+
+    # Run pre-build phases if requested
+    if args.pre_build:
+        from auto_sdd.pre_build.orchestrator import run_pre_build
+
+        logger.info("Running pre-build phases (1-6)...")
+        pre_results = run_pre_build(
+            config=config,
+            project_dir=project_dir,
+            user_input=args.vision_input,
+        )
+        failed = [r for r in pre_results if not r.passed]
+        if failed:
+            last = failed[-1]
+            codes = [e.code for e in last.errors]
+            logger.error(
+                "Pre-build failed at %s: %s", last.phase, codes,
+            )
+            sys.exit(2)
+        logger.info("Pre-build complete: %d phases passed", len(pre_results))
 
     # Run the loop
     loop = BuildLoopV2(

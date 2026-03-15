@@ -59,7 +59,7 @@ class TestValidateSignals:
     def test_valid_signals(self, tmp_path: Path) -> None:
         spec = tmp_path / ".specs" / "auth.md"
         spec.parent.mkdir(parents=True)
-        spec.write_text("# Auth spec\n")
+        spec.write_text("# Auth\n\nImplement login with email and password validation.\n")
         signals = ParsedSignals(
             feature_name="Auth", spec_file=".specs/auth.md",
         )
@@ -103,7 +103,7 @@ class TestValidateSignals:
         """L-00217: SPEC_FILE must resolve against project_dir, not cwd."""
         spec = tmp_path / ".specs" / "auth.md"
         spec.parent.mkdir(parents=True)
-        spec.write_text("# Auth\n")
+        spec.write_text("# Auth\n\nImplement login with email and password validation.\n")
         signals = ParsedSignals(
             feature_name="Auth", spec_file=".specs/auth.md",
         )
@@ -115,7 +115,12 @@ class TestExtractAndValidate:
     def test_end_to_end(self, tmp_path: Path) -> None:
         spec = tmp_path / ".specs" / "dashboard.md"
         spec.parent.mkdir(parents=True)
-        spec.write_text("# Dashboard\n")
+        spec.write_text("# Dashboard\n\nBuild an analytics dashboard with charts and filters.\n")
+        # Create source files so SOURCE_FILES validation passes
+        src_dir = tmp_path / "src"
+        src_dir.mkdir()
+        (src_dir / "dashboard.tsx").write_text("export default function Dashboard() {}")
+        (src_dir / "widgets.tsx").write_text("export default function Widgets() {}")
         output = (
             "Building Dashboard feature...\n"
             "FEATURE_BUILT: Dashboard\n"
@@ -142,3 +147,118 @@ class TestExtractAndValidate:
         assert d["feature_name"] == "X"
         assert d["valid"] is True
         assert d["source_files"] == ["a.ts"]
+
+
+class TestCodeBlockSkip:
+    def test_signal_inside_code_block_ignored(self) -> None:
+        output = (
+            "Here's what I did:\n"
+            "```\n"
+            "FEATURE_BUILT: FakeSignal\n"
+            "```\n"
+            "FEATURE_BUILT: RealSignal\n"
+        )
+        signals = parse_signals(output)
+        assert signals.feature_name == "RealSignal"
+
+    def test_all_signals_inside_code_block(self) -> None:
+        output = (
+            "```\n"
+            "FEATURE_BUILT: Trapped\n"
+            "SPEC_FILE: trapped.md\n"
+            "```\n"
+        )
+        signals = parse_signals(output)
+        assert signals.feature_name == ""
+        assert signals.spec_file == ""
+
+    def test_signal_after_code_block_works(self) -> None:
+        output = (
+            "```python\n"
+            "print('hello')\n"
+            "```\n"
+            "FEATURE_BUILT: AfterBlock\n"
+            "SPEC_FILE: .specs/after.md\n"
+            "SOURCE_FILES: src/a.ts\n"
+        )
+        signals = parse_signals(output)
+        assert signals.feature_name == "AfterBlock"
+        assert signals.spec_file == ".specs/after.md"
+        assert signals.source_files == ["src/a.ts"]
+
+
+class TestSpecContentValidation:
+    def test_spec_too_short_fails(self, tmp_path: Path) -> None:
+        """Spec files must contain more than 25 characters."""
+        spec = tmp_path / ".specs" / "tiny.md"
+        spec.parent.mkdir(parents=True)
+        spec.write_text("# Tiny")  # 6 chars
+        signals = ParsedSignals(
+            feature_name="Tiny", spec_file=".specs/tiny.md",
+        )
+        result = validate_signals(signals, tmp_path)
+        assert result.valid is False
+        assert any("insufficient content" in e for e in result.errors)
+
+    def test_spec_exactly_25_chars_fails(self, tmp_path: Path) -> None:
+        spec = tmp_path / ".specs" / "edge.md"
+        spec.parent.mkdir(parents=True)
+        spec.write_text("a" * 25)  # exactly 25
+        signals = ParsedSignals(
+            feature_name="Edge", spec_file=".specs/edge.md",
+        )
+        result = validate_signals(signals, tmp_path)
+        assert result.valid is False
+        assert any("insufficient content" in e for e in result.errors)
+
+    def test_spec_26_chars_passes(self, tmp_path: Path) -> None:
+        spec = tmp_path / ".specs" / "ok.md"
+        spec.parent.mkdir(parents=True)
+        spec.write_text("a" * 26)  # just over
+        signals = ParsedSignals(
+            feature_name="OK", spec_file=".specs/ok.md",
+        )
+        result = validate_signals(signals, tmp_path)
+        assert result.valid is True
+
+
+class TestSourceFilesValidation:
+    def test_missing_source_file_fails(self, tmp_path: Path) -> None:
+        spec = tmp_path / ".specs" / "feat.md"
+        spec.parent.mkdir(parents=True)
+        spec.write_text("# Feature\n\nA feature with enough content here.\n")
+        signals = ParsedSignals(
+            feature_name="Feat", spec_file=".specs/feat.md",
+            source_files=["src/missing.ts"],
+        )
+        result = validate_signals(signals, tmp_path)
+        assert result.valid is False
+        assert any("does not exist" in e for e in result.errors)
+
+    def test_source_file_outside_project_fails(self, tmp_path: Path) -> None:
+        spec = tmp_path / ".specs" / "feat.md"
+        spec.parent.mkdir(parents=True)
+        spec.write_text("# Feature\n\nA feature with enough content here.\n")
+        outside = tmp_path.parent / "outside.ts"
+        outside.write_text("evil")
+        signals = ParsedSignals(
+            feature_name="Feat", spec_file=".specs/feat.md",
+            source_files=[str(outside)],
+        )
+        result = validate_signals(signals, tmp_path)
+        assert result.valid is False
+        assert any("outside project" in e for e in result.errors)
+
+    def test_valid_source_files_pass(self, tmp_path: Path) -> None:
+        spec = tmp_path / ".specs" / "feat.md"
+        spec.parent.mkdir(parents=True)
+        spec.write_text("# Feature\n\nA feature with enough content here.\n")
+        src = tmp_path / "src" / "app.ts"
+        src.parent.mkdir()
+        src.write_text("export default {}")
+        signals = ParsedSignals(
+            feature_name="Feat", spec_file=".specs/feat.md",
+            source_files=["src/app.ts"],
+        )
+        result = validate_signals(signals, tmp_path)
+        assert result.valid is True

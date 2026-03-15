@@ -1,6 +1,6 @@
 # System Inventory & Evaluation Framework
 
-> Current state of Auto-SDD V2 as of 2026-03-14.
+> Current state of Auto-SDD V2 as of 2026-03-15.
 > What's built, what happens when, where the exposure is, what to track.
 
 ---
@@ -13,7 +13,7 @@
 | Test code | 701 | 22 | 95 |
 | Validation script | 658 | 1 | 12 |
 | **Total** | **3,833** | **34** | **168** |
-| Tests passing | **125** | | |
+| Tests passing | **325** | | |
 
 ---
 

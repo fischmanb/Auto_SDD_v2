@@ -36,10 +36,10 @@ The orchestrator captures test count BEFORE the agent runs (baseline),
 then runs tests AFTER the agent commits (current), and compares. If
 tests were deleted or modified to pass, the count delta reveals it.
 
-**ExecGate enforcement**: EG3 (commit auth) owns test regression
-detection. `check_build()` and `check_tests()` from `build_gates.py`
-run as subprocess calls from the orchestrator, not through the agent's
-tool calls.
+**ExecGate enforcement**: EG5 (commit auth) owns test regression
+detection. EG3 (`check_build()`) and EG4 (`check_tests()`) from
+the exec_gates modules run as subprocess calls from the orchestrator,
+not through the agent's tool calls.
 
 ---
 
@@ -73,9 +73,9 @@ MUST be. Agent judgment is reserved only for genuinely creative tasks
 | Test execution | Agent runs, self-reports | Orchestrator subprocess |
 | Build verification | Agent reports | `check_build()` subprocess |
 | Signal extraction | Agent self-assessment | EG2 mechanical parse |
-| Commit validation | Agent says "committed" | EG3 git state check |
+| Commit validation | Agent says "committed" | EG5 git state check |
 | Scope containment | Prompt instruction | EG1 path validation |
-| Test regression | Agent "notices" | EG3 count comparison |
+| Test regression | Agent "notices" | EG5 count comparison |
 | Command safety | Prompt instruction | EG1 9-layer validation |
 
 The cost of deterministic checks is zero (microseconds of Python).
@@ -172,16 +172,16 @@ Someone must decide what code to write. That decision is inherently
 LLM judgment (or human judgment, which violates DP-1). This is not
 a problem to solve — it's a boundary to accept.
 
-The deterministic gates (EG1, EG2, EG3, build checks, test checks)
+The deterministic gates (EG1, EG2, EG3, EG4, EG5, build checks, test checks)
 catch everything that can be caught mechanically:
 
-- Agent didn't commit → EG3
-- Agent broke existing tests → EG3 regression check
+- Agent didn't commit → EG5
+- Agent broke existing tests → EG5 regression check
 - Agent touched forbidden files → EG1 path gate
 - Agent ran forbidden commands → EG1 command gate
 - Agent didn't emit signals → EG2
-- Code doesn't compile → orchestrator build check
-- Existing tests fail → orchestrator test check
+- Code doesn't compile → EG3 build check
+- Existing tests fail → EG4 test check
 
 The gap between "compiles and passes tests" and "actually implements
 the spec correctly" requires judgment. That judgment lives in the

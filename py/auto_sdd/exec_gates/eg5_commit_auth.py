@@ -1,14 +1,15 @@
-"""EG3: Commit Auth ExecGate — final check before HEAD advances.
+"""EG5: Commit Auth ExecGate — final check before HEAD advances.
 
-After all mechanical gates pass, this is the last deterministic check
-before the loop state changes become irreversible. Validates:
+After all mechanical gates pass (EG2 signals, EG3 build, EG4 tests),
+this is the last deterministic check before the loop state changes
+become irreversible. Validates:
 
     1. HEAD actually advanced (agent committed something)
     2. Working tree is clean (no uncommitted changes left behind)
     3. No files outside project scope were touched (contamination)
     4. Test count did not regress (if baseline provided)
 
-This gate runs AFTER the build gates (tsc/build, test pass) — it
+This gate runs AFTER EG3 (build) and EG4 (test) — it
 catches state-level issues that build gates don't cover.
 """
 from __future__ import annotations
@@ -93,11 +94,19 @@ def _check_tree_clean(project_dir: Path) -> tuple[bool, str]:
         if result.returncode != 0:
             return False, "tree_clean (git status failed)"
 
+        lines = [line for line in result.stdout.splitlines() if line.strip()]
+
+        # Warn on untracked files (don't fail — could be build artifacts)
+        untracked = [line for line in lines if line.startswith("??")]
+        if untracked:
+            logger.warning(
+                "EG5: %d untracked file(s) after agent finished: %s",
+                len(untracked),
+                ", ".join(line[3:] for line in untracked[:5]),
+            )
+
         # Filter to tracked changes only (ignore untracked '??')
-        dirty = [
-            line for line in result.stdout.splitlines()
-            if line.strip() and not line.startswith("??")
-        ]
+        dirty = [line for line in lines if not line.startswith("??")]
         if dirty:
             return False, f"tree_clean ({len(dirty)} uncommitted change(s))"
         return True, "tree_clean"
@@ -171,7 +180,7 @@ def authorize_commit(
 ) -> CommitAuthResult:
     """Run all commit authorization checks.
 
-    This is the EG3 gate — the final deterministic check before
+    This is the EG5 gate — the final deterministic check before
     the loop state advances. Returns CommitAuthResult with the
     overall decision and per-check details.
 
@@ -200,8 +209,8 @@ def authorize_commit(
     result.authorized = len(result.checks_failed) == 0
 
     if result.authorized:
-        logger.info("EG3 commit authorized: %s", result.summary)
+        logger.info("EG5 commit authorized: %s", result.summary)
     else:
-        logger.warning("EG3 commit BLOCKED: %s", result.summary)
+        logger.warning("EG5 commit BLOCKED: %s", result.summary)
 
     return result

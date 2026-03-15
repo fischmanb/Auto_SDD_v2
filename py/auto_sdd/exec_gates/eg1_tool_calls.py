@@ -613,11 +613,22 @@ class BuildAgentExecutor:
         allowed_branch: str = "",
         allowed_runtimes: set[str] | None = None,
         command_timeout: int = 60,
+        protected_paths: set[str | Path] | None = None,
     ) -> None:
         self.project_root = project_root.resolve()
         self.allowed_branch = allowed_branch
         self.command_timeout = command_timeout
         self._written_files: set[str] = set()
+
+        # Paths the agent cannot write to (e.g. test files).
+        # Resolved at construction so matching is exact.
+        if protected_paths:
+            self._protected_paths: frozenset[str] = frozenset(
+                str((project_root / p).resolve()) for p in protected_paths
+            )
+            logger.info("EG1: %d protected path(s)", len(self._protected_paths))
+        else:
+            self._protected_paths = frozenset()
 
         # Derive runtimes: explicit > auto-detected
         if allowed_runtimes is None:
@@ -676,6 +687,8 @@ class BuildAgentExecutor:
         path_str = args.get("path", "")
         content = args.get("content", "")
 
+        if not isinstance(path_str, str):
+            raise ToolCallBlocked("write_file: 'path' must be a string")
         if not path_str:
             raise ToolCallBlocked("write_file: 'path' is required")
         if not isinstance(content, str):
@@ -686,6 +699,12 @@ class BuildAgentExecutor:
         if not _is_path_within_project(path_str, self.project_root):
             raise ToolCallBlocked(
                 f"write_file: path '{full_path}' escapes project root"
+            )
+
+        if str(full_path) in self._protected_paths:
+            raise ToolCallBlocked(
+                f"write_file: '{path_str}' is a protected file "
+                f"(e.g. test file). The agent cannot modify it."
             )
 
         try:
@@ -704,6 +723,8 @@ class BuildAgentExecutor:
     def _exec_read_file(self, args: dict[str, Any]) -> str:
         """Gate + execute: read_file(path)."""
         path_str = args.get("path", "")
+        if not isinstance(path_str, str):
+            raise ToolCallBlocked("read_file: 'path' must be a string")
         if not path_str:
             raise ToolCallBlocked("read_file: 'path' is required")
 

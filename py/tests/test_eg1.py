@@ -286,3 +286,24 @@ class TestBuildAgentExecutor:
         ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
         with pytest.raises(ToolCallBlocked, match="specific packages"):
             ex.execute("run_command", {"command": "npm install lodash"})
+
+    def test_protected_path_write_blocked(self, tmp_project: Path) -> None:
+        test_file = "tests/test_login.spec.ts"
+        (tmp_project / "tests").mkdir()
+        (tmp_project / test_file).write_text("original")
+        ex = BuildAgentExecutor(
+            tmp_project, allowed_runtimes={"node"},
+            protected_paths={test_file},
+        )
+        with pytest.raises(ToolCallBlocked, match="protected file"):
+            ex.execute("write_file", {"path": test_file, "content": "tampered"})
+        # Verify file wasn't modified
+        assert (tmp_project / test_file).read_text() == "original"
+
+    def test_non_protected_path_write_allowed(self, tmp_project: Path) -> None:
+        ex = BuildAgentExecutor(
+            tmp_project, allowed_runtimes={"node"},
+            protected_paths={"tests/test_login.spec.ts"},
+        )
+        ex.execute("write_file", {"path": "src/app.ts", "content": "code"})
+        assert (tmp_project / "src/app.ts").read_text() == "code"
