@@ -153,9 +153,8 @@ def _call_agent(file_tree: str, config: object) -> str:
         config=config,
         system_prompt="You are a codebase analyst. Respond with a concise structural summary.",
         user_prompt=prompt,
-        tools=[],  # No tools needed for summary
+        tools=None,
         executor=None,
-        max_turns=1,
     )
 
     if not result.success or not result.output.strip():
