@@ -209,3 +209,28 @@ spec author's job is to make intent unambiguous. The test suite's
 job is to encode acceptance criteria. These are separate concerns
 and mixing them (by having the orchestrator generate or evaluate
 acceptance criteria) violates both DP-2 and separation of concerns.
+
+---
+
+## P8: Fixes must generalize
+
+Every bug fix must be evaluated against the question: "Will this
+same class of failure recur under different inputs?" If yes, the
+fix must address the class, not the instance. A fix that patches
+one specific input without handling the general case is a regression
+waiting to happen.
+
+Applied examples:
+- Gherkin parser failed on plain `Scenario:` without `#` prefix →
+  wrong fix: add that format to the regex. Right fix: rewrite the
+  parser to be format-agnostic (strip formatting noise, find keywords).
+- Roadmap dep name "Global Layout" didn't match feature name
+  "Global Layout & Theming" → wrong fix: manually edit the roadmap.
+  Right fix: normalize names before matching so minor formatting
+  differences don't break the dependency graph.
+- Test assertions string-matched on error messages → wrong fix:
+  update the test when the message changes. Right fix: structured
+  error codes (GateError) so tests assert on stable contracts.
+
+This principle applies before committing: ask "does this generalize?"
+If the answer is no, the fix is incomplete.

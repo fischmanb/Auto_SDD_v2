@@ -271,6 +271,56 @@ def _parse_roadmap(project_dir: Path) -> list[Feature]:
                 status="pending",
             )
 
+    # ── Normalize dep names (P8: fixes must generalize) ──
+    # Models write dep names that don't exactly match feature names.
+    # Resolution order:
+    #   1. Exact match
+    #   2. Normalized match (strip non-alnum, lowercase)
+    #   3. Token subset match (all dep words appear in feature name)
+    # This handles "Global Layout" → "Global Layout & Theming",
+    # "data-loader" → "Data Loader", etc.
+    import re as _re
+
+    def _normalize(s: str) -> str:
+        return "".join(c for c in s.lower() if c.isalnum())
+
+    def _tokens(s: str) -> set[str]:
+        return set(_re.findall(r"[a-z0-9]+", s.lower()))
+
+    all_names = set(pending.keys()) | done_names
+    norm_to_name: dict[str, str] = {_normalize(n): n for n in all_names}
+
+    def _resolve_dep(dep: str) -> str:
+        """Resolve a dep name to an actual feature name."""
+        if dep in all_names:
+            return dep
+        # Try normalized exact match
+        norm_dep = _normalize(dep)
+        match = norm_to_name.get(norm_dep)
+        if match:
+            return match
+        # Try token subset: all dep tokens present in a feature name
+        dep_tokens = _tokens(dep)
+        if dep_tokens:
+            candidates = [
+                n for n in all_names
+                if dep_tokens <= _tokens(n)
+            ]
+            if len(candidates) == 1:
+                return candidates[0]
+        return dep  # unresolved, will be caught below
+
+    for name, feat in pending.items():
+        resolved_deps: list[str] = []
+        for dep in feat.deps:
+            resolved = _resolve_dep(dep)
+            if resolved != dep:
+                logger.info(
+                    "Dep %r resolved to %r (fuzzy match)", dep, resolved,
+                )
+            resolved_deps.append(resolved)
+        feat.deps = resolved_deps
+
     # ── Kahn's algorithm: topological sort with cycle detection ──
     # In-degree counts only pending→pending edges.
     # Deps that point to done_names are already satisfied.
