@@ -35,6 +35,12 @@ from typing import Any
 
 from auto_sdd.lib.model_config import ModelConfig
 from auto_sdd.lib.local_agent import AgentResult, run_local_agent
+from auto_sdd.lib.reliability import (
+    ResumeState, LockError,
+    acquire_lock, release_lock,
+    read_state, write_state, clean_state,
+    new_campaign_id,
+)
 from auto_sdd.exec_gates.eg1_tool_calls import BuildAgentExecutor
 from auto_sdd.exec_gates.eg2_signal_parse import extract_and_validate, ParsedSignals
 from auto_sdd.exec_gates.eg3_build_check import check_build, detect_build_cmd, BuildCheckResult
@@ -411,10 +417,52 @@ class BuildLoopV2:
     # ── Entry point ──────────────────────────────────────────────────
 
     def run(self) -> int:
-        """Execute the full build loop. Returns exit code."""
+        """Execute the full build loop. Returns exit code.
+
+        Acquires campaign lock, loads resume state, skips completed
+        features, persists state after each success, cleans up on
+        completion.
+        """
+        # ── Lock ─────────────────────────────────────────────────────
+        try:
+            acquire_lock(self.project_dir)
+        except LockError as exc:
+            logger.error("Cannot start: %s", exc)
+            return 2
+
+        try:
+            return self._run_locked()
+        finally:
+            release_lock(self.project_dir)
+
+    def _run_locked(self) -> int:
+        """Inner run, called while holding the campaign lock."""
         features = _parse_roadmap(self.project_dir)
         if not features:
             logger.info("No buildable features found — nothing to do")
+            return 0
+
+        # ── Resume state ─────────────────────────────────────────────
+        state = read_state(self.project_dir)
+        if state is None:
+            state = ResumeState(
+                campaign_id=new_campaign_id(),
+                started_at=datetime.now(timezone.utc).isoformat(),
+            )
+
+        # Filter out already-completed features
+        completed_set = set(state.completed)
+        if completed_set:
+            before = len(features)
+            features = [f for f in features if f.name not in completed_set]
+            logger.info(
+                "Resume: %d features skipped (%d remaining)",
+                before - len(features), len(features),
+            )
+
+        if not features:
+            logger.info("All features already completed — nothing to do")
+            clean_state(self.project_dir)
             return 0
 
         limit = len(features)
@@ -438,11 +486,19 @@ class BuildLoopV2:
                 idx + 1, limit, feature.name, feature.complexity,
             )
 
+            # Track current feature in resume state
+            state.current = feature.name
+            write_state(self.project_dir, state)
+
             success = self._build_feature(feature)
 
             duration = int(time.time()) - feature_start
             if success:
                 self.built += 1
+                # Persist completed feature for crash recovery
+                state.completed.append(feature.name)
+                state.current = ""
+                write_state(self.project_dir, state)
                 logger.info(
                     "✓ %s built in %s", feature.name, _format_duration(duration),
                 )
@@ -461,6 +517,11 @@ class BuildLoopV2:
         )
 
         self._write_summary(total_duration)
+
+        # Clean resume state on full success (no failures)
+        if self.failed == 0:
+            clean_state(self.project_dir)
+
         return 1 if self.failed > 0 else 0
 
     # ── SELECT + BUILD + GATE + ADVANCE (per feature) ────────────────
