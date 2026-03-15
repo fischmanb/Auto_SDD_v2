@@ -10,7 +10,7 @@ name: qwen3-coder-next
 
 # ── Connection ───────────────────────────────────────────────
 base_url: "http://localhost:1234/v1"
-model: "qwen3-coder-next"  # Update to actual LM Studio model ID after loading
+model: "qwen3-coder-next-mlx"
 api_key: "lm-studio"
 
 # ── Generation ───────────────────────────────────────────────
