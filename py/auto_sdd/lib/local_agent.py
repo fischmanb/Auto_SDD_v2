@@ -587,7 +587,6 @@ def _run_anthropic_agent(
                 "messages": messages,
                 "max_tokens": config.max_tokens,
                 "temperature": config.temperature,
-                "top_p": config.top_p,
             }
             if anthropic_tools:
                 kwargs["tools"] = anthropic_tools
