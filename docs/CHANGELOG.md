@@ -124,7 +124,12 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 
 9 new tests (6 git chain, 3 write-then-exec exemption). 420 tests total.
 
-### Commits (session 7 continued)
+### Pipe stripping in translation + config bumps
+- Translation layer bug: `cat file | head -100` extracted path as `file | head -100`. Fixed: `re.split(r'\s*[|><;]', path)[0]` strips pipe/redirect suffixes before path is used.
+- GLM config: `max_tokens` 8192→16384 (model hit output budget on turn 8 after nudge — trying to write entire file in one response). `max_turns` 40→60 (model needs ~8 turns reading + room to write + commit).
+- 2 new tests: `cat file | head`, `head file | grep`. 422 tests total.
+
+### Commits (session 7 continued, part 2)
 - `10148a9` SESSION-STATE + CHANGELOG update
 - `5566826` Cross-feature learning
 - `978f2b5` max_turns 20→40 + qwen3 config

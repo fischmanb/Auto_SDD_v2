@@ -586,3 +586,26 @@ class TestWriteThenExecGitExempt:
         })
         with pytest.raises(ToolCallBlocked, match="Write-then-exec"):
             ex.execute("run_command", {"command": "npx tsx src/evil.ts"})
+
+
+    def test_cat_pipe_head_translated(self, tmp_project: Path) -> None:
+        """cat file | head -100 extracts path correctly (no pipe in path)."""
+        (tmp_project / "data").mkdir(exist_ok=True)
+        (tmp_project / "data" / "seed.json").write_text('{"test": true}')
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("run_command", {
+            "command": "cat data/seed.json | head -100",
+        })
+        parsed = json.loads(result)
+        assert "content" in parsed
+        assert "test" in parsed["content"]
+
+    def test_head_pipe_grep_translated(self, tmp_project: Path) -> None:
+        """head -50 file | grep pattern → read_file(file)."""
+        (tmp_project / "src" / "index.ts").write_text("export const x = 1;\n")
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("run_command", {
+            "command": "head -50 src/index.ts | grep export",
+        })
+        parsed = json.loads(result)
+        assert "content" in parsed

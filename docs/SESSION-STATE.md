@@ -105,7 +105,7 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 ### Unit test coverage
 | Test file | Module | Tests |
 |---|---|---|
-| test_eg1.py | eg1_tool_calls.py | 110 |
+| test_eg1.py | eg1_tool_calls.py | 112 |
 | test_eg2.py | eg2_signal_parse.py | 24 |
 | test_eg3.py | eg3_build_check.py | 24 |
 | test_eg4.py | eg4_test_check.py | 31 |
@@ -139,7 +139,6 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 - EG4 test check fails with exit code 127 on every feature (vitest not in PATH or not configured). Tests never run.
 - `vision-input.txt` deleted by a failed branch cleanup — `cat` fails silently, pre-build skips vision phase because output already exists.
 - Auto-complete needs testing against real EG2/EG3/EG4 pipeline — signals are injected but downstream gates may still fail.
-- Translation layer `cat file | head -100` extracts path as `file | head -100` (includes pipe). Needs pipe stripping.
 
 ### V1 port steps remaining
 | Step | What | Notes |
@@ -192,7 +191,7 @@ V1 port items must account for:
 - EG1 runtime re-detection: writing a marker file (package.json, pyproject.toml, etc.) triggers re-scan. Handles project bootstrapping.
 - 7d (prompt_builder.py) deferred: current inline prompts sufficient for first campaign. Tune fix/retry variants after real failure data.
 - Model configs: `config/models/` now has gpt-oss-120b.yaml, qwen3-coder-next.yaml, glm-4.7-flash.yaml. Model is a YAML config swap.
-- 420 tests total (110 EG1, 30 phase_red, 23 codebase_summary, 20 reliability, 16 branch_manager + others).
+- 422 tests total (112 EG1, 30 phase_red, 23 codebase_summary, 20 reliability, 16 branch_manager + others).
 
 ## References
 - `docs/architectural-inventory.md` — 12-phase pipeline

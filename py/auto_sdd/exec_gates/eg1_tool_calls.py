@@ -782,8 +782,11 @@ class BuildAgentExecutor:
                     m = re.match(pattern, cmd)
                     if m:
                         path = m.group(1).strip().strip("'\"")
-                        logger.info("EG1 translate: run_command(%s) → read_file(%s)", cmd[:60], path)
-                        return "read_file", {"path": path}
+                        # Strip pipe/redirect suffixes: "file | head" → "file"
+                        path = re.split(r'\s*[|><;]', path)[0].strip()
+                        if path:
+                            logger.info("EG1 translate: run_command(%s) → read_file(%s)", cmd[:60], path)
+                            return "read_file", {"path": path}
 
             # Match: python -c "...open('file')..." or python -c "...read_text()..."
             py_match = re.match(r'^python[3]?\s+-c\s+["\'](.+)["\']$', cmd, re.DOTALL)
