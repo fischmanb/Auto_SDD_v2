@@ -367,3 +367,146 @@ class TestGherkinFormatVariants:
         assert parsed is not None
         assert len(parsed.scenarios) == 1
         assert parsed.scenarios[0].name == "Successful login"
+
+
+# ── Adversarial format tests ─────────────────────────────────────────────────
+# Edge cases that should parse correctly with format-agnostic extraction.
+
+
+BULLET_LIST_GHERKIN = textwrap.dedent("""\
+    ---
+    feature: Bullet Format
+    domain: test
+    ---
+    # Bullet Format
+
+    ## Scenarios
+
+    - Scenario: Listed scenario
+      - Given the data exists
+      - When the user acts
+      - Then something happens
+""")
+
+MIXED_FORMATTING = textwrap.dedent("""\
+    ---
+    feature: Mixed Format
+    domain: test
+    ---
+    # Mixed Format
+
+    Here is some prose explaining the feature.
+
+    ### Scenario: Markdown header scenario
+    Given a markdown-formatted spec
+    When the parser reads it
+    Then it extracts the scenario
+
+    ```gherkin
+    Scenario: Code block scenario
+      Given a code block
+      When parsed
+      Then also extracted
+    ```
+
+    ## Scenario: H2 scenario
+    Given an h2 header
+    When parsed
+    Then also works
+""")
+
+FEATURE_KEYWORD_NOISE = textwrap.dedent("""\
+    ---
+    feature: Noise Test
+    domain: test
+    ---
+    # Noise Test
+
+    Feature: This is a Gherkin Feature header (not a scenario)
+
+    Scenario: Real scenario
+    Given the feature line above is not a scenario
+    When the parser sees it
+    Then it does not crash or misparse
+""")
+
+NUMBERED_LIST_SCENARIOS = textwrap.dedent("""\
+    ---
+    feature: Numbered
+    domain: test
+    ---
+    # Numbered
+
+    1. Scenario: First
+       Given step one
+       Then result one
+
+    2. Scenario: Second
+       Given step two
+       Then result two
+""")
+
+CASE_INSENSITIVE_STEPS = textwrap.dedent("""\
+    ---
+    feature: Case Test
+    domain: test
+    ---
+
+    Scenario: Mixed case steps
+    given lowercase given
+    WHEN uppercase when
+    Then normal then
+    AND lowercase and
+""")
+
+
+class TestAdversarialFormats:
+    """Edge cases that broke the old regex parser or could plausibly appear."""
+
+    def test_bullet_list_gherkin(self, tmp_path: Path) -> None:
+        spec = tmp_path / "bullet.feature.md"
+        spec.write_text(BULLET_LIST_GHERKIN)
+        parsed = parse_feature_spec(spec)
+        assert parsed is not None
+        assert len(parsed.scenarios) == 1
+        assert parsed.scenarios[0].name == "Listed scenario"
+        assert len(parsed.scenarios[0].steps) == 3
+
+    def test_mixed_formatting_three_scenarios(self, tmp_path: Path) -> None:
+        spec = tmp_path / "mixed.feature.md"
+        spec.write_text(MIXED_FORMATTING)
+        parsed = parse_feature_spec(spec)
+        assert parsed is not None
+        assert len(parsed.scenarios) == 3
+        names = [s.name for s in parsed.scenarios]
+        assert "Markdown header scenario" in names
+        assert "Code block scenario" in names
+        assert "H2 scenario" in names
+
+    def test_feature_keyword_not_treated_as_scenario(self, tmp_path: Path) -> None:
+        spec = tmp_path / "noise.feature.md"
+        spec.write_text(FEATURE_KEYWORD_NOISE)
+        parsed = parse_feature_spec(spec)
+        assert parsed is not None
+        assert len(parsed.scenarios) == 1
+        assert parsed.scenarios[0].name == "Real scenario"
+        assert len(parsed.scenarios[0].steps) == 3
+
+    def test_numbered_list_scenarios(self, tmp_path: Path) -> None:
+        spec = tmp_path / "numbered.feature.md"
+        spec.write_text(NUMBERED_LIST_SCENARIOS)
+        parsed = parse_feature_spec(spec)
+        assert parsed is not None
+        assert len(parsed.scenarios) == 2
+        assert parsed.scenarios[0].name == "First"
+        assert parsed.scenarios[1].name == "Second"
+
+    def test_case_insensitive_steps(self, tmp_path: Path) -> None:
+        spec = tmp_path / "case.feature.md"
+        spec.write_text(CASE_INSENSITIVE_STEPS)
+        parsed = parse_feature_spec(spec)
+        assert parsed is not None
+        assert len(parsed.scenarios) == 1
+        assert len(parsed.scenarios[0].steps) == 4
+        keywords = [s.keyword for s in parsed.scenarios[0].steps]
+        assert keywords == ["Given", "When", "Then", "And"]

@@ -20,22 +20,70 @@ logger = logging.getLogger(__name__)
 
 
 # ── Gherkin parser ───────────────────────────────────────────────────────────
+#
+# Design: format-agnostic keyword extraction.
+#
+# LLMs emit Gherkin in unpredictable formatting — markdown headers,
+# fenced code blocks, indented, plain, mixed. Instead of encoding
+# format assumptions into regexes, the parser:
+#
+#   1. Strips every line to bare text (removes leading #'s, whitespace,
+#      list markers, code fence markers)
+#   2. Checks if the stripped line starts with a Gherkin keyword
+#   3. Builds scenarios from the keyword sequence
+#
+# This means "### Scenario: X", "  Scenario: X", "- Scenario: X",
+# and "```\nScenario: X" all parse identically.
 
-# Matches Scenario headers in any of these formats:
-#   ### Scenario: Name           (markdown header)
-#   ## Scenario: Name            (markdown header)
-#   Scenario: Name               (plain Gherkin, possibly indented)
-#   Scenario Outline: Name       (parameterized Gherkin)
-# The leading whitespace, optional markdown #'s, and "Outline" keyword
-# are all tolerated so the parser works regardless of how the LLM
-# formatted the spec.
-SCENARIO_HEADER = re.compile(
-    r"^\s*(?:#{1,4}\s+)?Scenario(?:\s+Outline)?:\s*(.+)",
-    re.MULTILINE,
-)
-GHERKIN_STEP = re.compile(
-    r"^\s*(Given|When|Then|And|But)\s+(.+)", re.MULTILINE,
-)
+_STEP_KEYWORDS = frozenset({"given", "when", "then", "and", "but"})
+
+
+def _strip_line(line: str) -> str:
+    """Strip markdown/formatting noise from a line, returning bare text.
+
+    Removes: leading whitespace, markdown header markers (# ## ### ####),
+    list markers (- * 1.), code fence markers (```), pipe chars from tables.
+    """
+    s = line.strip()
+    # Skip code fence markers entirely
+    if s.startswith("```"):
+        return ""
+    # Strip markdown header prefix
+    if s.startswith("#"):
+        s = s.lstrip("#").strip()
+    # Strip list markers: "- ", "* ", "1. ", "2. " etc.
+    if s.startswith(("- ", "* ")):
+        s = s[2:].strip()
+    elif len(s) >= 3 and s[0].isdigit() and s[1] == "." and s[2] == " ":
+        s = s[3:].strip()
+    return s
+
+
+def _is_scenario_header(stripped: str) -> str | None:
+    """If stripped line is a Scenario header, return the scenario name.
+
+    Recognizes: "Scenario: Name", "Scenario Outline: Name",
+    "Scenario Template: Name" (all case-insensitive on keyword).
+    Returns None if not a scenario header.
+    """
+    low = stripped.lower()
+    for prefix in ("scenario outline:", "scenario template:", "scenario:"):
+        if low.startswith(prefix):
+            name = stripped[len(prefix):].strip()
+            return name if name else None
+    return None
+
+
+def _is_step(stripped: str) -> tuple[str, str] | None:
+    """If stripped line is a Gherkin step, return (keyword, text).
+
+    Recognizes lines starting with Given/When/Then/And/But (case-insensitive)
+    followed by a space and step text.
+    """
+    parts = stripped.split(None, 1)
+    if len(parts) == 2 and parts[0].lower() in _STEP_KEYWORDS:
+        return (parts[0].capitalize(), parts[1])
+    return None
 
 
 @dataclass
@@ -90,25 +138,29 @@ def parse_feature_spec(spec_path: Path) -> ParsedSpec | None:
     else:
         body = text
 
-    # Parse scenarios
+    # Parse scenarios — format-agnostic keyword extraction
     scenarios: list[GherkinScenario] = []
     current_scenario: GherkinScenario | None = None
 
-    for line in body.splitlines():
-        scenario_match = SCENARIO_HEADER.match(line.strip())
-        if scenario_match:
-            if current_scenario:
-                scenarios.append(current_scenario)
-            current_scenario = GherkinScenario(
-                name=scenario_match.group(1).strip(),
-            )
+    for raw_line in body.splitlines():
+        stripped = _strip_line(raw_line)
+        if not stripped:
             continue
 
-        step_match = GHERKIN_STEP.match(line)
-        if step_match and current_scenario is not None:
+        # Check for scenario header
+        scenario_name = _is_scenario_header(stripped)
+        if scenario_name is not None:
+            if current_scenario:
+                scenarios.append(current_scenario)
+            current_scenario = GherkinScenario(name=scenario_name)
+            continue
+
+        # Check for step keyword
+        step = _is_step(stripped)
+        if step is not None and current_scenario is not None:
             current_scenario.steps.append(GherkinStep(
-                keyword=step_match.group(1),
-                text=step_match.group(2).strip(),
+                keyword=step[0],
+                text=step[1],
             ))
 
     if current_scenario:
