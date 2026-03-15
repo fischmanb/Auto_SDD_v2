@@ -21,8 +21,17 @@ logger = logging.getLogger(__name__)
 
 # ── Gherkin parser ───────────────────────────────────────────────────────────
 
+# Matches Scenario headers in any of these formats:
+#   ### Scenario: Name           (markdown header)
+#   ## Scenario: Name            (markdown header)
+#   Scenario: Name               (plain Gherkin, possibly indented)
+#   Scenario Outline: Name       (parameterized Gherkin)
+# The leading whitespace, optional markdown #'s, and "Outline" keyword
+# are all tolerated so the parser works regardless of how the LLM
+# formatted the spec.
 SCENARIO_HEADER = re.compile(
-    r"^(?:###?\s*)?Scenario:\s*(.+)", re.MULTILINE,
+    r"^\s*(?:#{1,4}\s+)?Scenario(?:\s+Outline)?:\s*(.+)",
+    re.MULTILINE,
 )
 GHERKIN_STEP = re.compile(
     r"^\s*(Given|When|Then|And|But)\s+(.+)", re.MULTILINE,

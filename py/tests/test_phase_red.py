@@ -254,3 +254,116 @@ class TestRunPhaseRed:
         # Shopping cart should have 3 test functions
         cart_content = (project / "tests" / "test_shopping_cart.py").read_text()
         assert cart_content.count('pytest.fail("Not implemented")') == 3
+
+
+# ── Gherkin format variants ──────────────────────────────────────────────────
+# The parser must handle Gherkin in any format an LLM might produce.
+
+
+PLAIN_GHERKIN_SPEC = textwrap.dedent("""\
+    ---
+    feature: Property Card
+    domain: dashboard
+    ---
+    # Property Card
+
+    ```gherkin
+    Feature: Property Card
+
+      Scenario: Display property data
+        Given the seed data is loaded
+        When the user opens the dashboard
+        Then the card shows the address
+        And the card shows the rent
+    ```
+""")
+
+INDENTED_GHERKIN_SPEC = textwrap.dedent("""\
+    ---
+    feature: Tenant Table
+    domain: dashboard
+    ---
+    # Tenant Table
+
+    ## Gherkin Scenarios
+
+      Scenario: Show all tenants
+        Given the seed data contains 62 tenants
+        When the table renders
+        Then 62 rows are displayed
+""")
+
+SCENARIO_OUTLINE_SPEC = textwrap.dedent("""\
+    ---
+    feature: Lease Chart
+    domain: analytics
+    ---
+    # Lease Chart
+
+    ### Scenario Outline: Filter by transaction type
+    Given lease transactions are loaded
+    When the user filters by <type>
+    Then only <type> transactions are shown
+""")
+
+H2_SCENARIO_SPEC = textwrap.dedent("""\
+    ---
+    feature: Comp Benchmarks
+    domain: analytics
+    ---
+    # Comp Benchmarks
+
+    ## Scenario: Compare subject to comps
+    Given the comp set has 6 properties
+    When the chart renders
+    Then the subject property is highlighted
+""")
+
+
+class TestGherkinFormatVariants:
+    """Parser handles Gherkin in any format an LLM might emit."""
+
+    def test_plain_gherkin_in_code_block(self, tmp_path: Path) -> None:
+        spec = tmp_path / "prop.feature.md"
+        spec.write_text(PLAIN_GHERKIN_SPEC)
+        parsed = parse_feature_spec(spec)
+        assert parsed is not None
+        assert len(parsed.scenarios) == 1
+        assert parsed.scenarios[0].name == "Display property data"
+        assert len(parsed.scenarios[0].steps) == 4
+
+    def test_indented_gherkin(self, tmp_path: Path) -> None:
+        spec = tmp_path / "tenant.feature.md"
+        spec.write_text(INDENTED_GHERKIN_SPEC)
+        parsed = parse_feature_spec(spec)
+        assert parsed is not None
+        assert len(parsed.scenarios) == 1
+        assert parsed.scenarios[0].name == "Show all tenants"
+        assert len(parsed.scenarios[0].steps) == 3
+
+    def test_scenario_outline(self, tmp_path: Path) -> None:
+        spec = tmp_path / "chart.feature.md"
+        spec.write_text(SCENARIO_OUTLINE_SPEC)
+        parsed = parse_feature_spec(spec)
+        assert parsed is not None
+        assert len(parsed.scenarios) == 1
+        assert parsed.scenarios[0].name == "Filter by transaction type"
+        assert len(parsed.scenarios[0].steps) == 3
+
+    def test_h2_scenario_header(self, tmp_path: Path) -> None:
+        spec = tmp_path / "comp.feature.md"
+        spec.write_text(H2_SCENARIO_SPEC)
+        parsed = parse_feature_spec(spec)
+        assert parsed is not None
+        assert len(parsed.scenarios) == 1
+        assert parsed.scenarios[0].name == "Compare subject to comps"
+        assert len(parsed.scenarios[0].steps) == 3
+
+    def test_markdown_h3_still_works(self, tmp_path: Path) -> None:
+        """Original format (### Scenario:) still parses."""
+        spec = tmp_path / "auth.feature.md"
+        spec.write_text(VALID_SPEC)
+        parsed = parse_feature_spec(spec)
+        assert parsed is not None
+        assert len(parsed.scenarios) == 1
+        assert parsed.scenarios[0].name == "Successful login"
