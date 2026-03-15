@@ -5,6 +5,72 @@
 
 ---
 
+## 2026-03-15 (session 7)
+
+### V1 port steps completed
+- **7a: reliability.py** (202 lines, 20 tests). fcntl.flock + PID stale detection (matches v1 pattern). ResumeState dataclass, atomic write via tempfile+rename. Wired into build loop: lock acquire/release in `run()` (try/finally), resume filtering in `_run_locked()`, per-feature state persistence on success, `clean_state` on full campaign success.
+- **7b: branch_manager.py** (173 lines, 16 tests). Chained strategy only (independent/sequential stripped per P6). setup_feature_branch from main, merge_feature_branch (--no-ff), delete_feature_branch, cleanup_merged_branches. Build loop wired: branch per feature, merge on success, delete on all failure exits, post-campaign cleanup. `allowed_branch=""` TODO resolved.
+- **7e: codebase_summary.py** (265 lines, 23 tests). File tree generation with _EXCLUDED_DIRS (incl SDD metadata dirs per L-00227). Git tree hash cache layer. Agent call via run_local_agent (no tools, single turn). Recent learnings reader. config=None skips agent (testable without model).
+
+### Preflight summary
+- Build loop prints preflight summary to terminal before starting: model, project, branch, commands, feature list.
+- `--auto-approve` / `AUTO_APPROVE` env var. Default: require user confirmation. Rejection returns exit code 3.
+- All 17 integration test instantiations updated with auto_approve=True.
+
+### P8: fixes must generalize (new architecture principle)
+- Added to architecture-principles.md. Every bug fix evaluated against "will this class of failure recur under different inputs?" Instance fixes are incomplete.
+- Applied examples: Gherkin parser, roadmap dep matching, error message string matching.
+
+### Gherkin parser rewrite (P8 applied)
+- Replaced regex-based format matching with format-agnostic keyword extraction. Parser strips formatting noise (markdown headers, code fences, list markers, indentation) from each line, checks for bare Gherkin keywords.
+- `_strip_line()`, `_is_scenario_header()`, `_is_step()` — no format assumptions.
+- Handles: plain Gherkin, fenced code blocks, markdown h1-h4, indented, bullet lists, numbered lists, Scenario Outline, Scenario Template, case-insensitive steps.
+- 10 new tests (5 format variants + 5 adversarial). 30 parser tests total.
+
+### Fuzzy dep matching in roadmap parser (P8 applied)
+- 3-tier resolution: exact match → normalized match (strip non-alnum) → token subset match (all dep words in feature name).
+- Handles model-generated mismatches like "Global Layout" → "Global Layout & Theming". Ambiguous matches (multiple candidates) left unresolved to fail loudly.
+
+### Topo sort cascade-skip fix
+- When feature A is skipped (dep not in roadmap), features depending on A now cascade-skip instead of reporting false cycles. Propagation repeats until stable. Stale edges cleaned from in-degree after removal.
+
+### EG1 runtime re-detection (P8 applied)
+- `_refresh_runtimes()` extracted from constructor, re-callable. Called after `write_file` creates any runtime marker file (package.json, pyproject.toml, Cargo.toml, etc.).
+- `_RUNTIME_MARKERS` frozenset lists all files that trigger re-scan. Handles project bootstrapping — agent can create package.json and use npm commands in the same session.
+- 4 new tests: blocked without marker, npm allowed after writing package.json, python allowed after writing pyproject.toml, non-marker file no retrigger.
+
+### EG1 redirect hints
+- Blocked file-reading commands (cat, sed, head, tail, python, etc.) now append "Use the read_file tool to read files instead." to the rejection message.
+
+### System prompt rewrite
+- Explicitly documents all 3 tools (read_file, write_file, run_command) with usage guidance. Tells agent to use read_file for reading, not run_command with shell commands. run_command scoped to git, npm, build/test only.
+
+### Package install fix
+- pyproject.toml: added [build-system], [project], [tool.setuptools.packages.find]. `pip install -e .` makes `python -m auto_sdd.scripts.build_loop_v2` work.
+
+### Test target project (cre-pulse)
+- `/Users/sorel/cre-pulse/` — Next.js 14 dashboard for CRE market intelligence.
+- data/seed.json: real CompStak data for 1 WTC (62 tenants, 40 quarterly tx rows, 6 comp properties).
+- 7 features across 3 phases, topo-sorted. Pre-build phases 1-6 run successfully against GPT-OSS-120B.
+
+### Test counts
+- 398 tests total (was 325 at session start). New: reliability 20, branch_manager 16, codebase_summary 23, phase_red +10, eg1 +4.
+
+### Commits
+- `4a849f7` Sessions 3-6 bulk commit (5,516 insertions)
+- `c4f8624` Step 7a: reliability.py
+- `a99befb` Step 7b: branch_manager.py
+- `11c3dc3` Step 7e: codebase_summary.py + preflight
+- `081c4ca` Package install fix
+- `dac8b5c` Gherkin parser generalize (first pass)
+- `03fb82d` Gherkin parser rewrite (format-agnostic)
+- `7519fa9` Topo sort cascade-skip fix
+- `9962f78` P8 principle + fuzzy dep matching
+- `bf257ad` System prompt + EG1 redirect hints
+- `10b2e1b` EG1 runtime re-detection
+
+---
+
 ## 2026-03-15 (session 6)
 
 ### Code changes (step 6b: integration tests)

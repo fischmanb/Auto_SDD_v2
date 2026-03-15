@@ -105,14 +105,14 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 ### Unit test coverage
 | Test file | Module | Tests |
 |---|---|---|
-| test_eg1.py | eg1_tool_calls.py | 84 |
+| test_eg1.py | eg1_tool_calls.py | 88 |
 | test_eg2.py | eg2_signal_parse.py | 24 |
 | test_eg3.py | eg3_build_check.py | 24 |
 | test_eg4.py | eg4_test_check.py | 31 |
 | test_eg5.py | eg5_commit_auth.py | 19 |
 | test_model_config.py | model_config.py | 9 |
 | test_validators.py | pre_build/validators.py | 42 |
-| test_phase_red.py | pre_build/phase_red.py | 20 |
+| test_phase_red.py | pre_build/phase_red.py | 30 |
 | test_local_agent.py | local_agent.py | 31 |
 | test_integration.py | cross-module integration | 41 |
 | test_reliability.py | reliability.py | 20 |
@@ -122,7 +122,7 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 ## Open items
 
 ### Design work needed (no code exists)
-- ~~RED phase scaffolder (phase 6)~~ — **Done**: `phase_red.py` (deterministic Gherkin→test generator, pytest + vitest, 20 tests)
+- ~~RED phase scaffolder (phase 6)~~ — **Done**: `phase_red.py` (deterministic Gherkin→test generator, pytest + vitest, format-agnostic parser, 30 tests)
 - EG6 spec adherence checker: which metadata fields are checkable, scoring model
 - Build loop metrics (phases 7–12): all blank in `architectural-inventory.md`
 - Structured error types: replace `errors: list[str]` with `errors: list[GateError]` across EG2, EG5, GateResult. ~25 call sites, ~15 test assertions. New pre-build code uses `GateError` natively; EG migration remains. Est. 2–3 hours.
@@ -157,11 +157,11 @@ All v1 modules that referenced `claude_wrapper.py` or agent-reported results nee
 Model choice: **gpt-oss-120b** — selected for Harmony instruction hierarchy (system > developer > user > assistant > tool), a trained-in conflict resolution order unique to this model. No other competitive open-weight model has an equivalent. Evaluated against Qwen3-Coder-Next (stronger coding benchmarks, no hierarchy). Decision: Harmony's architectural enforcement properties outweigh unquantified coding gap. Re-evaluate with empirical data after first campaign.
 
 V1 port items must account for:
-- **7d (prompt_builder.py)**: Use `developer` role for orchestrator instructions, `user` role for task content. Reasoning tokens consume `max_tokens` budget — if prompt is large, output budget shrinks. Current default 8192 is fine; don't bloat injected context.
-- **7e (codebase_summary.py)**: Same budget concern. Exclude SDD metadata from summaries (already done in V1 fix).
-- **7a, 7b (reliability.py, branch_manager.py)**: Model-agnostic. No OSS-specific concerns.
+- **7d (prompt_builder.py)**: Deferred. Current inline prompts sufficient for first campaign. Use `developer` role for orchestrator instructions, `user` role for task content when implemented.
+- **7e (codebase_summary.py)**: **Done**. Budget concern noted — exclude SDD metadata from summaries (handled via _EXCLUDED_DIRS).
+- **7a, 7b (reliability.py, branch_manager.py)**: **Done**. Model-agnostic.
 - **local_agent.py** already handles: reasoning_content stripping (older turns), parallel tool call defense (sequential processing + warning), finish_reason routing (stop/tool_calls/length), defensive JSON parsing. 31 tests cover these paths.
-- Serving: Ollama on Mac Studio M3 Ultra 256GB. `eos_token_id` override for parallel calling fix is a serving-layer config, not client-side.
+- Serving: LM Studio on Mac Studio M3 Ultra 256GB at localhost:1234. Model ID: gpt-oss-120b-mlx.
 
 ## Key decisions in effect
 - Pre-build test generation: Response B (structured Gherkin → deterministic scaffolding). No LLM in verification. Response A (LLM-authored frozen tests) eliminated as DP-2 adjacent.
@@ -170,8 +170,13 @@ V1 port items must account for:
 - Gherkin/RED cycle restored from Adrian's auto-sdd. Implemented in `phase_red.py` (deterministic generator, no agent).
 - Structured error types (`GateError`) adopted for all new code; existing EG migration deferred.
 - EG1 tool set: hardcoded {write_file, read_file, run_command}. New tools require new EG1 code, not config.
-- Agent model: gpt-oss-120b via Ollama. Harmony format, `developer` role for orchestrator instructions. Re-evaluate Qwen3-Coder-Next after first campaign with empirical data.
+- Agent model: gpt-oss-120b via LM Studio (localhost:1234). Harmony format, `developer` role for orchestrator instructions. Re-evaluate Qwen3-Coder-Next after first campaign with empirical data.
 - Agent prompt: reveal boundaries (writable paths, allowed commands), conceal mechanism (EG1 internals).
+- P8: fixes must generalize. Every bug fix evaluated against "will this class of failure recur?" Instance fixes are incomplete.
+- Gherkin parser: format-agnostic keyword extraction. No assumptions about LLM formatting.
+- Roadmap dep matching: 3-tier fuzzy resolution (exact → normalized → token subset). Models don't write dep names precisely.
+- EG1 runtime re-detection: writing a marker file (package.json, pyproject.toml, etc.) triggers re-scan. Handles project bootstrapping.
+- 7d (prompt_builder.py) deferred: current inline prompts sufficient for first campaign. Tune fix/retry variants after real failure data.
 
 ## References
 - `docs/architectural-inventory.md` — 12-phase pipeline
