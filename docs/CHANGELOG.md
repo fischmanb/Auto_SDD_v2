@@ -145,6 +145,15 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 - `e01d752` Read-only nudge
 - `0f91208` Turn-level logging
 - `d65cc8c` Git chain + write-then-exec exemption + auto-complete
+- `e2c5780` Pipe stripping + GLM config bumps
+- `86219dd` Context window management (read_file cap — reverted next commit)
+- `ff38545` Revert read_file cap, fix trimming strategy (keep_recent=2)
+
+### Anthropic API support
+- `claude-sonnet.yaml` config. Uses `${ANTHROPIC_API_KEY}` env var (expanded at config load).
+- `local_agent.py`: dispatch to `_run_anthropic_agent` when base_url contains `anthropic.com`. Uses `anthropic` Python SDK. Same loop logic (nudge, trimming, EG1 enforcement) adapted for Anthropic message/tool format.
+- `model_config.py`: `${ENV_VAR}` expansion in all string config values.
+- Existing OpenAI path untouched. Local model configs unmodified.
 
 ---
 

@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -104,6 +106,14 @@ class ModelConfig:
                 ", ".join(sorted(unknown)),
             )
         filtered = {k: v for k, v in data.items() if k in known}
+        # Expand ${ENV_VAR} references in string values
+        for k, v in filtered.items():
+            if isinstance(v, str) and "${" in v:
+                filtered[k] = re.sub(
+                    r'\$\{([^}]+)\}',
+                    lambda m: os.environ.get(m.group(1), m.group(0)),
+                    v,
+                )
         return cls(**filtered)
 
     # ── Serialization ────────────────────────────────────────────────

@@ -1,0 +1,33 @@
+# Claude Sonnet — API build agent for validation
+#
+# Uses Anthropic API, not local serving. Tests the enforcement
+# layer against a model with reliable function calling.
+# Does NOT replace local configs — separate config for comparison.
+#
+# Requires ANTHROPIC_API_KEY env var.
+
+name: claude-sonnet
+
+# ── Connection ───────────────────────────────────────────────
+base_url: "https://api.anthropic.com"
+model: "claude-sonnet-4-20250514"
+api_key: "${ANTHROPIC_API_KEY}"
+
+# ── Generation ───────────────────────────────────────────────
+max_tokens: 16384
+temperature: 0.7
+top_p: 0.9
+
+# ── Context management ───────────────────────────────────────
+strip_reasoning_older_turns: false
+
+# ── Loop limits ──────────────────────────────────────────────
+max_turns: 40
+timeout_seconds: 120
+
+# ── Role mapping ─────────────────────────────────────────────
+use_developer_role: false
+
+# ── Optional overrides ───────────────────────────────────────
+eos_token_ids: []
+extra_params: {}

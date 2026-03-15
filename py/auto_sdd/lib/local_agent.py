@@ -137,6 +137,16 @@ def run_local_agent(
     Returns:
         AgentResult with final output, tool call records, and metadata.
     """
+    # Dispatch: Anthropic API vs OpenAI-compatible
+    if "anthropic.com" in (config.base_url or ""):
+        return _run_anthropic_agent(
+            config=config,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            tools=tools,
+            executor=executor,
+        )
+
     client = OpenAI(
         base_url=config.base_url,
         api_key=config.api_key,
@@ -514,3 +524,242 @@ def _trim_old_tool_results(
                     messages[idx]["content"] = content[:200] + "...(trimmed)"
             except (json.JSONDecodeError, TypeError):
                 messages[idx]["content"] = content[:200] + "...(trimmed)"
+
+
+# ── Anthropic API agent ──────────────────────────────────────────────────────
+
+
+def _convert_tools_openai_to_anthropic(
+    tools: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]] | None:
+    """Convert OpenAI tool format to Anthropic tool format."""
+    if not tools:
+        return None
+    anthropic_tools = []
+    for tool in tools:
+        fn = tool.get("function", {})
+        anthropic_tools.append({
+            "name": fn.get("name", ""),
+            "description": fn.get("description", ""),
+            "input_schema": fn.get("parameters", {"type": "object", "properties": {}}),
+        })
+    return anthropic_tools
+
+
+def _run_anthropic_agent(
+    config: ModelConfig,
+    system_prompt: str,
+    user_prompt: str,
+    tools: list[dict[str, Any]] | None,
+    executor: ToolExecutor,
+) -> AgentResult:
+    """Run agent loop against Anthropic Messages API.
+
+    Same logic as the OpenAI path: multi-turn tool calling with
+    nudge, trimming, and EG1 enforcement. Different wire format.
+    """
+    import anthropic
+
+    client = anthropic.Anthropic(
+        api_key=config.api_key,
+        timeout=config.timeout_seconds,
+    )
+
+    messages: list[dict[str, Any]] = [
+        {"role": "user", "content": user_prompt},
+    ]
+    anthropic_tools = _convert_tools_openai_to_anthropic(tools) or []
+
+    result = AgentResult()
+    start_time = time.monotonic()
+
+    _READ_ONLY_NUDGE_THRESHOLD = 8
+    turns_since_write = 0
+    has_written = False
+
+    for turn in range(config.max_turns):
+        result.turn_count = turn + 1
+
+        try:
+            kwargs: dict[str, Any] = {
+                "model": config.model,
+                "system": system_prompt,
+                "messages": messages,
+                "max_tokens": config.max_tokens,
+                "temperature": config.temperature,
+                "top_p": config.top_p,
+            }
+            if anthropic_tools:
+                kwargs["tools"] = anthropic_tools
+                kwargs["tool_choice"] = {"type": "auto"}
+            response = client.messages.create(**kwargs)
+        except Exception as exc:
+            result.finish_reason = "error"
+            result.error = f"Anthropic API call failed on turn {turn}: {exc}"
+            logger.error("Anthropic request failed on turn %d: %s", turn, exc)
+            break
+
+        # Parse response content blocks
+        text_parts = []
+        tool_uses = []
+        for block in response.content:
+            if block.type == "text":
+                text_parts.append(block.text)
+            elif block.type == "tool_use":
+                tool_uses.append(block)
+
+        has_text = bool(text_parts)
+        has_tools = bool(tool_uses)
+        logger.info(
+            "Turn %d: stop_reason=%s, has_text=%s, has_tools=%s",
+            turn, response.stop_reason, has_text, has_tools,
+        )
+
+        # Build assistant message for history (full content blocks)
+        assistant_content = []
+        for block in response.content:
+            if block.type == "text":
+                assistant_content.append({"type": "text", "text": block.text})
+            elif block.type == "tool_use":
+                assistant_content.append({
+                    "type": "tool_use",
+                    "id": block.id,
+                    "name": block.name,
+                    "input": block.input,
+                })
+        messages.append({"role": "assistant", "content": assistant_content})
+
+        # Route on stop_reason
+        if response.stop_reason == "end_turn":
+            result.output = "\n".join(text_parts)
+            result.finish_reason = "stop"
+            result.success = True
+            logger.info(
+                "Agent completed in %d turns (%.1fs). Output length: %d chars",
+                result.turn_count,
+                time.monotonic() - start_time,
+                len(result.output),
+            )
+            break
+
+        elif response.stop_reason == "tool_use" and tool_uses:
+            tool_results = []
+            for tu in tool_uses:
+                fn_name = tu.name
+                fn_args = tu.input if isinstance(tu.input, dict) else {}
+
+                arg_summary = ""
+                if fn_name == "read_file":
+                    arg_summary = fn_args.get("path", "?")
+                elif fn_name == "write_file":
+                    arg_summary = fn_args.get("path", "?")
+                elif fn_name == "run_command":
+                    arg_summary = fn_args.get("command", "?")[:60]
+                logger.info("Turn %d: %s(%s)", turn, fn_name, arg_summary)
+
+                record = ToolCallRecord(
+                    turn=turn, name=fn_name, arguments=fn_args, result="",
+                )
+                tool_result = _execute_with_gate(executor, fn_name, fn_args, record)
+                result.tool_calls.append(record)
+
+                tool_results.append({
+                    "type": "tool_result",
+                    "tool_use_id": tu.id,
+                    "content": tool_result,
+                })
+
+            # Feed results back as user message
+            messages.append({"role": "user", "content": tool_results})
+
+            # Track writes for nudge
+            wrote_this_turn = any(tu.name == "write_file" for tu in tool_uses)
+            if wrote_this_turn:
+                turns_since_write = 0
+                has_written = True
+            else:
+                turns_since_write += 1
+
+            if turns_since_write >= _READ_ONLY_NUDGE_THRESHOLD and not has_written:
+                nudge = (
+                    "You have spent several turns reading files without writing any code. "
+                    "You have enough context. Start implementing NOW by using write_file "
+                    "to create the source files for this feature. Do not read any more files."
+                )
+                messages.append({"role": "user", "content": nudge})
+                logger.info("Nudge injected at turn %d (no writes in %d turns)", turn, turns_since_write)
+                turns_since_write = 0
+
+        elif response.stop_reason == "max_tokens":
+            result.finish_reason = "length"
+            result.error = "max_tokens exhausted"
+            result.output = "\n".join(text_parts)
+            logger.warning("max_tokens exceeded on turn %d", turn)
+            break
+
+        else:
+            logger.warning(
+                "Unexpected stop_reason=%r on turn %d", response.stop_reason, turn,
+            )
+
+        # Trim old tool results for context management
+        _trim_old_anthropic_results(messages, keep_recent=2)
+
+    else:
+        result.finish_reason = "max_turns"
+        result.error = f"Reached {config.max_turns} turns without completion"
+        logger.warning("Agent hit max_turns (%d)", config.max_turns)
+
+    result.duration_seconds = time.monotonic() - start_time
+    return result
+
+
+def _trim_old_anthropic_results(
+    messages: list[dict[str, Any]], keep_recent: int = 2,
+) -> None:
+    """Trim old tool_result content in Anthropic message format.
+
+    Anthropic tool results are user messages with content blocks
+    of type "tool_result". Trim content in older results to prevent
+    context bloat, same as the OpenAI path.
+    """
+    # Find user messages that contain tool_result blocks
+    result_indices = []
+    for i, msg in enumerate(messages):
+        if msg.get("role") != "user":
+            continue
+        content = msg.get("content")
+        if isinstance(content, list) and any(
+            isinstance(b, dict) and b.get("type") == "tool_result" for b in content
+        ):
+            result_indices.append(i)
+
+    if len(result_indices) <= keep_recent:
+        return
+
+    for idx in result_indices[:-keep_recent]:
+        content = messages[idx].get("content")
+        if not isinstance(content, list):
+            continue
+        for block in content:
+            if not isinstance(block, dict) or block.get("type") != "tool_result":
+                continue
+            original = block.get("content", "")
+            if isinstance(original, str) and len(original) > 200:
+                try:
+                    parsed = json.loads(original)
+                    if isinstance(parsed, dict):
+                        summary = {}
+                        for key in ("path", "status", "error", "returncode",
+                                    "size", "truncated", "bytes_written"):
+                            if key in parsed:
+                                summary[key] = parsed[key]
+                        if "content" in parsed:
+                            summary["content"] = "(trimmed)"
+                        if "stdout" in parsed:
+                            summary["stdout"] = parsed["stdout"][:100] + "..."
+                        block["content"] = json.dumps(summary)
+                    else:
+                        block["content"] = original[:200] + "...(trimmed)"
+                except (json.JSONDecodeError, TypeError):
+                    block["content"] = original[:200] + "...(trimmed)"
