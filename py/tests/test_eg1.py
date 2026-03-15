@@ -410,3 +410,99 @@ class TestCdPrefixStripping:
             ex.execute("run_command", {
                 "command": "git status && git log",
             })
+
+
+# ── Tool call translation (P8: meet models where they are) ───────────────────
+
+
+class TestToolCallTranslation:
+    """EG1 translates common model mistakes instead of blocking."""
+
+    def test_listdir_translated_to_ls(self, tmp_project: Path) -> None:
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("listdir", {"path": "."})
+        parsed = json.loads(result)
+        assert "stdout" in parsed or "stderr" in parsed
+
+    def test_list_dir_translated(self, tmp_project: Path) -> None:
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("list_dir", {"path": "."})
+        parsed = json.loads(result)
+        assert "stdout" in parsed or "stderr" in parsed
+
+    def test_list_directory_translated(self, tmp_project: Path) -> None:
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("list_directory", {"path": "."})
+        parsed = json.loads(result)
+        assert "stdout" in parsed or "stderr" in parsed
+
+    def test_sed_translated_to_read_file(self, tmp_project: Path) -> None:
+        (tmp_project / "src" / "app.ts").write_text("const x = 1;\n")
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("run_command", {
+            "command": "sed -n '1,200p' src/app.ts",
+        })
+        parsed = json.loads(result)
+        assert "const x = 1" in parsed.get("content", "")
+
+    def test_cat_translated_to_read_file(self, tmp_project: Path) -> None:
+        (tmp_project / "src" / "app.ts").write_text("hello world\n")
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("run_command", {
+            "command": "cat src/app.ts",
+        })
+        parsed = json.loads(result)
+        assert "hello world" in parsed.get("content", "")
+
+    def test_read_file_with_command_arg(self, tmp_project: Path) -> None:
+        """Model passes command='cat file' to read_file instead of path."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("read_file", {
+            "command": "cat src/index.ts",
+        })
+        parsed = json.loads(result)
+        assert "content" in parsed
+
+    def test_read_file_with_file_arg(self, tmp_project: Path) -> None:
+        """Model passes file='path' instead of path='path'."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("read_file", {
+            "file": "src/index.ts",
+        })
+        parsed = json.loads(result)
+        assert "content" in parsed
+
+    def test_ls_with_error_chaining_cleaned(self, tmp_project: Path) -> None:
+        """ls -la path 2>/dev/null || echo 'No dir' → ls -la path."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("run_command", {
+            "command": "ls -la src 2>/dev/null || echo 'No src'",
+        })
+        parsed = json.loads(result)
+        assert "stdout" in parsed
+
+    def test_python_file_read_translated(self, tmp_project: Path) -> None:
+        """python -c with open() → read_file."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("run_command", {
+            "command": "python -c \"import json; data=json.load(open('data/seed.json')); print(data)\"",
+        })
+        # Should translate to read_file("data/seed.json")
+        # File may not exist but shouldn't be blocked by EG1
+        assert isinstance(result, str)
+
+    def test_real_write_file_not_translated(self, tmp_project: Path) -> None:
+        """Normal write_file calls pass through unchanged."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("write_file", {
+            "path": "test.txt", "content": "hello",
+        })
+        parsed = json.loads(result)
+        assert parsed["status"] == "success"
+
+    def test_real_run_command_not_translated(self, tmp_project: Path) -> None:
+        """Normal git commands pass through unchanged."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("run_command", {"command": "git status"})
+        parsed = json.loads(result)
+        assert "stdout" in parsed

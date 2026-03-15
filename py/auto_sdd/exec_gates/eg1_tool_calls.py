@@ -698,6 +698,11 @@ class BuildAgentExecutor:
         Raises ToolCallBlocked on validation failure, recording the
         pattern for cross-feature learning.
         """
+        # Translate common model mistakes before dispatch (P8).
+        # Models understand intent but can't map to the 3-tool schema.
+        # Meet them where they are instead of burning turns on rejections.
+        name, arguments = self._translate_tool_call(name, arguments)
+
         try:
             return self._dispatch(name, arguments)
         except ToolCallBlocked as exc:
@@ -706,6 +711,107 @@ class BuildAgentExecutor:
             if pattern not in self.blocked_patterns:
                 self.blocked_patterns.append(pattern)
             raise
+
+    def _translate_tool_call(
+        self, name: str, arguments: dict[str, Any],
+    ) -> tuple[str, dict[str, Any]]:
+        """Translate common model mistakes into correct tool calls.
+
+        Models understand intent but can't map to the 3-tool schema.
+        Instead of blocking and hoping they learn (they don't — empirically
+        confirmed across GPT-OSS-120B, Qwen3-Coder-Next, GLM-4.7), translate
+        their intent into the correct tool call. EG1 still validates the
+        translated call — security is unchanged.
+
+        Translation rules:
+        - Unknown tool names that imply file reading → read_file
+        - Unknown tool names that imply directory listing → run_command(ls)
+        - read_file with 'command' arg instead of 'path' → extract path
+        - run_command with file-reading commands (sed, cat, head, etc.) → read_file
+        - run_command with python -c reading files → read_file
+        """
+        # ── Unknown tool names → map to known tools ──────────────
+        _READ_ALIASES = frozenset({
+            "cat", "view", "view_file", "get_file", "read",
+            "file_read", "open_file", "show_file",
+        })
+        _DIR_ALIASES = frozenset({
+            "listdir", "list_dir", "list_directory", "ls", "dir",
+            "list_files", "get_directory", "browse",
+        })
+
+        if name in _READ_ALIASES:
+            path = arguments.get("path", arguments.get("file", ""))
+            logger.info("EG1 translate: %s → read_file(%s)", name, path)
+            return "read_file", {"path": path}
+
+        if name in _DIR_ALIASES:
+            path = arguments.get("path", arguments.get("directory", "."))
+            logger.info("EG1 translate: %s → run_command(ls %s)", name, path)
+            return "run_command", {"command": f"ls -la {path}"}
+
+        # ── read_file with wrong argument names ──────────────────
+        if name == "read_file" and "path" not in arguments:
+            # Model passed command="cat file" or file="path"
+            cmd = arguments.get("command", "")
+            file_arg = arguments.get("file", arguments.get("filename", ""))
+            if cmd:
+                # Extract path from "cat /path/to/file" style
+                parts = cmd.strip().split()
+                path = parts[-1] if parts else ""
+                logger.info("EG1 translate: read_file(command=%s) → read_file(path=%s)", cmd[:60], path)
+                return "read_file", {"path": path}
+            if file_arg:
+                logger.info("EG1 translate: read_file(file=%s) → read_file(path=%s)", file_arg, file_arg)
+                return "read_file", {"path": file_arg}
+
+        # ── run_command with file-reading intent → read_file ─────
+        if name == "run_command":
+            cmd = arguments.get("command", "").strip()
+            # Match: cat <file>, head <file>, tail <file>, sed -n '...' <file>
+            _READ_CMD_PATTERNS = [
+                (r'^cat\s+(.+)$',),
+                (r'^head\s+(?:-\d+\s+)?(.+)$',),
+                (r'^tail\s+(?:-\d+\s+)?(.+)$',),
+                (r"^sed\s+-n\s+'[^']+'\s+(.+)$",),
+                (r'^less\s+(.+)$',),
+                (r'^more\s+(.+)$',),
+            ]
+            for patterns in _READ_CMD_PATTERNS:
+                for pattern in patterns:
+                    m = re.match(pattern, cmd)
+                    if m:
+                        path = m.group(1).strip().strip("'\"")
+                        logger.info("EG1 translate: run_command(%s) → read_file(%s)", cmd[:60], path)
+                        return "read_file", {"path": path}
+
+            # Match: python -c "...open('file')..." or python -c "...read_text()..."
+            py_match = re.match(r'^python[3]?\s+-c\s+["\'](.+)["\']$', cmd, re.DOTALL)
+            if py_match:
+                py_code = py_match.group(1)
+                # Try to extract file path from open() or Path() calls
+                file_match = re.search(r"open\(['\"]([^'\"]+)['\"]\)", py_code)
+                if not file_match:
+                    file_match = re.search(r"Path\(['\"]([^'\"]+)['\"]\)", py_code)
+                if file_match:
+                    path = file_match.group(1)
+                    logger.info("EG1 translate: python -c → read_file(%s)", path)
+                    return "read_file", {"path": path}
+
+            # Match: ls <path> with optional error suppression
+            # Models write: ls -la /path 2>/dev/null || echo "No dir"
+            # Strip the error handling, keep the ls
+            ls_match = re.match(r'^(ls\s+(?:-[a-zA-Z]+\s+)?\S+)', cmd)
+            if ls_match:
+                clean_ls = ls_match.group(1).strip()
+                if clean_ls != cmd:
+                    logger.info(
+                        "EG1 translate: cleaned ls command: %s → %s",
+                        cmd[:60], clean_ls,
+                    )
+                return "run_command", {"command": clean_ls}
+
+        return name, arguments
 
     def _dispatch(self, name: str, arguments: dict[str, Any]) -> str:
         """Inner dispatch — separated so execute() can catch blocks."""
