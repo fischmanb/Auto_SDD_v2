@@ -1,0 +1,31 @@
+# GLM-4.7 Flash — Third build agent candidate
+#
+# From the GLM-4 family. Testing tool-use compliance after
+# GPT-OSS-120B and Qwen3-Coder-Next both failed to follow
+# a 3-tool schema within session context.
+
+name: glm-4.7-flash
+
+# ── Connection ───────────────────────────────────────────────
+base_url: "http://localhost:1234/v1"
+model: "glm-4.7-flash-mlx"
+api_key: "lm-studio"
+
+# ── Generation ───────────────────────────────────────────────
+max_tokens: 8192
+temperature: 0.7
+top_p: 0.9
+
+# ── Context management ───────────────────────────────────────
+strip_reasoning_older_turns: false
+
+# ── Loop limits ──────────────────────────────────────────────
+max_turns: 40
+timeout_seconds: 600
+
+# ── Role mapping ─────────────────────────────────────────────
+use_developer_role: false
+
+# ── Optional overrides ───────────────────────────────────────
+eos_token_ids: []
+extra_params: {}
