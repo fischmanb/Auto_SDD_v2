@@ -139,6 +139,10 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 - EG4 test check fails with exit code 127 on every feature (vitest not in PATH or not configured). Tests never run.
 - `vision-input.txt` deleted by a failed branch cleanup — `cat` fails silently, pre-build skips vision phase because output already exists.
 - Auto-complete needs testing against real EG2/EG3/EG4 pipeline — signals are injected but downstream gates may still fail.
+- `codebase_summary.py` passes `max_turns=1` to `run_local_agent` — kwarg doesn't exist, fails silently.
+
+### First successful build agent run
+Claude Sonnet completed Data Loader in 13 turns, 31.5 seconds. Zero EG1 blocks, no translation needed, no nudge fired. Model followed 3-tool schema natively with correct argument names. This validates the enforcement architecture end-to-end — the model was the only bottleneck, not the infrastructure. Local models (GPT-OSS-120B, Qwen3-Coder-Next, GLM-4.7-flash) all failed at tool-use compliance despite translation layer, nudge, and cross-feature learning. The Mac Studio runs the orchestrator, gates, tests, and git locally; only the creative work (code generation) routes through the API.
 
 ### V1 port steps remaining
 | Step | What | Notes |

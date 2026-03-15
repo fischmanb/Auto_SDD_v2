@@ -155,6 +155,21 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 - `model_config.py`: `${ENV_VAR}` expansion in all string config values.
 - Existing OpenAI path untouched. Local model configs unmodified.
 
+### Bugfixes from first Claude API run
+- `AgentResult.success` is a read-only property (derived from `finish_reason == "stop"`). Anthropic path was assigning to it directly. Fixed: set `result.finish_reason = "stop"` instead.
+- `codebase_summary.py` passes `max_turns=1` to `run_local_agent` but the function doesn't accept that kwarg. Fails silently (caught exception, returns empty summary). Known bug, not yet fixed.
+
+### First successful end-to-end tool-calling loop
+- Claude Sonnet completed Data Loader feature in 13 turns, 31.5 seconds on first run.
+- Turn sequence: read package.json → find .ts files → ls project → ls data → read seed.json → find ts files (refined) → find src ts → ls project → read spec → write data-loader.ts → write useDataLoader hook → git add → git commit → stop with FEATURE_BUILT signal.
+- Zero EG1 blocks. No translation needed. No nudge needed. Model followed 3-tool schema natively.
+- Crashed at EG2 due to `success` property bug (above). After fix, full pipeline should complete.
+- This validates the entire enforcement architecture: EG1-EG5 gates, branch management, resume state, preflight — all functional. The model was the bottleneck, not the infrastructure.
+
+### Commits (session 7 continued, part 3)
+- `eaa2d7a` Anthropic API support + claude-sonnet.yaml
+- `43d9983` Fix AgentResult.success property assignment
+
 ---
 
 ## 2026-03-15 (session 6)
