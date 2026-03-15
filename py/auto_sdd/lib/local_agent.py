@@ -266,6 +266,11 @@ def run_local_agent(
         if config.strip_reasoning_older_turns:
             _strip_older_reasoning(messages)
 
+        # ── Context management: trim old tool results ────────────────
+        # Tool results (file contents, ls output) bloat context fast.
+        # Keep last 4 tool results full, truncate older ones to summary.
+        _trim_old_tool_results(messages, keep_recent=4)
+
     else:
         # for/else: exhausted max_turns without break
         result.finish_reason = "max_turns"
@@ -462,3 +467,48 @@ def _truncate_args(args: dict[str, Any], max_len: int = 120) -> str:
     """Truncate arguments dict for log output."""
     s = json.dumps(args)
     return s[:max_len] + "..." if len(s) > max_len else s
+
+
+def _trim_old_tool_results(
+    messages: list[dict[str, Any]], keep_recent: int = 4,
+) -> None:
+    """Truncate old tool result messages to prevent context bloat.
+
+    Tool results (file contents, directory listings, command output) fill
+    the context window fast. After keep_recent full results, older ones
+    are truncated to a brief summary.
+
+    This is the input-side complement to max_tokens (output-side).
+    Without it, 8 reads × 8KB = 64KB of tool results leaves no room
+    for the model to generate code.
+    """
+    tool_indices = [
+        i for i, m in enumerate(messages) if m.get("role") == "tool"
+    ]
+
+    if len(tool_indices) <= keep_recent:
+        return
+
+    # Truncate all but the most recent keep_recent tool results
+    for idx in tool_indices[:-keep_recent]:
+        content = messages[idx].get("content", "")
+        if len(content) > 200:
+            # Try to parse as JSON and keep just the metadata
+            try:
+                parsed = json.loads(content)
+                if isinstance(parsed, dict):
+                    # Keep path/status/error, drop content
+                    summary = {}
+                    for key in ("path", "status", "error", "returncode",
+                                "size", "truncated", "bytes_written"):
+                        if key in parsed:
+                            summary[key] = parsed[key]
+                    if "content" in parsed:
+                        summary["content"] = "(trimmed — see original file)"
+                    if "stdout" in parsed:
+                        summary["stdout"] = parsed["stdout"][:100] + "..." if len(parsed.get("stdout", "")) > 100 else parsed.get("stdout", "")
+                    messages[idx]["content"] = json.dumps(summary)
+                else:
+                    messages[idx]["content"] = content[:200] + "...(trimmed)"
+            except (json.JSONDecodeError, TypeError):
+                messages[idx]["content"] = content[:200] + "...(trimmed)"

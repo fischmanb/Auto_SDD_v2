@@ -901,12 +901,17 @@ class BuildAgentExecutor:
 
         try:
             content = full_path.read_text()
-            logger.debug("EG1 read_file: %s (%d bytes)", path_str, len(content))
+            # Cap at 8KB to prevent context window bloat.
+            # 8 reads × 8KB = 64KB — fits in 32K token context
+            # with room for system prompt and output.
+            max_chars = 8000
+            truncated = len(content) > max_chars
+            logger.debug("EG1 read_file: %s (%d bytes, truncated=%s)", path_str, len(content), truncated)
             return json.dumps({
-                "content": content[:50000],
+                "content": content[:max_chars],
                 "path": path_str,
                 "size": len(content),
-                "truncated": len(content) > 50000,
+                "truncated": truncated,
             })
         except FileNotFoundError:
             return json.dumps({"error": f"File not found: {path_str}"})

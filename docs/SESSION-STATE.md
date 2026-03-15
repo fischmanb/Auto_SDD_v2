@@ -186,6 +186,7 @@ V1 port items must account for:
 - Read-only nudge: after 8 consecutive turns without write_file, inject "Start implementing NOW" message.
 - Auto-complete: when agent writes files but doesn't commit/signal, Python auto-commits and injects FEATURE_BUILT signals.
 - Cross-feature learning: EG1 blocked patterns accumulated across features, injected into next feature's system prompt.
+- Context window management: read_file capped at 8KB (was 50KB). Old tool results trimmed to metadata after 4 recent results. Prevents context bloat that caused max_tokens exhaustion after nudge.
 - Gherkin parser: format-agnostic keyword extraction. No assumptions about LLM formatting.
 - Roadmap dep matching: 3-tier fuzzy resolution (exact → normalized → token subset). Models don't write dep names precisely.
 - EG1 runtime re-detection: writing a marker file (package.json, pyproject.toml, etc.) triggers re-scan. Handles project bootstrapping.

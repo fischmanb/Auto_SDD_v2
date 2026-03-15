@@ -129,6 +129,11 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 - GLM config: `max_tokens` 8192→16384 (model hit output budget on turn 8 after nudge — trying to write entire file in one response). `max_turns` 40→60 (model needs ~8 turns reading + room to write + commit).
 - 2 new tests: `cat file | head`, `head file | grep`. 422 tests total.
 
+### Context window management
+- **Input-side**: `read_file` response capped at 8KB (was 50KB). After 8 reads × 8KB = 64KB, leaves room in 32K-token context for system prompt, feature spec, and output.
+- **Input-side**: `_trim_old_tool_results()` in local_agent.py: after 4 most recent tool results, older ones truncated to metadata only (path, status, error — file contents replaced with "(trimmed)"). Prevents conversation history from filling the context window with stale read results.
+- These are the input-side complement to `max_tokens` (output budget). Without them, models hit `max_tokens exceeded` immediately after the nudge because the context was already full of read results.
+
 ### Commits (session 7 continued, part 2)
 - `10148a9` SESSION-STATE + CHANGELOG update
 - `5566826` Cross-feature learning
