@@ -41,6 +41,11 @@ from auto_sdd.lib.reliability import (
     read_state, write_state, clean_state,
     new_campaign_id,
 )
+from auto_sdd.lib.branch_manager import (
+    BranchError,
+    setup_feature_branch, merge_feature_branch,
+    delete_feature_branch, cleanup_merged_branches,
+)
 from auto_sdd.exec_gates.eg1_tool_calls import BuildAgentExecutor
 from auto_sdd.exec_gates.eg2_signal_parse import extract_and_validate, ParsedSignals
 from auto_sdd.exec_gates.eg3_build_check import check_build, detect_build_cmd, BuildCheckResult
@@ -392,6 +397,7 @@ class BuildLoopV2:
         test_cmd: str = "",
         max_features: int | None = None,
         max_retries: int = 1,
+        main_branch: str = "main",
     ) -> None:
         self.config = model_config
         self.project_dir = project_dir.resolve()
@@ -399,6 +405,7 @@ class BuildLoopV2:
         self.test_cmd = test_cmd or detect_test_cmd(self.project_dir)
         self.max_features = max_features
         self.max_retries = max_retries
+        self.main_branch = main_branch
 
         # Results tracking
         self.records: list[FeatureRecord] = []
@@ -518,6 +525,9 @@ class BuildLoopV2:
 
         self._write_summary(total_duration)
 
+        # Post-campaign cleanup
+        cleanup_merged_branches(self.project_dir, self.main_branch)
+
         # Clean resume state on full success (no failures)
         if self.failed == 0:
             clean_state(self.project_dir)
@@ -531,8 +541,23 @@ class BuildLoopV2:
 
         SELECT → BUILD → GATE → ADVANCE
 
+        Creates a feature branch before the retry loop. On success,
+        merges to main. On failure, deletes the branch.
+
         Returns True on success, False on failure after retries.
         """
+        # ── Branch setup (once per feature) ──────────────────────
+        try:
+            branch_result = setup_feature_branch(
+                self.project_dir, self.main_branch,
+            )
+        except BranchError as exc:
+            logger.error("Branch setup failed for %s: %s", feature.name, exc)
+            self._record(feature, "failed", 0, error=str(exc))
+            return False
+
+        branch_name = branch_result.branch_name
+
         for attempt in range(self.max_retries + 1):
             if attempt > 0:
                 logger.info(
@@ -556,7 +581,7 @@ class BuildLoopV2:
             protected = _discover_test_files(self.project_dir, self.test_cmd)
             executor = BuildAgentExecutor(
                 project_root=self.project_dir,
-                allowed_branch="",  # TODO: wire branch manager
+                allowed_branch=branch_name,
                 command_timeout=60,
                 protected_paths=protected,
             )
@@ -589,6 +614,9 @@ class BuildLoopV2:
                     if attempt >= 1:
                         self._git_reset(head_before)
                     continue
+                delete_feature_branch(
+                    self.project_dir, branch_name, self.main_branch,
+                )
                 return False
 
             # ── GATE (EG2 → EG3 → EG4 → EG5) ───────────────────────
@@ -609,20 +637,38 @@ class BuildLoopV2:
                     if attempt >= 1:
                         self._git_reset(head_before)
                     continue
+                delete_feature_branch(
+                    self.project_dir, branch_name, self.main_branch,
+                )
                 return False
 
             # ── ADVANCE ──────────────────────────────────────────────
-            # All gates passed — record success and move to next feature
+            # All gates passed — merge to main and record success
             current_test_count = (
                 gate.eg4_tests.test_count if gate.eg4_tests else None
             )
+            try:
+                merge_feature_branch(
+                    self.project_dir, branch_name, self.main_branch,
+                )
+            except BranchError as exc:
+                logger.error("Merge failed for %s: %s", feature.name, exc)
+                self._record(feature, "failed", attempt, error=str(exc))
+                delete_feature_branch(
+                    self.project_dir, branch_name, self.main_branch,
+                )
+                return False
+
             self._record(
                 feature, "built", attempt,
                 test_count=current_test_count,
             )
             return True
 
-        # Exhausted all retries
+        # Exhausted all retries — clean up the feature branch
+        delete_feature_branch(
+            self.project_dir, branch_name, self.main_branch,
+        )
         return False
 
     # ── GATE: deterministic ExecGate checks (EG2–EG5) ─────────────
