@@ -803,6 +803,14 @@ class BuildLoopV2:
                 )
                 return False
 
+            # ── AUTO-COMPLETE: commit and signals if model forgot ────
+            # Models write files and stop without committing or emitting
+            # signals. Same principle as translation — if the model can't
+            # do it, do it in Python.
+            agent_result = self._auto_complete_if_needed(
+                agent_result, executor, feature, branch_name,
+            )
+
             # ── GATE (EG2 → EG3 → EG4 → EG5) ───────────────────────
             # All checks deterministic, orchestrator-side, short-circuit
             gate = self._run_gate(
@@ -856,6 +864,85 @@ class BuildLoopV2:
         return False
 
     # ── GATE: deterministic ExecGate checks (EG2–EG5) ─────────────
+
+    def _auto_complete_if_needed(
+        self,
+        agent_result: AgentResult,
+        executor: BuildAgentExecutor,
+        feature: Feature,
+        branch_name: str,
+    ) -> AgentResult:
+        """Auto-commit and inject signals if model forgot.
+
+        Models write files and stop without committing or emitting
+        FEATURE_BUILT signals. Rather than failing at EG2, detect
+        the situation and complete the loop in Python.
+        """
+        output = agent_result.output or ""
+        has_signal = "FEATURE_BUILT" in output
+        has_written = bool(executor._written_files)
+
+        if has_signal or not has_written:
+            return agent_result
+
+        logger.info(
+            "Auto-complete: agent wrote %d file(s) but didn't signal. "
+            "Committing and injecting signals.",
+            len(executor._written_files),
+        )
+
+        # Auto-commit if there are uncommitted changes
+        try:
+            status = subprocess.run(
+                ["git", "status", "--porcelain"],
+                capture_output=True, text=True,
+                cwd=str(self.project_dir),
+            )
+            if status.stdout.strip():
+                subprocess.run(
+                    ["git", "add", "-A"],
+                    capture_output=True, text=True,
+                    cwd=str(self.project_dir),
+                )
+                subprocess.run(
+                    ["git", "commit", "-m",
+                     f"Auto-commit: {feature.name} (agent forgot to commit)"],
+                    capture_output=True, text=True,
+                    cwd=str(self.project_dir),
+                )
+                logger.info("Auto-complete: committed changes")
+        except Exception as exc:
+            logger.warning("Auto-complete: git commit failed: %s", exc)
+
+        # Find the spec file
+        spec_file = ""
+        spec_dir = self.project_dir / ".specs" / "features"
+        if spec_dir.is_dir():
+            slug = feature.name.lower().replace(" ", "-")
+            for p in spec_dir.rglob("*.md"):
+                if slug in p.stem.lower():
+                    spec_file = str(p.relative_to(self.project_dir))
+                    break
+
+        # Derive source files from executor's written files
+        source_files = []
+        for f in executor._written_files:
+            try:
+                rel = str(Path(f).relative_to(self.project_dir))
+                source_files.append(rel)
+            except ValueError:
+                source_files.append(f)
+
+        # Inject signals into agent output
+        signals = (
+            f"\nFEATURE_BUILT: {feature.name}\n"
+            f"SPEC_FILE: {spec_file}\n"
+            f"SOURCE_FILES: {','.join(source_files)}\n"
+        )
+        agent_result.output = output + signals
+        agent_result.success = True
+        logger.info("Auto-complete: injected signals for %s", feature.name)
+        return agent_result
 
     def _run_gate(
         self,

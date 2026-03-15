@@ -919,9 +919,14 @@ class BuildAgentExecutor:
             raise ToolCallBlocked("run_command: 'command' must be a string")
 
         # Strip redundant cd <project_dir> && prefix (P8: generalizable).
-        # Models habitually prepend cd to commands. Since cwd is already
-        # project_root, strip it and validate the actual command.
         command = self._strip_cd_prefix(command)
+
+        # Handle git add && git commit chains (P8: standard dev pattern).
+        # Models write "git add -A && git commit -m '...'" because that's
+        # how developers do it. Split and run sequentially.
+        git_chain = self._split_git_chain(command)
+        if git_chain:
+            return self._exec_git_chain(git_chain)
 
         # Write-then-exec detection (before general validation)
         self._check_write_then_exec(command)
@@ -997,6 +1002,66 @@ class BuildAgentExecutor:
 
         return command
 
+    def _split_git_chain(self, command: str) -> list[str] | None:
+        """Split chained git commands into individual commands.
+
+        Recognizes patterns like:
+            git add -A && git commit -m "message"
+            git add . && git commit -m "message"
+            git add file.ts && git commit -m "message"
+
+        Returns list of individual git commands, or None if not a git chain.
+        """
+        cmd = command.strip()
+        if not cmd.startswith("git "):
+            return None
+        # Split on && and check each part is a git command
+        parts = [p.strip() for p in cmd.split("&&")]
+        if len(parts) < 2:
+            return None
+        if all(p.startswith("git ") for p in parts):
+            return parts
+        return None
+
+    def _exec_git_chain(self, commands: list[str]) -> str:
+        """Execute a chain of git commands sequentially.
+
+        Each command is validated individually through the normal
+        command validation pipeline.
+        """
+        results = []
+        for cmd in commands:
+            # Validate each command
+            _validate_command_layers(
+                cmd,
+                self._allowed_runtime_tokens,
+                self._allowed_npm_scripts,
+                self._allowed_npx_packages,
+                self.allowed_branch,
+                self.project_root,
+            )
+            try:
+                result = subprocess.run(
+                    cmd, shell=True,
+                    capture_output=True, text=True,
+                    timeout=self.command_timeout,
+                    cwd=str(self.project_root),
+                )
+                results.append({
+                    "command": cmd,
+                    "stdout": result.stdout[:2000],
+                    "stderr": result.stderr[:1000],
+                    "returncode": result.returncode,
+                })
+                if result.returncode != 0:
+                    logger.info("Git chain stopped at '%s' (rc=%d)", cmd[:60], result.returncode)
+                    break
+            except subprocess.TimeoutExpired:
+                results.append({"command": cmd, "error": "timeout", "returncode": -1})
+                break
+        logger.info("EG1: executed git chain (%d commands)", len(results))
+        return json.dumps(results)
+
     def _check_write_then_exec(self, command: str) -> None:
         """Detect and block execution of agent-written scripts.
 
@@ -1007,7 +1072,13 @@ class BuildAgentExecutor:
         if not self._written_files:
             return
 
-        cmd_parts = command.strip().split()
+        # Git commands reference files but don't execute them.
+        # git add, git commit, git diff, git status, etc. are safe.
+        cmd_stripped = command.strip()
+        if cmd_stripped.startswith("git "):
+            return
+
+        cmd_parts = cmd_stripped.split()
         for part in cmd_parts:
             candidate = part.lstrip("./")
             full_candidate = (self.project_root / candidate).resolve()

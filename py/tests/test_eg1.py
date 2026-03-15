@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -404,11 +405,11 @@ class TestCdPrefixStripping:
         assert isinstance(result, str)
 
     def test_real_chaining_still_blocked(self, tmp_project: Path) -> None:
-        """Non-cd chaining is still blocked."""
+        """Non-git chaining is still blocked."""
         ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
         with pytest.raises(ToolCallBlocked, match="command chaining"):
             ex.execute("run_command", {
-                "command": "git status && git log",
+                "command": "echo hello && echo world",
             })
 
 
@@ -506,3 +507,82 @@ class TestToolCallTranslation:
         result = ex.execute("run_command", {"command": "git status"})
         parsed = json.loads(result)
         assert "stdout" in parsed
+
+
+# ── Git chain handling ───────────────────────────────────────────────────────
+
+
+class TestGitChain:
+    """EG1 handles git add && git commit as a valid pattern."""
+
+    def test_git_add_commit_chain(self, tmp_project: Path) -> None:
+        """git add -A && git commit is executed, not blocked."""
+        import subprocess as sp
+        env = {**os.environ, "GIT_AUTHOR_NAME": "test", "GIT_AUTHOR_EMAIL": "t@t",
+               "GIT_COMMITTER_NAME": "test", "GIT_COMMITTER_EMAIL": "t@t"}
+        sp.run(["git", "init", "-b", "main"], cwd=str(tmp_project),
+               capture_output=True, env=env)
+        sp.run(["git", "add", "-A"], cwd=str(tmp_project),
+               capture_output=True, env=env)
+        sp.run(["git", "commit", "-m", "init", "--allow-empty"],
+               cwd=str(tmp_project), capture_output=True, env=env)
+
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        result = ex.execute("run_command", {
+            "command": "git add -A && git commit -m 'test commit' --allow-empty",
+        })
+        parsed = json.loads(result)
+        assert isinstance(parsed, list)
+        assert len(parsed) == 2
+        assert parsed[0]["command"].startswith("git add")
+        assert parsed[1]["command"].startswith("git commit")
+
+    def test_non_git_chaining_still_blocked(self, tmp_project: Path) -> None:
+        """Mixed git + non-git chaining is blocked."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        with pytest.raises(ToolCallBlocked):
+            ex.execute("run_command", {
+                "command": "git add -A && npm run build",
+            })
+
+
+# ── Write-then-exec git exemption ───────────────────────────────────────────
+
+
+class TestWriteThenExecGitExempt:
+    """Git commands referencing written files are NOT blocked."""
+
+    def test_git_add_written_ts_file(self, tmp_project: Path) -> None:
+        """Agent writes .ts file then git adds it — allowed."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        ex.execute("write_file", {
+            "path": "src/data-loader.ts",
+            "content": "export function loadData() { return {}; }",
+        })
+        result = ex.execute("run_command", {
+            "command": "git add src/data-loader.ts",
+        })
+        assert isinstance(result, str)  # not blocked
+
+    def test_git_commit_after_write(self, tmp_project: Path) -> None:
+        """Agent writes file, git adds and commits — allowed."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        ex.execute("write_file", {
+            "path": "src/app.ts",
+            "content": "console.log('hello');",
+        })
+        result = ex.execute("run_command", {
+            "command": "git add -A && git commit -m 'add app' --allow-empty",
+        })
+        parsed = json.loads(result)
+        assert isinstance(parsed, list)
+
+    def test_non_git_exec_of_written_file_still_blocked(self, tmp_project: Path) -> None:
+        """Running a written .ts file via node is still blocked."""
+        ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
+        ex.execute("write_file", {
+            "path": "src/evil.ts",
+            "content": "process.exit(1);",
+        })
+        with pytest.raises(ToolCallBlocked, match="Write-then-exec"):
+            ex.execute("run_command", {"command": "npx tsx src/evil.ts"})
