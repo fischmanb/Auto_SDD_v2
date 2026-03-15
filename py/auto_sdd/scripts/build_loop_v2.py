@@ -293,10 +293,33 @@ def _parse_roadmap(project_dir: Path) -> list[Feature]:
             in_degree[name] += 1
             dependents[dep].append(name)
 
+    # Cascade skips: if A is skipped and B depends on A, B must also skip.
+    # Repeat until no new skips propagate.
+    changed = True
+    while changed:
+        changed = False
+        for name in list(pending.keys()):
+            if name in skipped_names:
+                continue
+            for dep in pending[name].deps:
+                if dep in skipped_names:
+                    logger.warning(
+                        "Feature %r depends on skipped %r — skipping",
+                        name, dep,
+                    )
+                    skipped_names.add(name)
+                    changed = True
+                    break
+
     # Remove skipped features from the graph
     for name in skipped_names:
-        del in_degree[name]
-        del dependents[name]
+        in_degree.pop(name, None)
+        dependents.pop(name, None)
+    # Clean edges pointing to skipped features
+    for name in list(in_degree.keys()):
+        for dep in pending[name].deps:
+            if dep in skipped_names:
+                in_degree[name] = max(0, in_degree[name] - 1)
 
     # Seed queue with features that have zero in-degree
     from collections import deque
