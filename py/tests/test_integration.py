@@ -187,6 +187,7 @@ class TestBuildLoopIntegration:
                 project_dir=git_project,
                 build_cmd="echo build-ok",
                 test_cmd='echo "Tests: 2 passed"',
+                auto_approve=True,
             )
             exit_code = loop.run()
 
@@ -208,6 +209,7 @@ class TestBuildLoopIntegration:
                 build_cmd="echo ok",
                 test_cmd='echo "Tests: 1 passed"',
                 max_retries=0,
+                auto_approve=True,
             )
             exit_code = loop.run()
 
@@ -231,6 +233,7 @@ class TestBuildLoopIntegration:
                 build_cmd="echo ok",
                 test_cmd='echo "Tests: 1 passed"',
                 max_retries=0,
+                auto_approve=True,
             )
             exit_code = loop.run()
 
@@ -264,6 +267,7 @@ class TestBuildLoopIntegration:
                 build_cmd="echo ok",
                 test_cmd='echo "Tests: 2 passed"',
                 max_retries=1,
+                auto_approve=True,
             )
             exit_code = loop.run()
 
@@ -295,6 +299,7 @@ class TestBuildLoopIntegration:
                 project_dir=project,
                 build_cmd="echo ok",
                 test_cmd='echo "Tests: 3 passed"',
+                auto_approve=True,
             )
             loop.run()
 
@@ -312,6 +317,7 @@ class TestBuildLoopIntegration:
                 project_dir=git_project,
                 build_cmd="echo ok",
                 test_cmd='echo "Tests: 2 passed"',
+                auto_approve=True,
             )
             loop.run()
 
@@ -334,6 +340,7 @@ class TestBuildLoopIntegration:
                 build_cmd="exit 1",  # Build fails
                 test_cmd='echo "Tests: 1 passed"',
                 max_retries=0,
+                auto_approve=True,
             )
             exit_code = loop.run()
 
@@ -351,6 +358,7 @@ class TestBuildLoopIntegration:
                 build_cmd="echo ok",
                 test_cmd="exit 1",  # Tests fail
                 max_retries=0,
+                auto_approve=True,
             )
             exit_code = loop.run()
 
@@ -376,6 +384,7 @@ class TestBuildLoopIntegration:
                 build_cmd="echo ok",
                 test_cmd='echo "Tests: 1 passed"',
                 max_retries=0,
+                auto_approve=True,
             )
             exit_code = loop.run()
 
@@ -401,6 +410,7 @@ class TestGatePipelineShortCircuit:
             project_dir=git_project,
             build_cmd="echo ok",
             test_cmd='echo "Tests: 2 passed"',
+            auto_approve=True,
         )
         agent_result = _agent_result(
             output=(
@@ -425,6 +435,7 @@ class TestGatePipelineShortCircuit:
             project_dir=git_project,
             build_cmd="echo ok",
             test_cmd='echo "Tests: 1 passed"',
+            auto_approve=True,
         )
         # No signals in output
         gate = loop._run_gate(_agent_result(output="no signals"), head, 0)
@@ -446,6 +457,7 @@ class TestGatePipelineShortCircuit:
             project_dir=git_project,
             build_cmd="exit 1",  # fails
             test_cmd='echo "Tests: 1 passed"',
+            auto_approve=True,
         )
         agent_result = _agent_result(
             output=(
@@ -472,6 +484,7 @@ class TestGatePipelineShortCircuit:
             project_dir=git_project,
             build_cmd="echo ok",
             test_cmd="exit 1",  # tests fail
+            auto_approve=True,
         )
         agent_result = _agent_result(
             output=(
@@ -813,6 +826,7 @@ class TestBuildLoopConfig:
                 build_cmd="echo ok",
                 test_cmd='echo "Tests: 2 passed"',
                 max_features=1,
+                auto_approve=True,
             )
             loop.run()
 
@@ -825,6 +839,7 @@ class TestBuildLoopConfig:
         loop = BuildLoopV2(
             model_config=_cfg(),
             project_dir=git_project,
+            auto_approve=True,
         )
         # tsconfig.json present → build should be tsc-based
         assert "tsc" in loop.build_cmd or "npx" in loop.build_cmd
@@ -838,6 +853,7 @@ class TestBuildLoopConfig:
             project_dir=git_project,
             build_cmd="make build",
             test_cmd="make test",
+            auto_approve=True,
         )
         assert loop.build_cmd == "make build"
         assert loop.test_cmd == "make test"
@@ -855,6 +871,7 @@ class TestBuildLoopConfig:
             project_dir=git_project,
             build_cmd="echo ok",
             test_cmd="echo ok",
+            auto_approve=True,
         )
         assert loop.run() == 0
         assert loop.built == 0

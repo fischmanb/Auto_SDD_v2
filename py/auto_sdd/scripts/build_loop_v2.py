@@ -46,6 +46,7 @@ from auto_sdd.lib.branch_manager import (
     setup_feature_branch, merge_feature_branch,
     delete_feature_branch, cleanup_merged_branches,
 )
+from auto_sdd.lib.codebase_summary import generate_codebase_summary
 from auto_sdd.exec_gates.eg1_tool_calls import BuildAgentExecutor
 from auto_sdd.exec_gates.eg2_signal_parse import extract_and_validate, ParsedSignals
 from auto_sdd.exec_gates.eg3_build_check import check_build, detect_build_cmd, BuildCheckResult
@@ -357,7 +358,9 @@ def _build_system_prompt(feature: Feature, project_dir: Path) -> str:
     )
 
 
-def _build_user_prompt(feature: Feature, project_dir: Path) -> str:
+def _build_user_prompt(
+    feature: Feature, project_dir: Path, codebase_summary: str = "",
+) -> str:
     """Build the user prompt with the feature spec and context."""
     spec_dir = project_dir / ".specs" / "features"
     spec_content = ""
@@ -372,12 +375,17 @@ def _build_user_prompt(feature: Feature, project_dir: Path) -> str:
     if not spec_content:
         spec_content = f"Implement the feature: {feature.name}"
 
-    return (
+    parts = [
         f"Implement the following feature:\n\n"
         f"Feature: {feature.name}\n"
         f"Complexity: {feature.complexity}\n\n"
-        f"Specification:\n{spec_content}\n"
-    )
+        f"Specification:\n{spec_content}\n",
+    ]
+
+    if codebase_summary:
+        parts.append(f"\n## Codebase Context\n\n{codebase_summary}\n")
+
+    return "\n".join(parts)
 
 
 # ── Core orchestrator ────────────────────────────────────────────────────────
@@ -398,6 +406,7 @@ class BuildLoopV2:
         max_features: int | None = None,
         max_retries: int = 1,
         main_branch: str = "main",
+        auto_approve: bool = False,
     ) -> None:
         self.config = model_config
         self.project_dir = project_dir.resolve()
@@ -406,6 +415,8 @@ class BuildLoopV2:
         self.max_features = max_features
         self.max_retries = max_retries
         self.main_branch = main_branch
+        self.auto_approve = auto_approve
+        self._codebase_summary: str = ""
 
         # Results tracking
         self.records: list[FeatureRecord] = []
@@ -481,6 +492,20 @@ class BuildLoopV2:
             len(features), limit, self.max_retries,
         )
 
+        # ── Codebase summary (generated once, reused per feature) ────
+        self._codebase_summary = generate_codebase_summary(
+            self.project_dir, self.config,
+        )
+        if self._codebase_summary:
+            logger.info("Codebase summary: %d chars", len(self._codebase_summary))
+        else:
+            logger.info("Codebase summary: empty (no cache, agent skipped or failed)")
+
+        # ── Preflight summary ────────────────────────────────────────
+        if not self._preflight(features[:limit]):
+            logger.info("Preflight rejected — aborting")
+            return 3
+
         start_time = int(time.time())
 
         # ── Per-feature loop ─────────────────────────────────────────
@@ -534,6 +559,43 @@ class BuildLoopV2:
 
         return 1 if self.failed > 0 else 0
 
+    # ── Preflight summary ────────────────────────────────────────────
+
+    def _preflight(self, features: list[Feature]) -> bool:
+        """Print preflight summary. Returns True to proceed, False to abort.
+
+        When auto_approve is False (default), waits for user confirmation.
+        """
+        print("\n" + "═" * 60)
+        print("  AUTO-SDD V2 — Preflight Summary")
+        print("═" * 60)
+        print(f"  Model:    {self.config.model}")
+        print(f"  Project:  {self.project_dir}")
+        print(f"  Branch:   {self.main_branch}")
+        print(f"  Build:    {self.build_cmd or '(none)'}")
+        print(f"  Test:     {self.test_cmd or '(none)'}")
+        print(f"  Retries:  {self.max_retries}")
+        print(f"  Summary:  {'yes' if self._codebase_summary else 'no'}")
+        print()
+        print(f"  Features ({len(features)}):")
+        for i, f in enumerate(features, 1):
+            deps = f", deps={f.deps}" if f.deps else ""
+            print(f"    {i}. {f.name} [{f.complexity}]{deps}")
+        print()
+        print("═" * 60)
+
+        if self.auto_approve:
+            print("  Auto-approved.\n")
+            return True
+
+        try:
+            answer = input("  Proceed? [y/N] ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            return False
+
+        return answer in ("y", "yes")
+
     # ── SELECT + BUILD + GATE + ADVANCE (per feature) ────────────────
 
     def _build_feature(self, feature: Feature) -> bool:
@@ -575,7 +637,9 @@ class BuildLoopV2:
 
             # Build prompts
             system_prompt = _build_system_prompt(feature, self.project_dir)
-            user_prompt = _build_user_prompt(feature, self.project_dir)
+            user_prompt = _build_user_prompt(
+                feature, self.project_dir, self._codebase_summary,
+            )
 
             # Create executor (EG1 gate) scoped to this feature
             protected = _discover_test_files(self.project_dir, self.test_cmd)
@@ -869,6 +933,12 @@ def main() -> None:
         help="Max retries per feature (default: 1)",
     )
     parser.add_argument(
+        "--auto-approve",
+        action="store_true",
+        default=bool(os.environ.get("AUTO_APPROVE", "")),
+        help="Skip preflight confirmation (default: require approval)",
+    )
+    parser.add_argument(
         "--pre-build",
         action="store_true",
         default=False,
@@ -934,6 +1004,7 @@ def main() -> None:
         test_cmd=args.test_cmd,
         max_features=args.max_features,
         max_retries=args.max_retries,
+        auto_approve=args.auto_approve,
     )
 
     exit_code = loop.run()
