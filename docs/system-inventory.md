@@ -13,7 +13,7 @@
 | Test code | 701 | 22 | 95 |
 | Validation script | 658 | 1 | 12 |
 | **Total** | **3,833** | **34** | **168** |
-| Tests passing | **325** | | |
+| Tests passing | **422** | | |
 
 ---
 
