@@ -1365,6 +1365,12 @@ def main() -> None:
         help="Run pre-build phases (1-6) before the build loop",
     )
     parser.add_argument(
+        "--pre-build-only",
+        action="store_true",
+        default=False,
+        help="Run pre-build phases (1-6) then exit (no build loop)",
+    )
+    parser.add_argument(
         "--vision-input",
         default=os.environ.get("VISION_INPUT", ""),
         help="User input for Phase 1 (VISION). Required if --pre-build and no .specs/vision.md",
@@ -1397,7 +1403,7 @@ def main() -> None:
     )
 
     # Run pre-build phases if requested
-    if args.pre_build:
+    if args.pre_build or args.pre_build_only:
         from auto_sdd.pre_build.orchestrator import run_pre_build
 
         logger.info("Running pre-build phases (1-6)...")
@@ -1415,6 +1421,9 @@ def main() -> None:
             )
             sys.exit(2)
         logger.info("Pre-build complete: %d phases passed", len(pre_results))
+
+        if args.pre_build_only:
+            sys.exit(0)
 
     # Run the loop
     loop = BuildLoopV2(
