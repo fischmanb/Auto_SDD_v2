@@ -228,6 +228,23 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 
 **First complete V2 campaign**: 7/7 features built for cre-pulse (Next.js 14 CRE dashboard). 24 source files, 147 tests passing, ~36 minutes total. 4 first-try successes, 2 on retry 1, 1 on retry 2. EG3 caught hallucinated type properties. EG4 caught a real color token value mismatch. Both self-corrected on retry via error feedback.
 
+### Post-campaign: Dashboard Shell + build prompt optimization (session 7 continued, part 6)
+
+**Dep export scanner** (`0a9e2ae`): `_scan_dep_exports()` scans `src/` for all `.ts`/`.tsx` files, extracts export lines, and injects them into the user prompt as an "Available Imports" section when a feature has dependencies. Agent sees exact import paths and type signatures without burning turns reading files. First attempt for Dashboard Shell dropped from 60+ turns to 16 turns.
+
+**Dead code fix** (`0a9e2ae`): `_build_system_prompt` had a `return` statement before the `blocked_patterns` injection block. Cross-feature learning was never reaching the agent in any previous campaign. Fixed by assigning to a variable first.
+
+**Retry prompt fix** (`9c01a89`): Old retry prompt said "Read the files you wrote previously to understand what went wrong" which sent the agent into a 60-turn exploration loop re-reading all 24 existing files. New prompt: "Do NOT re-read files whose exports are listed above. Read ONLY your own files, then write corrected versions immediately."
+
+**EG3 Next.js detection** (`3e3de59`): `detect_build_cmd` only checked for `next.config.*` files. Next.js 14+ works without config files, so detection fell through to `npx tsc --noEmit`, which doesn't catch server/client boundary violations (e.g., `import { readFileSync } from 'fs'` in a client component). Now also checks for `next` in package.json dependencies. Returns `npm run build` which runs the full Next.js compiler including webpack bundling.
+
+**Dashboard Shell campaign**: Feature 8 added to cre-pulse roadmap. App Shell creates `app/layout.tsx` and `app/page.tsx`, imports and renders all 7 feature modules. First attempt: 16 turns, EG3 failed (implicit `any` types). Retry with error feedback succeeded. App renders in browser: property overview, tenant roster, lease velocity timeline, comp set benchmarks. Manual fix required for DataLoader `fs` import (server-only module used in client component) — would be caught by `npm run build` in future campaigns.
+
+### Commits (session 7 continued, part 6)
+- `0a9e2ae` Dep export scanner + dead code fix in system prompt
+- `9c01a89` Retry prompt: stop telling agent to re-read all files
+- `3e3de59` EG3 Next.js detection: check package.json deps
+
 ### Commits (session 7 continued, part 5)
 - `013e9a2` CHANGELOG + SESSION-STATE update (part 4)
 - `6d9aa7f` Read-only && chain splitting (run both sides)

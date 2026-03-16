@@ -146,7 +146,7 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 - Carpet-bombing project state between runs wastes money. When only the last feature needs a rerun, release the lock (`rm -f logs/.build-lock`) and rerun — resume state picks up where it left off. Do not nuke resume-state.json or source files unless truly needed.
 
 ### First complete V2 campaign
-7/7 features built for cre-pulse (Next.js 14 CRE dashboard). 24 source files, 147 tests passing, 5 test suites, ~36 minutes total. Claude Sonnet 4.6 via Anthropic API.
+8/8 features built for cre-pulse (Next.js 14 CRE dashboard). 26 source files, 147 tests passing, 5 test suites. Claude Sonnet 4.6 via Anthropic API. App renders in browser at localhost:3000.
 
 | Feature | Attempts | Tests | Failure Mode |
 |---------|----------|-------|--------------|
@@ -157,10 +157,11 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 | Tenant Roster Table | 1 | 94 | -- |
 | Lease Velocity Timeline | 1 | 120 | -- |
 | Comp Set Benchmarks | 2 | 147 | 60-turn limit on first attempt |
+| Dashboard Shell | 2 | 147 | EG3: implicit any types on callbacks |
 
 EG3 caught hallucinated `startingRent`/`effectiveRent` properties on `Property` type — they don't exist in seed data. Retry read the exact TypeScript error and fixed it. EG4 caught a real color token value mismatch. Both self-corrected via error feedback injection.
 
-App compiles (`npx tsc --noEmit` clean) and all tests pass (`npx vitest run`). Missing app entry point (no `app/` directory) — `next dev` fails. Fixed by adding App Shell feature to roadmap + pre-build enforcement for future projects.
+App renders full dashboard: property overview card, tenant roster table, lease velocity timeline chart, comp set benchmarks chart and table. Manual fix required post-campaign: DataLoader used `fs.readFileSync` (Node.js server-only) in a client component. `npx tsc --noEmit` missed this because `fs` is valid TypeScript — only the Next.js bundler catches server/client boundary violations. EG3 detection fixed to use `npm run build` for Next.js projects.
 
 Local models (GPT-OSS-120B, Qwen3-Coder-Next, GLM-4.7-flash) all failed at tool-use compliance. Mac Studio runs orchestrator, gates, tests, git locally. API handles code generation only.
 
@@ -229,6 +230,10 @@ V1 port items must account for:
 - 7d (prompt_builder.py) deferred: current inline prompts sufficient for first campaign. Tune fix/retry variants after real failure data.
 - Model configs: `config/models/` now has gpt-oss-120b.yaml, qwen3-coder-next.yaml, glm-4.7-flash.yaml, claude-sonnet.yaml. Model is a YAML config swap. Claude config uses Anthropic API via `${ANTHROPIC_API_KEY}` env var; all others are local via LM Studio at localhost:1234.
 - 422 tests total (112 EG1, 30 phase_red, 23 codebase_summary, 20 reliability, 16 branch_manager + others).
+- Dep export scanner: `_scan_dep_exports()` scans src/ for all .ts/.tsx exports and injects them into the user prompt when a feature has deps. Agent sees exact import paths without burning turns reading files. Cut Dashboard Shell from 60+ turns to 16.
+- Retry prompt must not instruct exploration. Old prompt said "Read the files you wrote previously" which sent the agent into a 60-turn loop. New prompt: "Do NOT re-read files whose exports are listed above."
+- EG3 Next.js detection: also checks for `next` in package.json deps, not just `next.config.*` files. Next.js 14+ works without config files. Returns `npm run build` which catches server/client boundary violations that `npx tsc --noEmit` misses.
+- Cross-feature learning dead code: `_build_system_prompt` had a `return` before the `blocked_patterns` injection. Fixed by assigning to variable first. Blocked patterns were never reaching the agent in any previous campaign.
 
 ## References
 - `docs/architectural-inventory.md` — 12-phase pipeline
