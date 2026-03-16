@@ -426,6 +426,47 @@ def _parse_roadmap(project_dir: Path) -> list[Feature]:
 # ── Build prompt construction ────────────────────────────────────────────────
 
 
+def _scan_dep_exports(project_dir: Path) -> str:
+    """Scan existing source files and extract export signatures.
+
+    Returns a formatted string showing each file's path and its exports.
+    This gives the build agent exact knowledge of what's importable
+    without burning turns reading every file.
+    """
+    import re
+
+    src_dir = project_dir / "src"
+    if not src_dir.is_dir():
+        return ""
+
+    lines: list[str] = []
+    for ext in ("*.ts", "*.tsx"):
+        for fpath in sorted(src_dir.rglob(ext)):
+            rel = str(fpath.relative_to(project_dir))
+            if "__tests__" in rel or ".test." in rel:
+                continue
+            try:
+                content = fpath.read_text(errors="replace")
+            except OSError:
+                continue
+            exports = []
+            for line in content.splitlines():
+                stripped = line.strip()
+                if stripped.startswith("export "):
+                    # Trim to first { or ( for readability
+                    sig = stripped[:120]
+                    exports.append(sig)
+            if exports:
+                lines.append(f"\n### {rel}")
+                for e in exports[:15]:
+                    lines.append(f"  {e}")
+
+    if not lines:
+        return ""
+
+    return "## Available Imports (already built)\n" + "\n".join(lines) + "\n"
+
+
 def _build_system_prompt(
     feature: Feature,
     project_dir: Path,
@@ -436,7 +477,7 @@ def _build_system_prompt(
     This is the minimal prompt that tells the agent what to do.
     Adapted from v1 prompt_builder.py but stripped to essentials.
     """
-    return (
+    prompt = (
         "You are a build agent. You implement software features using three tools: "
         "write_file, read_file, and run_command.\n\n"
         "TOOLS:\n"
@@ -511,6 +552,15 @@ def _build_user_prompt(
 
     if codebase_summary:
         parts.append(f"\n## Codebase Context\n\n{codebase_summary}\n")
+
+    if feature.deps:
+        dep_exports = _scan_dep_exports(project_dir)
+        if dep_exports:
+            parts.append(f"\n{dep_exports}")
+            parts.append(
+                "\nUse the imports above directly. Do NOT spend turns reading "
+                "these files — their export signatures are already provided.\n"
+            )
 
     return "\n".join(parts)
 
