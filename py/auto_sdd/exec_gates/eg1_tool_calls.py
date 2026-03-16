@@ -1018,25 +1018,38 @@ class BuildAgentExecutor:
         return command
 
     def _strip_fallback_chain(self, command: str) -> str:
-        """Strip || fallback from commands.
+        """Strip chaining from commands where the primary is read-only.
 
-        Models write 'cmd1 || cmd2' as error handling — try the primary
-        command, fall back if it fails. We run the primary command only.
-        If it fails, the model sees the error and can run the fallback
-        as a separate tool call.
+        Models chain commands with || (fallback) and && (sequential).
+        For read-only primaries (find, ls, cat, etc.), run the first
+        command only. The model sees the result and can call the second
+        separately. Git chains are handled by _split_git_chain before
+        this method is called.
 
         Also strips '2>&1' and '2>/dev/null' stderr redirects since
         subprocess.run captures stderr separately.
         """
+        _READ_ONLY_CMDS = frozenset({
+            "find", "ls", "cat", "head", "tail", "wc", "grep",
+            "tree", "file", "stat", "du", "df", "echo", "printf",
+            "test", "which", "type", "pwd",
+        })
+
         cmd = command.strip()
-        # Strip stderr redirects first
+        # Strip stderr redirects
         cmd = re.sub(r'\s*2>[>&]?[/\w]*', '', cmd).strip()
-        # Strip || fallback
-        if '||' in cmd:
-            primary = cmd.split('||')[0].strip()
-            if primary:
-                logger.debug("EG1: stripped fallback chain, keeping: %s", primary[:60])
-                return primary
+
+        # Strip || or && when primary is a read-only command
+        for sep in ('||', '&&'):
+            if sep in cmd:
+                primary = cmd.split(sep)[0].strip()
+                first_token = primary.split()[0] if primary.split() else ""
+                if first_token in _READ_ONLY_CMDS and primary:
+                    logger.debug(
+                        "EG1: stripped '%s' chain, keeping: %s", sep, primary[:60],
+                    )
+                    return primary
+
         return cmd
 
     def _split_git_chain(self, command: str) -> list[str] | None:

@@ -405,11 +405,11 @@ class TestCdPrefixStripping:
         assert isinstance(result, str)
 
     def test_real_chaining_still_blocked(self, tmp_project: Path) -> None:
-        """Non-git chaining is still blocked."""
+        """Non-read-only && chaining is still blocked."""
         ex = BuildAgentExecutor(tmp_project, allowed_runtimes={"node"})
         with pytest.raises(ToolCallBlocked, match="command chaining"):
             ex.execute("run_command", {
-                "command": "echo hello && echo world",
+                "command": "npm install && npm run build",
             })
 
 
