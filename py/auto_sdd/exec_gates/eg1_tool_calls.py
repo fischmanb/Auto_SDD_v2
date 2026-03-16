@@ -943,6 +943,10 @@ class BuildAgentExecutor:
         if git_chain:
             return self._exec_git_chain(git_chain)
 
+        safe_chain = self._split_safe_chain(command)
+        if safe_chain:
+            return self._exec_safe_chain(safe_chain)
+
         # Write-then-exec detection (before general validation)
         self._check_write_then_exec(command)
 
@@ -1018,39 +1022,85 @@ class BuildAgentExecutor:
         return command
 
     def _strip_fallback_chain(self, command: str) -> str:
-        """Strip chaining from commands where the primary is read-only.
+        """Strip stderr redirects and || fallbacks from commands.
 
-        Models chain commands with || (fallback) and && (sequential).
-        For read-only primaries (find, ls, cat, etc.), run the first
-        command only. The model sees the result and can call the second
-        separately. Git chains are handled by _split_git_chain before
-        this method is called.
+        Models append '2>&1', '2>/dev/null', and '|| echo "..."' to
+        commands. subprocess.run captures stderr separately so redirects
+        are noise. || fallbacks are stripped — model sees the error and
+        can call the fallback separately.
 
-        Also strips '2>&1' and '2>/dev/null' stderr redirects since
-        subprocess.run captures stderr separately.
+        && chains for read-only commands are handled by
+        _split_safe_chain / _exec_safe_chain before this is called.
         """
-        _READ_ONLY_CMDS = frozenset({
-            "find", "ls", "cat", "head", "tail", "wc", "grep",
-            "tree", "file", "stat", "du", "df", "echo", "printf",
-            "test", "which", "type", "pwd",
-        })
-
         cmd = command.strip()
-        # Strip stderr redirects
         cmd = re.sub(r'\s*2>[>&]?[/\w]*', '', cmd).strip()
-
-        # Strip || or && when primary is a read-only command
-        for sep in ('||', '&&'):
-            if sep in cmd:
-                primary = cmd.split(sep)[0].strip()
-                first_token = primary.split()[0] if primary.split() else ""
-                if first_token in _READ_ONLY_CMDS and primary:
-                    logger.debug(
-                        "EG1: stripped '%s' chain, keeping: %s", sep, primary[:60],
-                    )
-                    return primary
-
+        if '||' in cmd:
+            primary = cmd.split('||')[0].strip()
+            if primary:
+                logger.debug("EG1: stripped || fallback, keeping: %s", primary[:60])
+                return primary
         return cmd
+
+    _SAFE_CHAIN_CMDS: frozenset[str] = frozenset({
+        "find", "ls", "cat", "head", "tail", "wc", "grep",
+        "tree", "file", "stat", "du", "df", "echo", "printf",
+        "test", "which", "type", "pwd",
+    })
+
+    def _split_safe_chain(self, command: str) -> list[str] | None:
+        """Split && chains where all parts are read-only commands.
+
+        Returns list of individual commands if all are safe, or None
+        if any part is not read-only. Each command is validated and
+        executed individually by _exec_safe_chain.
+        """
+        cmd = command.strip()
+        if '&&' not in cmd:
+            return None
+        parts = [p.strip() for p in cmd.split('&&')]
+        if len(parts) < 2:
+            return None
+        for part in parts:
+            first_token = part.split()[0] if part.split() else ""
+            if first_token not in self._SAFE_CHAIN_CMDS:
+                return None
+        return parts
+
+    def _exec_safe_chain(self, commands: list[str]) -> str:
+        """Execute a chain of read-only commands sequentially.
+
+        Each command is validated through full command validation.
+        All results are returned — unlike git chains, read-only
+        chains don't short-circuit on failure.
+        """
+        results = []
+        for cmd in commands:
+            cmd = re.sub(r'\s*2>[>&]?[/\w]*', '', cmd).strip()
+            _validate_command_layers(
+                cmd,
+                self._allowed_runtime_tokens,
+                self._allowed_npm_scripts,
+                self._allowed_npx_packages,
+                self.allowed_branch,
+                self.project_root,
+            )
+            try:
+                result = subprocess.run(
+                    cmd, shell=True,
+                    capture_output=True, text=True,
+                    timeout=self.command_timeout,
+                    cwd=str(self.project_root),
+                )
+                results.append({
+                    "command": cmd,
+                    "stdout": result.stdout[:2000],
+                    "stderr": result.stderr[:1000],
+                    "returncode": result.returncode,
+                })
+            except subprocess.TimeoutExpired:
+                results.append({"command": cmd, "error": "timeout", "returncode": -1})
+        logger.info("EG1: executed safe chain (%d commands)", len(results))
+        return json.dumps(results)
 
     def _split_git_chain(self, command: str) -> list[str] | None:
         """Split chained git commands into individual commands.

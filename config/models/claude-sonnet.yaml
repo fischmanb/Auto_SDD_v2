@@ -21,7 +21,7 @@ temperature: 0.7
 strip_reasoning_older_turns: false
 
 # ── Loop limits ──────────────────────────────────────────────
-max_turns: 40
+max_turns: 60
 timeout_seconds: 120
 
 # ── Role mapping ─────────────────────────────────────────────
