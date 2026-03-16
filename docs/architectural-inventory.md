@@ -40,6 +40,30 @@ Generate .specs/design-system/tokens.md defining the visual vocabulary (colors, 
 **Metric:** % of features completed without design system deviation per build.
 
 
+### 3b. PERSONAS
+Derive 2-4 structured user personas from the vision and design tokens. Personas carry role, goals, device/environment, data density tolerance, critical interactions, frustration triggers, and accessibility needs. These inform design pattern decisions (3c) and spec generation (phase 5).
+
+**Input:** .specs/vision.md (target users, key screens), .specs/design-system/tokens.md (visual vocabulary).
+
+**Output:** .specs/personas.md with 2-4 personas, each with structured fields: name/role, goals, device/environment, density tolerance, critical interactions, frustration triggers, accessibility needs.
+
+**Goal:** Produce specific-enough personas that a designer can resolve layout tradeoffs (density vs breathing room, compact vs relaxed spacing) by referencing persona needs.
+
+**Metric:** % of design pattern decisions in 3c that cite a persona justification.
+
+
+### 3c. DESIGN PATTERNS
+Produce a structured design system document defining HOW tokens are applied: layout grid, component anatomy, spacing relationships, interaction states, positive/negative space rules, responsive behavior, and overflow/clipping conventions. Grounded in tokens and personas.
+
+**Input:** .specs/vision.md, .specs/design-system/tokens.md, .specs/personas.md.
+
+**Output:** .specs/design-system/patterns.md with sections: Layout Grid, Component Anatomy, Spacing Relationships, Interaction States, Positive & Negative Space, Responsive Behavior, Overflow & Clipping Rules. Every decision justified against persona needs.
+
+**Goal:** Bridge between raw token values and implementation. Build agents and spec generation (phase 5) reference this document to produce consistent, high-quality UI without ad-hoc layout decisions.
+
+**Metric:** % of features completed without layout/spacing deviation per build.
+
+
 ### 4. ROADMAP
 Decompose the vision into right-sized features (S/M/L), identify dependencies between them, topologically sort by dependency (with cycle detection), sequence into named phases, and write .specs/roadmap.md as a parseable, build-ready table.
 

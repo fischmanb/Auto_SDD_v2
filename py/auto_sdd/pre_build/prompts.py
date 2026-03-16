@@ -117,6 +117,123 @@ def design_system_user_prompt(project_dir: Path) -> str:
     )
 
 
+# ── Phase 3b: PERSONAS ────────────────────────────────────────────────────────
+
+
+def personas_system_prompt(project_dir: Path) -> str:
+    return (
+        "You are a UX researcher. Your job is to define concrete user "
+        "personas for a software project based on its vision and visual "
+        "design tokens.\n\n"
+        f"{SHARED_AGENT_RULES}\n"
+        f"Project root: {project_dir}\n"
+    )
+
+
+def personas_user_prompt(project_dir: Path) -> str:
+    vision = _read_if_exists(project_dir / ".specs" / "vision.md")
+    tokens = _read_if_exists(
+        project_dir / ".specs" / "design-system" / "tokens.md",
+    )
+    return (
+        "Create .specs/personas.md with 2-4 user personas.\n\n"
+        "Each persona MUST include:\n"
+        "- **Name & Role** (e.g., 'Sarah — Senior CRE Analyst')\n"
+        "- **Goals** (what they need to accomplish in the app)\n"
+        "- **Device & Environment** (screen size, lighting, multi-monitor, "
+        "mobile, etc.)\n"
+        "- **Data Density Tolerance** (high/medium/low — how much "
+        "information they want on screen at once)\n"
+        "- **Critical Interactions** (sort, filter, drill-down, compare, "
+        "export, etc.)\n"
+        "- **Frustration Triggers** (slow load, too much whitespace, "
+        "hidden data, cluttered UI, etc.)\n"
+        "- **Accessibility Needs** (if any — contrast, font size, "
+        "keyboard nav, screen reader)\n\n"
+        "Derive personas from the vision's target users. Make them "
+        "specific enough that a designer could use them to resolve "
+        "layout tradeoffs (e.g., 'should we prioritize density or "
+        "breathing room?').\n\n"
+        "Reference the design tokens where relevant — e.g., if a "
+        "persona works in a dark room, note that the dark theme "
+        "(zinc-900 background) serves them.\n\n"
+        f"Vision document:\n{vision}\n\n"
+        f"Design Tokens:\n{tokens}\n"
+    )
+
+
+# ── Phase 3c: DESIGN PATTERNS ────────────────────────────────────────────────
+
+
+def design_patterns_system_prompt(project_dir: Path) -> str:
+    return (
+        "You are a senior UI/UX designer. Your job is to produce a "
+        "structured design system document that defines layout rules, "
+        "component anatomy, interaction states, spacing relationships, "
+        "and responsive behavior — grounded in the project's design "
+        "tokens and user personas.\n\n"
+        f"{SHARED_AGENT_RULES}\n"
+        f"Project root: {project_dir}\n"
+    )
+
+
+def design_patterns_user_prompt(project_dir: Path) -> str:
+    vision = _read_if_exists(project_dir / ".specs" / "vision.md")
+    tokens = _read_if_exists(
+        project_dir / ".specs" / "design-system" / "tokens.md",
+    )
+    personas = _read_if_exists(project_dir / ".specs" / "personas.md")
+    return (
+        "Create .specs/design-system/patterns.md\n\n"
+        "This document defines HOW tokens are applied — not what the "
+        "token values are (that's in tokens.md).\n\n"
+        "Required sections:\n\n"
+        "## Layout Grid\n"
+        "- Page-level grid system (columns, gutters, margins)\n"
+        "- Content max-width and centering rules\n"
+        "- Responsive breakpoints and behavior at each\n\n"
+        "## Component Anatomy\n"
+        "For each common component type (card, table, chart container, "
+        "form, modal, nav), define:\n"
+        "- Internal padding (which spacing token)\n"
+        "- Gap between sibling components (which spacing token)\n"
+        "- Header/body/footer structure if applicable\n"
+        "- Border, shadow, and radius tokens used\n\n"
+        "## Spacing Relationships\n"
+        "- Section-to-section gap\n"
+        "- Card-to-card gap\n"
+        "- Label-to-input gap\n"
+        "- Heading-to-content gap\n"
+        "- Inline element spacing\n"
+        "ALL values must reference tokens from tokens.md, not raw px.\n\n"
+        "## Interaction States\n"
+        "Every interactive element must define these states:\n"
+        "- Default, Hover, Active/Pressed, Focus (keyboard), Disabled\n"
+        "- Loading (skeleton or spinner), Empty (no data), Error\n"
+        "Specify which color/opacity tokens apply to each state.\n\n"
+        "## Positive & Negative Space\n"
+        "- Density guidance per persona (e.g., analyst dashboards: "
+        "favor data density; consumer apps: favor breathing room)\n"
+        "- Minimum touch target sizes for interactive elements\n"
+        "- Rules for when to use compact vs relaxed spacing\n\n"
+        "## Responsive Behavior\n"
+        "- Breakpoint definitions (sm, md, lg, xl)\n"
+        "- What collapses, stacks, or hides at each breakpoint\n"
+        "- Minimum readable widths for tables and charts\n\n"
+        "## Overflow & Clipping Rules\n"
+        "- Text truncation vs wrap rules by context\n"
+        "- Table horizontal scroll behavior\n"
+        "- Chart container minimum height\n"
+        "- Z-index layering convention (base, dropdown, modal, toast)\n\n"
+        "Every decision must be justified against the user personas. "
+        "If a persona has high data density tolerance, say so and "
+        "explain how that drives tighter spacing.\n\n"
+        f"Vision document:\n{vision}\n\n"
+        f"Design Tokens:\n{tokens}\n\n"
+        f"User Personas:\n{personas}\n"
+    )
+
+
 # ── Phase 4: ROADMAP ─────────────────────────────────────────────────────────
 
 
@@ -180,6 +297,10 @@ def spec_first_user_prompt(
     tokens = _read_if_exists(
         project_dir / ".specs" / "design-system" / "tokens.md",
     )
+    personas = _read_if_exists(project_dir / ".specs" / "personas.md")
+    patterns = _read_if_exists(
+        project_dir / ".specs" / "design-system" / "patterns.md",
+    )
 
     deps_str = ", ".join(feature_deps) if feature_deps else "none"
 
@@ -188,10 +309,28 @@ def spec_first_user_prompt(
         f"{feature_name.lower().replace(' ', '-')}.feature.md\n\n"
         "The file MUST have:\n"
         "1. YAML front matter with keys: feature, domain, status, deps, "
-        "design_refs\n"
+        "design_refs, interaction_states\n"
+        "   - interaction_states: list of UI states this feature covers "
+        "(e.g., [default, loading, empty, error, hover, disabled])\n"
         "2. At least one Gherkin scenario with Given/When/Then steps\n"
         "3. A User Journey section (where user comes from, where they go)\n"
         "4. Design Token References section\n\n"
+        "TOKEN ASSERTION REQUIREMENT:\n"
+        "Every Gherkin scenario MUST assert specific design token values "
+        "from tokens.md in its Then/And steps. Do NOT write vague "
+        "assertions like 'uses the design tokens.' Instead write:\n"
+        "  Then the card background MUST be `zinc-800`\n"
+        "  And text uses `text-base` with color `zinc-100`\n"
+        "Every UI-producing feature must have token assertions derived "
+        "from tokens.md. Reference exact token names in backticks.\n\n"
+        "INTERACTION STATES:\n"
+        "For UI features, Gherkin scenarios must cover interaction states "
+        "listed in the front matter (loading, empty, error, hover, etc.). "
+        "Each state should have at least one Then/And step.\n\n"
+        "LAYOUT & SPACING:\n"
+        "Reference spacing tokens and layout patterns from patterns.md "
+        "where applicable. Assert padding, gaps, and responsive behavior "
+        "in Gherkin steps.\n\n"
         "Create parent directories as needed.\n\n"
         f"Feature: {feature_name}\n"
         f"Domain: {feature_domain}\n"
@@ -199,5 +338,7 @@ def spec_first_user_prompt(
         f"Dependencies: {deps_str}\n\n"
         f"Vision:\n{vision}\n\n"
         f"Systems Design:\n{systems}\n\n"
-        f"Design Tokens:\n{tokens}\n"
+        f"Design Tokens:\n{tokens}\n\n"
+        f"Design Patterns:\n{patterns}\n\n"
+        f"User Personas:\n{personas}\n"
     )

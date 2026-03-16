@@ -28,16 +28,18 @@ Read code files only when working on them. Don't front-load 2000 lines of Python
 ### Pre-build phases (`py/auto_sdd/pre_build/`, new)
 | Module | Phase | Lines | What it does |
 |---|---|---|---|
-| `validators.py` | all | 412 | Deterministic validators for phases 1-6. Shared `_parse_roadmap_table()` also used by build loop. |
-| `prompts.py` | 1-5 | 202 | System/user prompt templates per phase |
+| `validators.py` | all | ~535 | Deterministic validators for phases 1-6. Shared `_parse_roadmap_table()` also used by build loop. New: `validate_personas()`, `validate_design_patterns()`, hardened `validate_feature_spec()` with `SPEC_NO_TOKEN_ASSERTIONS` and `SPEC_NO_INTERACTION_STATES`. |
+| `prompts.py` | 1-5 | ~344 | System/user prompt templates per phase. New: `personas_*_prompt()`, `design_patterns_*_prompt()`. Hardened `spec_first_user_prompt()` with token assertion requirement, interaction_states, patterns/personas inputs. |
 | `runner.py` | 1-5 | 152 | Shared agent invocation + validate + retry pattern |
 | `phase_vision.py` | 1 | 29 | Generates `.specs/vision.md` from user input |
 | `phase_systems.py` | 2 | 31 | Generates `.specs/systems-design.md` from vision |
 | `phase_design.py` | 3 | 31 | Generates `.specs/design-system/tokens.md` from vision |
+| `phase_personas.py` | 3b | 35 | Generates `.specs/personas.md` from vision + tokens |
+| `phase_design_patterns.py` | 3c | 39 | Generates `.specs/design-system/patterns.md` from vision + tokens + personas |
 | `phase_roadmap.py` | 4 | 28 | Generates `.specs/roadmap.md` from vision |
 | `phase_spec.py` | 5 | 119 | Generates `.feature.md` per pending roadmap feature |
 | `phase_red.py` | 6 | 272 | Deterministic Gherkin→test scaffold generator (no agent) |
-| `orchestrator.py` | all | 101 | Runs phases 1→6 sequentially, skips valid outputs (resume) |
+| `orchestrator.py` | all | ~144 | Runs phases 1→3→3b→3c→4→5→6 sequentially, skips valid outputs (resume) |
 
 ### Shared types (`py/auto_sdd/lib/types.py`, new)
 
@@ -111,7 +113,7 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 | test_eg4.py | eg4_test_check.py | 31 |
 | test_eg5.py | eg5_commit_auth.py | 19 |
 | test_model_config.py | model_config.py | 9 |
-| test_validators.py | pre_build/validators.py | 42 |
+| test_validators.py | pre_build/validators.py | ~62 |
 | test_phase_red.py | pre_build/phase_red.py | 30 |
 | test_local_agent.py | local_agent.py | 31 |
 | test_integration.py | cross-module integration | 41 |
@@ -123,17 +125,19 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 
 ### Design work needed (no code exists)
 - ~~RED phase scaffolder (phase 6)~~ — **Done**: `phase_red.py` (deterministic Gherkin→test generator, pytest + vitest, format-agnostic parser, 30 tests)
-- EG6 spec adherence checker: which metadata fields are checkable, scoring model
+- ~~EG6 spec adherence checker~~ — **Deferred**: Analysis showed most EG6 checks are already covered transitively by EG3/EG4 when specs encode token assertions in Gherkin. Phase 5 prompt hardening + validator now enforces token assertions and interaction states in specs. Remaining visual quality checks (overlap, spacing, clipping) deferred to Auto-QA (Playwright post-render).
 - Build loop metrics (phases 7–12): all blank in `architectural-inventory.md`
 - Structured error types: replace `errors: list[str]` with `errors: list[GateError]` across EG2, EG5, GateResult. ~25 call sites, ~15 test assertions. New pre-build code uses `GateError` natively; EG migration remains. Est. 2–3 hours.
+- Auto-QA post-render validation (Playwright screenshots): v1 port item. Covers visual bugs that deterministic code analysis cannot catch.
 
 ### Pre-build known issues
 - `runner.py` duplicates `BUILD_AGENT_TOOLS` array from `build_loop_v2.py`. Should be a single constant imported by both.
 - `phase_spec.py` re-scans roadmap text line by line to extract domain because `_parse_roadmap_table()` doesn't return it. Parser should add domain to its return dict.
 - Orchestrator skip logic is inverted readability: `validate_X()` returning empty list means valid/skip. Could confuse a reader.
-- `prompts.py` templates are first-draft. Need tuning once an agent runs against them in real inference.
+- ~~`prompts.py` templates are first-draft. Need tuning once an agent runs against them in real inference.~~ **Done**: Phase 5 prompts hardened with token assertion requirements, interaction_states, personas/patterns inputs. Phases 3b/3c prompts written.
 - No tests for `runner.py`, `orchestrator.py`, or phase 1-5 wrappers. All depend on `run_local_agent` which needs the OpenAI client mock (pattern now established in `test_local_agent.py`).
 - ~~**BUG**: `codebase_summary.py` passes `max_turns=1` to `run_local_agent`~~ — **Fixed** (`10c4752`). Removed invalid kwarg, changed `tools=[]` to `tools=None`.
+- Auto-QA post-render validation (Playwright screenshots + visual regression): planned for v1 port. Will handle visual bugs (overlap, spacing, element clipping) that can't be caught by deterministic code analysis. **OPEN ITEM** — not yet implemented.
 
 ### Live campaign issues discovered
 - ~~EG4 test check fails with exit code 127~~ — **Fixed**: vitest.config.ts added, npm install required before first run.
@@ -234,9 +238,13 @@ V1 port items must account for:
 - Retry prompt must not instruct exploration. Old prompt said "Read the files you wrote previously" which sent the agent into a 60-turn loop. New prompt: "Do NOT re-read files whose exports are listed above."
 - EG3 Next.js detection: also checks for `next` in package.json deps, not just `next.config.*` files. Next.js 14+ works without config files. Returns `npm run build` which catches server/client boundary violations that `npx tsc --noEmit` misses.
 - Cross-feature learning dead code: `_build_system_prompt` had a `return` before the `blocked_patterns` injection. Fixed by assigning to variable first. Blocked patterns were never reaching the agent in any previous campaign.
+- Pre-build pipeline expanded: 1 → 2 → 3(tokens) → 3b(personas) → 3c(design patterns) → 4 → 5(hardened) → 6. Personas written after tokens are set. Design patterns reference both tokens and personas.
+- Phase 5 token enforcement: Gherkin scenarios for UI features must have >=3 backtick-wrapped token assertions in Then/And steps. Validator `SPEC_NO_TOKEN_ASSERTIONS` enforces mechanically.
+- Phase 5 interaction states: UI features must declare `interaction_states` in YAML front matter. Validator `SPEC_NO_INTERACTION_STATES` enforces.
+- EG6 deferred: analysis of cre-pulse campaign showed EG3/EG4 catch token violations transitively when specs encode them in Gherkin. Phase 5 prompt/validator hardening is the correct fix. Visual quality checks deferred to Auto-QA (Playwright post-render, v1 port item).
 
 ## References
-- `docs/architectural-inventory.md` — 12-phase pipeline
+- `docs/architectural-inventory.md` — 12-phase pipeline (expanded: 3b personas, 3c design patterns)
 - `docs/architecture-principles.md` — P1–P8, DP-1, DP-2
 - `docs/module-map.md` — v1 function classification
 - `docs/system-inventory.md` — codebase metrics

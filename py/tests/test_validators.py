@@ -13,6 +13,8 @@ from auto_sdd.pre_build.validators import (
     validate_vision,
     validate_systems_design,
     validate_design_system,
+    validate_personas,
+    validate_design_patterns,
     validate_roadmap,
     validate_feature_spec,
     validate_all_specs,
@@ -390,3 +392,232 @@ class TestCheckDependencyCycles:
         errors = _check_dependency_cycles(features)
         assert len(errors) == 1
         assert errors[0].code == "ROADMAP_CYCLE"
+
+
+
+# ── PERSONAS tests ───────────────────────────────────────────────────────────
+
+
+class TestValidatePersonas:
+    def test_missing_file(self, project: Path):
+        errors = validate_personas(project)
+        assert len(errors) == 1
+        assert errors[0].code == "PERSONAS_MISSING"
+
+    def test_too_short(self, project: Path):
+        (project / ".specs" / "personas.md").write_text("hi")
+        errors = validate_personas(project)
+        assert any(e.code == "PERSONAS_TOO_SHORT" for e in errors)
+
+    def test_missing_sections(self, project: Path):
+        (project / ".specs" / "personas.md").write_text(
+            "# Personas\n## Sarah — Senior Analyst\n### Role\nSenior CRE Analyst.\n"
+        )
+        errors = validate_personas(project)
+        missing = [e for e in errors if e.code == "PERSONAS_MISSING_SECTION"]
+        # Should flag goals, device, density, critical interactions
+        assert len(missing) == 4
+
+    def test_valid(self, project: Path):
+        content = textwrap.dedent("""\
+            # User Personas
+
+            ## Sarah — Senior CRE Analyst
+            ### Role
+            Senior analyst at a mid-size CRE firm.
+            ### Goals
+            Quickly assess lease expirations and market positioning.
+            ### Device & Environment
+            27-inch monitor, dark office, multi-tab workflow.
+            ### Data Density Tolerance
+            High — wants maximum data on screen.
+            ### Critical Interactions
+            Sort tables, filter by date range, drill-down into tenant detail.
+            ### Frustration Triggers
+            Slow load, too much whitespace hiding data.
+            ### Accessibility Needs
+            High contrast for dark theme.
+        """)
+        (project / ".specs" / "personas.md").write_text(content)
+        errors = validate_personas(project)
+        assert errors == []
+
+
+# ── DESIGN PATTERNS tests ────────────────────────────────────────────────────
+
+
+class TestValidateDesignPatterns:
+    def test_missing_file(self, project: Path):
+        errors = validate_design_patterns(project)
+        assert len(errors) == 1
+        assert errors[0].code == "DESIGN_PATTERNS_MISSING"
+
+    def test_too_short(self, project: Path):
+        ds_dir = project / ".specs" / "design-system"
+        ds_dir.mkdir(parents=True, exist_ok=True)
+        (ds_dir / "patterns.md").write_text("hi")
+        errors = validate_design_patterns(project)
+        assert any(e.code == "DESIGN_PATTERNS_TOO_SHORT" for e in errors)
+
+    def test_missing_sections(self, project: Path):
+        ds_dir = project / ".specs" / "design-system"
+        ds_dir.mkdir(parents=True, exist_ok=True)
+        (ds_dir / "patterns.md").write_text(
+            "# Design Patterns\n## Layout Grid\n12-column grid with 24px gutters.\n"
+        )
+        errors = validate_design_patterns(project)
+        missing = [e for e in errors if e.code == "DESIGN_PATTERNS_MISSING_SECTION"]
+        # Should flag: component anatomy, spacing relationships, interaction states, responsive behavior
+        assert len(missing) == 4
+
+    def test_valid(self, project: Path):
+        ds_dir = project / ".specs" / "design-system"
+        ds_dir.mkdir(parents=True, exist_ok=True)
+        content = textwrap.dedent("""\
+            # Design Patterns
+            ## Layout Grid
+            12-column grid with spacing-4 gutters.
+            ## Component Anatomy
+            Cards: p-4 internal padding, rounded, shadow-sm.
+            ## Spacing Relationships
+            Section-to-section: spacing-8. Card-to-card: spacing-4.
+            ## Interaction States
+            Default, Hover (emerald-400), Active, Focus, Disabled (opacity-50).
+            ## Responsive Behavior
+            sm: single column. md: 2 columns. lg: 3 columns.
+        """)
+        (ds_dir / "patterns.md").write_text(content)
+        errors = validate_design_patterns(project)
+        assert errors == []
+
+
+# ── HARDENED SPEC-FIRST tests (token assertions, interaction states) ──────────
+
+
+class TestFeatureSpecTokenAssertions:
+    """Tests for SPEC_NO_TOKEN_ASSERTIONS and SPEC_NO_INTERACTION_STATES."""
+
+    def test_ui_feature_missing_token_assertions(self, tmp_path: Path):
+        """UI feature with vague token references fails validation."""
+        p = tmp_path / "vague.feature.md"
+        p.write_text(textwrap.dedent("""\
+            ---
+            feature: Property Card
+            domain: dashboard
+            status: draft
+            ---
+            # Property Card
+            ## Design Token References
+            Uses the design tokens from the design system.
+            ## Scenario
+            Given the dashboard loads
+            When the card renders
+            Then the card should use the design tokens
+            And it looks correct
+        """))
+        errors = validate_feature_spec(p)
+        assert any(e.code == "SPEC_NO_TOKEN_ASSERTIONS" for e in errors)
+
+    def test_ui_feature_missing_interaction_states(self, tmp_path: Path):
+        """UI feature without interaction_states in front matter fails."""
+        p = tmp_path / "no_states.feature.md"
+        p.write_text(textwrap.dedent("""\
+            ---
+            feature: Tenant Table
+            domain: dashboard
+            status: draft
+            ---
+            # Tenant Table
+            ## Design Token References
+            Colors: emerald-500, zinc-900.
+            ## Scenario
+            Given data is loaded
+            When the table renders
+            Then background MUST be `zinc-900`
+            And text color MUST be `zinc-100`
+            And accent highlights use `emerald-500`
+        """))
+        errors = validate_feature_spec(p)
+        assert any(e.code == "SPEC_NO_INTERACTION_STATES" for e in errors)
+        # Token assertions should pass (3 backtick tokens)
+        assert not any(e.code == "SPEC_NO_TOKEN_ASSERTIONS" for e in errors)
+
+    def test_ui_feature_with_tokens_and_states_passes(self, tmp_path: Path):
+        """UI feature with proper token assertions and states passes."""
+        p = tmp_path / "good.feature.md"
+        p.write_text(textwrap.dedent("""\
+            ---
+            feature: Tenant Table
+            domain: dashboard
+            status: draft
+            interaction_states: [default, loading, empty, hover]
+            ---
+            # Tenant Table
+            ## Design Token References
+            Colors: emerald-500, zinc-900.
+            ## Scenario
+            Given data is loaded
+            When the table renders
+            Then background MUST be `zinc-900`
+            And text color MUST be `zinc-100`
+            And accent highlights use `emerald-500`
+        """))
+        errors = validate_feature_spec(p)
+        assert errors == []
+
+    def test_non_ui_feature_skips_token_checks(self, tmp_path: Path):
+        """Non-UI feature (no design token section) skips token checks."""
+        p = tmp_path / "data_loader.feature.md"
+        p.write_text(textwrap.dedent("""\
+            ---
+            feature: Data Loader
+            domain: core
+            status: draft
+            ---
+            # Data Loader
+            ## Scenario
+            Given the app starts
+            When the loader reads seed.json
+            Then it exposes typed getters for all entities
+        """))
+        errors = validate_feature_spec(p)
+        assert not any(e.code == "SPEC_NO_TOKEN_ASSERTIONS" for e in errors)
+        assert not any(e.code == "SPEC_NO_INTERACTION_STATES" for e in errors)
+
+    def test_token_count_boundary(self, tmp_path: Path):
+        """Exactly 3 token assertions passes; 2 fails."""
+        def make_spec(then_lines: str) -> str:
+            return textwrap.dedent(f"""\
+                ---
+                feature: Widget
+                domain: ui
+                status: draft
+                interaction_states: [default]
+                ---
+                # Widget
+                ## Design Token References
+                Uses tokens from design system.
+                ## Scenario
+                Given the page loads
+                When the widget renders
+                {then_lines}
+            """)
+
+        # 2 tokens — should fail
+        p2 = tmp_path / "two.feature.md"
+        p2.write_text(make_spec(
+            "Then background is `zinc-900`\n"
+            "And text is `zinc-100`"
+        ))
+        errors2 = validate_feature_spec(p2)
+        assert any(e.code == "SPEC_NO_TOKEN_ASSERTIONS" for e in errors2)
+
+        # 3 tokens — should pass
+        p3 = tmp_path / "three.feature.md"
+        p3.write_text(make_spec(
+            "Then background is `zinc-900`\n"
+            "And text is `zinc-100`\n"
+            "And accent is `emerald-500`"
+        ))
+        errors3 = validate_feature_spec(p3)
+        assert not any(e.code == "SPEC_NO_TOKEN_ASSERTIONS" for e in errors3)

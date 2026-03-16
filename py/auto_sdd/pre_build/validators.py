@@ -64,6 +64,42 @@ def validate_design_system(project_dir: Path) -> list[GateError]:
     return _validate_markdown_sections(path, "DESIGN_SYSTEM", DESIGN_REQUIRED_SECTIONS)
 
 
+# ── Phase 3b: PERSONAS ──────────────────────────────────────────────────────
+
+PERSONAS_REQUIRED_SECTIONS = [
+    "role",
+    "goals",
+    "device",
+    "density",
+    "critical interactions",
+]
+
+
+def validate_personas(project_dir: Path) -> list[GateError]:
+    """Validate .specs/personas.md exists and has structured persona content."""
+    path = project_dir / ".specs" / "personas.md"
+    return _validate_markdown_sections(path, "PERSONAS", PERSONAS_REQUIRED_SECTIONS)
+
+
+# ── Phase 3c: DESIGN PATTERNS ───────────────────────────────────────────────
+
+DESIGN_PATTERNS_REQUIRED_SECTIONS = [
+    "layout grid",
+    "component anatomy",
+    "spacing relationships",
+    "interaction states",
+    "responsive behavior",
+]
+
+
+def validate_design_patterns(project_dir: Path) -> list[GateError]:
+    """Validate .specs/design-system/patterns.md exists with required sections."""
+    path = project_dir / ".specs" / "design-system" / "patterns.md"
+    return _validate_markdown_sections(
+        path, "DESIGN_PATTERNS", DESIGN_PATTERNS_REQUIRED_SECTIONS,
+    )
+
+
 # ── Phase 4: ROADMAP ─────────────────────────────────────────────────────────
 
 
@@ -108,6 +144,12 @@ SPEC_REQUIRED_FRONTMATTER_KEYS = ["feature", "domain", "status"]
 GHERKIN_PATTERN = re.compile(
     r"^\s*(Given|When|Then|And|But)\s+.+", re.MULTILINE,
 )
+# Matches backtick-wrapped tokens like `zinc-900`, `text-base`, `p-4`, `emerald-500`
+_TOKEN_IN_BACKTICKS = re.compile(r"`[a-z]+-[a-z0-9]+(?:-[a-z0-9]+)*`")
+_THEN_AND_PATTERN = re.compile(
+    r"^\s*(Then|And)\s+.+", re.MULTILINE,
+)
+_MIN_TOKEN_ASSERTIONS = 3
 
 
 def validate_feature_spec(spec_path: Path) -> list[GateError]:
@@ -117,6 +159,8 @@ def validate_feature_spec(spec_path: Path) -> list[GateError]:
     - File exists and is non-empty
     - YAML front matter present and parseable with required keys
     - At least one Gherkin step (Given/When/Then)
+    - UI features: interaction_states in front matter
+    - UI features: at least 3 backtick-wrapped token assertions in Then/And steps
     """
     errors: list[GateError] = []
 
@@ -153,6 +197,32 @@ def validate_feature_spec(spec_path: Path) -> list[GateError]:
             "SPEC_NO_GHERKIN",
             f"{spec_path}: no Given/When/Then steps found",
         ))
+
+    # UI feature checks — triggered when spec has a Design Token References section
+    body_lower = body.lower()
+    is_ui_feature = "design token" in body_lower
+
+    if is_ui_feature:
+        # Check interaction_states in front matter
+        if fm_data is not None and "interaction_states" not in fm_data:
+            errors.append(GateError(
+                "SPEC_NO_INTERACTION_STATES",
+                f"{spec_path}: UI feature missing 'interaction_states' in front matter",
+            ))
+
+        # Check for concrete token assertions in Then/And lines
+        then_and_text = "\n".join(
+            m.group(0) for m in _THEN_AND_PATTERN.finditer(body)
+        )
+        token_matches = _TOKEN_IN_BACKTICKS.findall(then_and_text)
+        if len(token_matches) < _MIN_TOKEN_ASSERTIONS:
+            errors.append(GateError(
+                "SPEC_NO_TOKEN_ASSERTIONS",
+                f"{spec_path}: UI feature has {len(token_matches)} token "
+                f"assertion(s) in Then/And steps, need at least "
+                f"{_MIN_TOKEN_ASSERTIONS}. Use backtick-wrapped token "
+                f"names like `zinc-900`, `text-base` in Then/And steps.",
+            ))
 
     return errors
 
@@ -312,7 +382,7 @@ def _parse_roadmap_table(
     """Parse roadmap markdown table rows.
 
     Returns (features_dict, errors).
-    features_dict: {name: {"id": int, "deps": list[str], "status": str, "complexity": str}}
+    features_dict: {name: {"id": int, "domain": str, "deps": list[str], "status": str, "complexity": str, "notes": str}}
     """
     features: dict[str, dict] = {}
     errors: list[GateError] = []
@@ -333,6 +403,7 @@ def _parse_roadmap_table(
             continue
 
         name = cells[1].strip()
+        domain = cells[2].strip().lower().replace(" ", "-") or "general"
         deps_str = cells[3].strip()
         complexity = cells[4].strip() or "M"
         status_cell = cells[6].strip()
@@ -352,7 +423,7 @@ def _parse_roadmap_table(
                 f"Feature '{name}' (#{fid}): unrecognized status '{status_cell}'",
             ))
 
-        features[name] = {"id": fid, "deps": deps, "status": status_cell, "complexity": complexity, "notes": notes}
+        features[name] = {"id": fid, "domain": domain, "deps": deps, "status": status_cell, "complexity": complexity, "notes": notes}
 
     return features, errors
 

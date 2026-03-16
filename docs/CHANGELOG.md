@@ -5,6 +5,52 @@
 
 ---
 
+## 2026-03-16 (session 8)
+
+### Pre-build pipeline expansion: personas, design patterns, spec hardening
+
+**Phase 3b: PERSONAS** (`phase_personas.py`, 35 lines)
+- New phase between tokens (3) and design patterns (3c). Generates `.specs/personas.md`.
+- Prompt requires 2-4 personas with structured fields: name/role, goals, device/environment, data density tolerance, critical interactions, frustration triggers, accessibility needs.
+- Personas written AFTER tokens are set — can reference token decisions (e.g., dark theme serves low-light environments).
+- Validator `validate_personas()`: checks file exists, has 5 required section keywords (role, goals, device, density, critical interactions).
+
+**Phase 3c: DESIGN PATTERNS** (`phase_design_patterns.py`, 39 lines)
+- New phase after personas. Generates `.specs/design-system/patterns.md`.
+- Defines HOW tokens are applied (tokens.md defines WHAT the values are). Sections: Layout Grid, Component Anatomy, Spacing Relationships, Interaction States, Positive & Negative Space, Responsive Behavior, Overflow & Clipping Rules.
+- All decisions must be justified against persona needs (density tolerance, device context).
+- Validator `validate_design_patterns()`: checks file exists, has 5 required section keywords.
+
+**Phase 5 prompt hardening** (`prompts.py`)
+- `spec_first_user_prompt()` now requires:
+  - Concrete token assertions in Gherkin Then/And steps (backtick-wrapped token names, not vague references)
+  - `interaction_states` key in YAML front matter (list of UI states covered)
+  - References to patterns.md and personas.md as inputs
+- Explicitly tells agent: "Do NOT write vague assertions like 'uses the design tokens.'"
+
+**Phase 5 validator hardening** (`validators.py`)
+- `SPEC_NO_TOKEN_ASSERTIONS`: UI features (detected by "design token" in spec body) must have >=3 backtick-wrapped token names in Then/And Gherkin lines. Regex: `` `[a-z]+-[a-z0-9]+` `` pattern matching.
+- `SPEC_NO_INTERACTION_STATES`: UI features must have `interaction_states` key in YAML front matter.
+- Non-UI features (e.g., Data Loader) skip both checks.
+
+**Orchestrator wiring** (`orchestrator.py`)
+- Pipeline: 1 → 2 → 3 → 3b → 3c → 4 → 5 → 6. Phases 3b and 3c have skip-if-valid resume support.
+
+**Tests** (`test_validators.py`)
+- `TestValidatePersonas`: 4 tests (missing file, too short, missing sections, valid).
+- `TestValidateDesignPatterns`: 4 tests (missing file, too short, missing sections, valid).
+- `TestFeatureSpecTokenAssertions`: 5 tests (vague tokens fail, missing interaction_states, valid UI feature, non-UI skips checks, boundary at exactly 3 tokens).
+
+**EG6 analysis and deferral**
+- Reviewed cre-pulse campaign artifacts. Token enforcement already works end-to-end where Gherkin encodes specific values (Global Layout, Shared UI, Tenant Roster). Gap was spec quality, not gate infrastructure.
+- EG6 deferred. Phase 5 hardening is the correct fix for the Class C gap identified in P7. Visual quality checks (overlap, spacing, clipping) deferred to Auto-QA (Playwright post-render, v1 port item).
+
+**New artifacts produced per project:**
+- `.specs/personas.md`
+- `.specs/design-system/patterns.md`
+
+---
+
 ## 2026-03-15 (session 7)
 
 ### V1 port steps completed

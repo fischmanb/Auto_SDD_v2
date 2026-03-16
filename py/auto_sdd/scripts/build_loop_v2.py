@@ -52,59 +52,9 @@ from auto_sdd.exec_gates.eg2_signal_parse import extract_and_validate, ParsedSig
 from auto_sdd.exec_gates.eg3_build_check import check_build, detect_build_cmd, BuildCheckResult
 from auto_sdd.exec_gates.eg4_test_check import check_tests, detect_test_cmd, TestCheckResult
 from auto_sdd.exec_gates.eg5_commit_auth import authorize_commit, CommitAuthResult
+from auto_sdd.lib.constants import BUILD_AGENT_TOOLS
 
 logger = logging.getLogger(__name__)
-
-# ── Tool definitions for the build agent ─────────────────────────────────────
-
-BUILD_AGENT_TOOLS: list[dict[str, Any]] = [
-    {
-        "type": "function",
-        "function": {
-            "name": "write_file",
-            "description": "Write content to a file at the given path, creating directories as needed.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "path": {"type": "string", "description": "File path relative to project root"},
-                    "content": {"type": "string", "description": "Complete file content"},
-                },
-                "required": ["path", "content"],
-                "additionalProperties": False,
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "read_file",
-            "description": "Read the contents of a file at the given path.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "path": {"type": "string", "description": "File path relative to project root"},
-                },
-                "required": ["path"],
-                "additionalProperties": False,
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "run_command",
-            "description": "Execute a shell command and return stdout/stderr.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "command": {"type": "string", "description": "Shell command to execute"},
-                },
-                "required": ["command"],
-                "additionalProperties": False,
-            },
-        },
-    },
-]
 
 
 # ── Data types ───────────────────────────────────────────────────────────────
@@ -549,6 +499,16 @@ def _build_user_prompt(
         f"Spec file: {spec_path}\n\n"
         f"Specification:\n{spec_content}\n",
     ]
+
+    # Inject design patterns (layout rules, component anatomy, spacing)
+    patterns_path = project_dir / ".specs" / "design-system" / "patterns.md"
+    if patterns_path.is_file():
+        patterns_content = patterns_path.read_text()
+        if patterns_content.strip():
+            parts.append(
+                f"\n## Design Patterns (apply to all components)\n\n"
+                f"{patterns_content}\n"
+            )
 
     if codebase_summary:
         parts.append(f"\n## Codebase Context\n\n{codebase_summary}\n")

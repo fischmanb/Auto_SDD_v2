@@ -10,64 +10,15 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Callable
+from typing import Callable
 
 from auto_sdd.lib.model_config import ModelConfig
 from auto_sdd.lib.local_agent import AgentResult, run_local_agent
 from auto_sdd.lib.types import GateError, PhaseResult
+from auto_sdd.lib.constants import BUILD_AGENT_TOOLS
 from auto_sdd.exec_gates.eg1_tool_calls import BuildAgentExecutor
 
 logger = logging.getLogger(__name__)
-
-# Same tool definitions as the build loop
-BUILD_AGENT_TOOLS: list[dict[str, Any]] = [
-    {
-        "type": "function",
-        "function": {
-            "name": "write_file",
-            "description": "Write content to a file, creating dirs as needed.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "path": {"type": "string", "description": "File path relative to project root"},
-                    "content": {"type": "string", "description": "Complete file content"},
-                },
-                "required": ["path", "content"],
-                "additionalProperties": False,
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "read_file",
-            "description": "Read the contents of a file.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "path": {"type": "string", "description": "File path relative to project root"},
-                },
-                "required": ["path"],
-                "additionalProperties": False,
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "run_command",
-            "description": "Execute a shell command and return stdout/stderr.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "command": {"type": "string", "description": "Shell command to execute"},
-                },
-                "required": ["command"],
-                "additionalProperties": False,
-            },
-        },
-    },
-]
 
 
 def run_phase(

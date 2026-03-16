@@ -65,16 +65,7 @@ def run_phase_spec_first(
     all_errors: list[GateError] = []
 
     for name, data in pending.items():
-        domain = "general"  # default domain
-        # Try to extract domain from the roadmap row if available
-        # The table has Domain in column 2 — stored as part of features dict
-        # but _parse_roadmap_table only stores id/deps/status. Read it fresh.
-        for line in text.splitlines():
-            if name in line and line.strip().startswith("|"):
-                cells = [c.strip() for c in line.split("|") if c.strip()]
-                if len(cells) >= 3:
-                    domain = cells[2].strip().lower().replace(" ", "-") or "general"
-                break
+        domain = data.get("domain", "general")
 
         spec_path = _spec_path_for_feature(project_dir, name, domain)
 
@@ -85,7 +76,7 @@ def run_phase_spec_first(
                 logger.info("SPEC_FIRST: %s already has valid spec — skipping", name)
                 continue
 
-        complexity = "M"  # default
+        complexity = data.get("complexity", "M")
         deps = data["deps"]
 
         def _validator(pd: Path, sp=spec_path) -> list[GateError]:

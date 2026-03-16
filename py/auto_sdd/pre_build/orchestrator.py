@@ -18,12 +18,16 @@ from auto_sdd.pre_build.validators import (
     validate_vision,
     validate_systems_design,
     validate_design_system,
+    validate_personas,
+    validate_design_patterns,
     validate_roadmap,
     validate_all_specs,
 )
 from auto_sdd.pre_build.phase_vision import run_phase_vision
 from auto_sdd.pre_build.phase_systems import run_phase_systems_design
 from auto_sdd.pre_build.phase_design import run_phase_design_system
+from auto_sdd.pre_build.phase_personas import run_phase_personas
+from auto_sdd.pre_build.phase_design_patterns import run_phase_design_patterns
 from auto_sdd.pre_build.phase_roadmap import run_phase_roadmap
 from auto_sdd.pre_build.phase_spec import run_phase_spec_first
 from auto_sdd.pre_build.phase_red import run_phase_red
@@ -82,6 +86,26 @@ def run_pre_build(
         results.append(PhaseResult(phase="DESIGN_SYSTEM", passed=True))
     else:
         result = run_phase_design_system(config, project_dir, max_attempts)
+        results.append(result)
+        if not result.passed:
+            return results
+
+    # ── Phase 3b: PERSONAS ───────────────────────────────────────────
+    if not validate_personas(project_dir):
+        logger.info("PERSONAS: output already valid — skipping")
+        results.append(PhaseResult(phase="PERSONAS", passed=True))
+    else:
+        result = run_phase_personas(config, project_dir, max_attempts)
+        results.append(result)
+        if not result.passed:
+            return results
+
+    # ── Phase 3c: DESIGN PATTERNS ────────────────────────────────────
+    if not validate_design_patterns(project_dir):
+        logger.info("DESIGN_PATTERNS: output already valid — skipping")
+        results.append(PhaseResult(phase="DESIGN_PATTERNS", passed=True))
+    else:
+        result = run_phase_design_patterns(config, project_dir, max_attempts)
         results.append(result)
         if not result.passed:
             return results
