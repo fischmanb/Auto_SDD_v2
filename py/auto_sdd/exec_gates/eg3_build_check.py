@@ -113,7 +113,24 @@ def detect_build_cmd(
         return "" if override == "skip" else override
 
     # ── Framework-specific (must precede generic tsconfig) ────────
-    if any((project_dir / cfg).exists() for cfg in _NEXTJS_CONFIGS):
+    # Next.js: check config files OR next in package.json deps.
+    # Next.js 14+ works without next.config.*, so config-only
+    # detection misses many projects.
+    is_nextjs = any((project_dir / cfg).exists() for cfg in _NEXTJS_CONFIGS)
+    if not is_nextjs:
+        pkg_path = project_dir / "package.json"
+        if pkg_path.exists():
+            try:
+                import json
+                pkg_data = json.loads(pkg_path.read_text())
+                all_deps = {}
+                all_deps.update(pkg_data.get("dependencies", {}))
+                all_deps.update(pkg_data.get("devDependencies", {}))
+                is_nextjs = "next" in all_deps
+            except (json.JSONDecodeError, OSError):
+                pass
+
+    if is_nextjs:
         pkg = project_dir / "package.json"
         if pkg.exists():
             try:
