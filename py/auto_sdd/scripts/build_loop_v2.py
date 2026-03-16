@@ -232,6 +232,19 @@ def _status(msg: str) -> None:
     print(f"\n\n  {msg}\n\n", flush=True)
 
 
+def _turns_for_complexity(complexity: str, base_turns: int) -> int:
+    """Scale max_turns based on feature complexity.
+
+    S features get the base config value. M features get 1.5x. L+ get 2x.
+    """
+    c = complexity.upper().split()[0] if complexity else "M"
+    if c == "S":
+        return base_turns
+    if c == "L" or c == "XL":
+        return int(base_turns * 2)
+    return int(base_turns * 1.5)
+
+
 def _parse_roadmap(project_dir: Path) -> list[Feature]:
     """Parse .specs/roadmap.md and return pending features in topo order.
 
@@ -608,6 +621,7 @@ class BuildLoopV2:
         )
 
         # ── Codebase summary (generated once, reused per feature) ────
+        self._warmup_project_deps()
         self._codebase_summary = generate_codebase_summary(
             self.project_dir, self.config,
         )
@@ -622,11 +636,27 @@ class BuildLoopV2:
             return 3
 
         start_time = int(time.time())
+        failed_features: set[str] = set()
 
         # ── Per-feature loop ─────────────────────────────────────────
         for idx in range(limit):
             feature = features[idx]
             feature_start = int(time.time())
+
+            # Skip features whose dependencies failed
+            failed_deps = [d for d in feature.deps if d in failed_features]
+            if failed_deps:
+                self.skipped += 1
+                _status(
+                    f"⊘ {feature.name} skipped — depends on failed: "
+                    f"{', '.join(failed_deps)}"
+                )
+                logger.warning(
+                    "⊘ %s skipped — depends on failed: %s",
+                    feature.name, ", ".join(failed_deps),
+                )
+                failed_features.add(feature.name)
+                continue
 
             _status(
                 f"═══ [{idx + 1}/{limit}] Feature: {feature.name} "
@@ -656,6 +686,7 @@ class BuildLoopV2:
                 )
             else:
                 self.failed += 1
+                failed_features.add(feature.name)
                 _status(f"✗ {feature.name} failed after {_format_duration(duration)}")
                 logger.warning(
                     "✗ %s failed after %s", feature.name, _format_duration(duration),
@@ -685,6 +716,46 @@ class BuildLoopV2:
         return 1 if self.failed > 0 else 0
 
     # ── Preflight summary ────────────────────────────────────────────
+
+    def _warmup_project_deps(self) -> None:
+        """Install project dependencies if marker files exist but install dirs don't.
+
+        Checks for common package managers and runs install commands:
+        - Node: package.json exists but node_modules/ doesn't → npm install
+        - Python: pyproject.toml/requirements.txt exists but .venv/ doesn't → pip install
+        - Rust: Cargo.toml exists but target/ doesn't → cargo build
+        - Go: go.mod exists but vendor/ doesn't → go mod download
+        """
+        p = self.project_dir
+
+        warmups: list[tuple[str, str, str, str]] = [
+            ("package.json", "node_modules", "npm install", "node"),
+            ("pyproject.toml", ".venv", "python3 -m venv .venv && .venv/bin/pip install -e .", "python"),
+            ("requirements.txt", ".venv", "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt", "python"),
+            ("Cargo.toml", "target", "cargo build", "rust"),
+            ("go.mod", "vendor", "go mod download", "go"),
+        ]
+
+        for marker, install_dir, cmd, label in warmups:
+            if (p / marker).is_file() and not (p / install_dir).is_dir():
+                _status(f"WARMUP: {label} deps not installed, running: {cmd}")
+                logger.info("Warmup: %s detected, installing deps", label)
+                try:
+                    result = subprocess.run(
+                        cmd, shell=True,
+                        capture_output=True, text=True,
+                        timeout=300,
+                        cwd=str(p),
+                    )
+                    if result.returncode == 0:
+                        logger.info("Warmup: %s install complete", label)
+                    else:
+                        logger.warning(
+                            "Warmup: %s install failed (rc=%d): %s",
+                            label, result.returncode, result.stderr[-200:],
+                        )
+                except subprocess.TimeoutExpired:
+                    logger.warning("Warmup: %s install timed out after 300s", label)
 
     def _preflight(self, features: list[Feature]) -> bool:
         """Print preflight summary. Returns True to proceed, False to abort.
@@ -746,6 +817,13 @@ class BuildLoopV2:
         branch_name = branch_result.branch_name
 
         last_gate_error: str = ""
+        base_max_turns = self.config.max_turns
+        scaled_turns = _turns_for_complexity(feature.complexity, base_max_turns)
+        self.config.max_turns = scaled_turns
+        logger.info(
+            "Turn budget: %d (base=%d, complexity=%s)",
+            scaled_turns, base_max_turns, feature.complexity,
+        )
         for attempt in range(self.max_retries + 1):
             if attempt > 0:
                 _status(f"RETRY {attempt}/{self.max_retries} for {feature.name}")
