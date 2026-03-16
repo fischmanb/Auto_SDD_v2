@@ -30,6 +30,11 @@ SHARED_AGENT_RULES = (
     "- Do NOT run tests\n"
     "- Do NOT modify existing files unless instructed\n"
     "- Do NOT use git push, git merge, git rebase, or git checkout\n"
+    "- Do NOT read files in data/ — your inputs are the .specs/ "
+    "artifacts provided in this prompt. Reading data files wastes "
+    "turns and bloats context.\n"
+    "- Do NOT explore the project with ls or find. Everything you "
+    "need is in this prompt. Start writing immediately.\n"
 )
 
 
