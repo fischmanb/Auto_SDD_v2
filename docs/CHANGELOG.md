@@ -208,6 +208,32 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 - `52896c3` Status formatting + EG3 timeout + CLI retries default
 - `1dd3fdc` Nudge 12 turns + fallback chain strip + test runner exemption
 
+### First complete campaign + post-campaign fixes (session 7 continued, part 5)
+
+**Safe chain execution** (`7e2a3ca`): `_split_safe_chain` / `_exec_safe_chain` — when all parts of a `&&` chain are read-only commands (find, ls, cat, grep, etc.), validate and execute ALL of them sequentially. Results from all commands returned to model. `||` chains still strip to primary only.
+
+**max_turns 60** (`7e2a3ca`): Claude Sonnet config bumped from 40 to 60. Comp Set Benchmarks hit 40-turn limit 3x in a row before this fix.
+
+**Dep cascade skip** (`0d910b4`): When a feature fails, all downstream features that depend on it are skipped with `⊘` status. Saves turns and API cost.
+
+**Project dep warmup** (`0d910b4`): `_warmup_project_deps()` runs before first feature. Checks marker files (package.json, pyproject.toml, Cargo.toml, go.mod) against install dirs (node_modules, .venv, target, vendor). Runs install if missing. 300s timeout.
+
+**Dynamic turn budget** (`0d910b4`): `_turns_for_complexity()` scales max_turns by feature size. S = base, M = 1.5x, L/XL = 2x. With base 60: S=60, M=90, L=120.
+
+**README rewrite** (`6e226e4`): Complete rewrite reflecting current architecture, first campaign results, setup/running instructions, EG1 enforcement details, project structure, key principles.
+
+**App entry point enforcement** (`2e8de53`): Pre-build roadmap phase now instructs the LLM to always include an App Shell as the final feature that creates the application entry point. Roadmap validator `_check_app_entry_point()` detects web apps (Next.js, React, Vue, Angular, Svelte via package.json) and returns GateError if no feature name or notes contains entry point keywords. Triggers retry with error context.
+
+**First complete V2 campaign**: 7/7 features built for cre-pulse (Next.js 14 CRE dashboard). 24 source files, 147 tests passing, ~36 minutes total. 4 first-try successes, 2 on retry 1, 1 on retry 2. EG3 caught hallucinated type properties. EG4 caught a real color token value mismatch. Both self-corrected on retry via error feedback.
+
+### Commits (session 7 continued, part 5)
+- `013e9a2` CHANGELOG + SESSION-STATE update (part 4)
+- `6d9aa7f` Read-only && chain splitting (run both sides)
+- `7e2a3ca` Safe chain execution + max_turns 60
+- `0d910b4` Dep cascade skip + warmup + dynamic turns
+- `6e226e4` README rewrite
+- `2e8de53` App entry point enforcement in pre-build
+
 ---
 
 ## 2026-03-15 (session 6)

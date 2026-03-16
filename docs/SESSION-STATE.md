@@ -140,18 +140,29 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 - `vision-input.txt` deleted by a failed branch cleanup — `cat` fails silently, pre-build skips vision phase because output already exists.
 - ~~Auto-complete needs testing~~ — Not triggered with Claude Sonnet (model commits and signals natively).
 - ~~`codebase_summary.py` max_turns kwarg~~ — **Fixed** (`10c4752`).
-- EG3 `npx tsc --noEmit` requires `node_modules` installed. If `npm install` hasn't been run, tsc binary is missing and EG3 fails with "not the tsc command you are looking for." Build loop should verify `node_modules` exists at startup.
+- ~~EG3 `npx tsc --noEmit` requires `node_modules` installed~~ — **Fixed** (`0d910b4`). `_warmup_project_deps()` runs before first feature, installs deps if marker file exists but install dir doesn't.
 - EG5 blocks on `tsconfig.tsbuildinfo` if not in gitignore. Added to cre-pulse gitignore.
 - Stale local commits from previous runs confuse the agent (reads pre-existing code, loops). Must `git reset --hard origin/main` not just `git checkout -- .` between runs.
+- Carpet-bombing project state between runs wastes money. When only the last feature needs a rerun, release the lock (`rm -f logs/.build-lock`) and rerun — resume state picks up where it left off. Do not nuke resume-state.json or source files unless truly needed.
 
-### First successful build agent run
-Claude Sonnet 4 completed Data Loader in 14 turns, 55 seconds (MacBook Air). All five gates passed: EG2 signals valid, EG3 build passed, EG4 tests passed (18 tests), EG5 commit authorized. Feature merged to main. Model followed 3-tool schema natively — zero EG1 blocks on successful run.
+### First complete V2 campaign
+7/7 features built for cre-pulse (Next.js 14 CRE dashboard). 24 source files, 147 tests passing, 5 test suites, ~36 minutes total. Claude Sonnet 4.6 via Anthropic API.
 
-Sonnet 4.6 also completes builds but nudge fires at turn 12 (reads more thoroughly). Agent writes code, commits, and emits correct signals after nudge. EG3 requires node_modules installed and tsc warm — first-run compilation can take 60+ seconds.
+| Feature | Attempts | Tests | Failure Mode |
+|---------|----------|-------|--------------|
+| Data Loader | 1 | -- | -- |
+| Global Layout & Theming | 1 | 23 | -- |
+| Shared UI Components | 2 | 65 | EG4: ColorTokens.accent value mismatch |
+| Property Overview Card | 3 | 65 | 40-turn limit, then EG3 hallucinated types |
+| Tenant Roster Table | 1 | 94 | -- |
+| Lease Velocity Timeline | 1 | 120 | -- |
+| Comp Set Benchmarks | 2 | 147 | 60-turn limit on first attempt |
 
-Local models (GPT-OSS-120B, Qwen3-Coder-Next, GLM-4.7-flash) all failed at tool-use compliance despite translation layer, nudge, and cross-feature learning. The Mac Studio runs the orchestrator, gates, tests, and git locally; only the creative work (code generation) routes through the API.
+EG3 caught hallucinated `startingRent`/`effectiveRent` properties on `Property` type — they don't exist in seed data. Retry read the exact TypeScript error and fixed it. EG4 caught a real color token value mismatch. Both self-corrected via error feedback injection.
 
-Multi-feature campaigns partially succeed (2/7 on Air with Sonnet 4). Failures are TypeScript errors from missing cross-feature context (agent imports from modules not yet built). Retry with error feedback helps — agent reads the TS error and fixes it. Remaining failures are from dep chain features building before their dependencies merge.
+App compiles (`npx tsc --noEmit` clean) and all tests pass (`npx vitest run`). Missing app entry point (no `app/` directory) — `next dev` fails. Fixed by adding App Shell feature to roadmap + pre-build enforcement for future projects.
+
+Local models (GPT-OSS-120B, Qwen3-Coder-Next, GLM-4.7-flash) all failed at tool-use compliance. Mac Studio runs orchestrator, gates, tests, git locally. API handles code generation only.
 
 ### V1 port steps remaining
 | Step | What | Notes |
@@ -208,6 +219,12 @@ V1 port items must account for:
 - Retry error feedback: gate/build errors injected into user prompt as `## PREVIOUS ATTEMPT FAILED` on retry. Agent reads its own broken code + the exact error.
 - Spec file path in user prompt: `_build_user_prompt` includes `Spec file: .specs/features/core/data-loader.feature.md` so agent can emit correct SPEC_FILE signal.
 - EG3 timeout: 300s (was 120s). First tsc run compiles all node_modules type defs.
+- EG1 safe chain execution: `find X && find Y` (all read-only commands) split, validated, ALL executed, all results returned. Non-read-only `&&` chains still blocked.
+- Dynamic turn budget: S = base config max_turns, M = 1.5x, L/XL = 2x. Complex features need more turns.
+- Dep cascade skip: when a feature fails, all downstream dependents are skipped. Saves API cost.
+- Project dep warmup: _warmup_project_deps() at campaign start. Detects package.json/pyproject.toml/Cargo.toml/go.mod without install dirs and runs install.
+- App entry point enforcement: roadmap prompt instructs LLM to always include an App Shell feature. Roadmap validator checks web apps for entry point keywords, returns GateError if missing.
+- Resume state is sacred. Don't nuke `resume-state.json` between runs unless truly needed. Release lock only (`rm -f logs/.build-lock`).
 - 7d (prompt_builder.py) deferred: current inline prompts sufficient for first campaign. Tune fix/retry variants after real failure data.
 - Model configs: `config/models/` now has gpt-oss-120b.yaml, qwen3-coder-next.yaml, glm-4.7-flash.yaml, claude-sonnet.yaml. Model is a YAML config swap. Claude config uses Anthropic API via `${ANTHROPIC_API_KEY}` env var; all others are local via LM Studio at localhost:1234.
 - 422 tests total (112 EG1, 30 phase_red, 23 codebase_summary, 20 reliability, 16 branch_manager + others).
