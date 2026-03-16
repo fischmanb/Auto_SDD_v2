@@ -61,7 +61,7 @@ def check_build(build_cmd: str, project_dir: Path) -> BuildCheckResult:
         result = subprocess.run(
             build_cmd, shell=True,
             capture_output=True, text=True,
-            cwd=str(project_dir), timeout=120,
+            cwd=str(project_dir), timeout=300,
         )
         output = result.stdout[-2000:] + result.stderr[-2000:]
         passed = result.returncode == 0
@@ -73,8 +73,8 @@ def check_build(build_cmd: str, project_dir: Path) -> BuildCheckResult:
 
         return BuildCheckResult(passed=passed, output=output)
     except subprocess.TimeoutExpired:
-        logger.warning("EG3 build check timed out after 120s")
-        return BuildCheckResult(passed=False, output="Build check timed out after 120s")
+        logger.warning("EG3 build check timed out after 300s")
+        return BuildCheckResult(passed=False, output="Build check timed out after 300s")
     except OSError as exc:
         logger.warning("EG3 build check error: %s", exc)
         return BuildCheckResult(passed=False, output=f"Build check failed: {exc}")

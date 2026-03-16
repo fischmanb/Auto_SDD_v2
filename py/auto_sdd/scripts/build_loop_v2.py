@@ -227,6 +227,11 @@ def _format_duration(seconds: int) -> str:
     return f"{s}s"
 
 
+def _status(msg: str) -> None:
+    """Print a prominent status message with visual separation."""
+    print(f"\n\n  {msg}\n\n", flush=True)
+
+
 def _parse_roadmap(project_dir: Path) -> list[Feature]:
     """Parse .specs/roadmap.md and return pending features in topo order.
 
@@ -623,6 +628,10 @@ class BuildLoopV2:
             feature = features[idx]
             feature_start = int(time.time())
 
+            _status(
+                f"═══ [{idx + 1}/{limit}] Feature: {feature.name} "
+                f"(complexity: {feature.complexity}) ═══"
+            )
             logger.info(
                 "═══ [%d/%d] Feature: %s (complexity: %s) ═══",
                 idx + 1, limit, feature.name, feature.complexity,
@@ -641,17 +650,23 @@ class BuildLoopV2:
                 state.completed.append(feature.name)
                 state.current = ""
                 write_state(self.project_dir, state)
+                _status(f"✓ {feature.name} built in {_format_duration(duration)}")
                 logger.info(
                     "✓ %s built in %s", feature.name, _format_duration(duration),
                 )
             else:
                 self.failed += 1
+                _status(f"✗ {feature.name} failed after {_format_duration(duration)}")
                 logger.warning(
                     "✗ %s failed after %s", feature.name, _format_duration(duration),
                 )
 
         # ── Summary ──────────────────────────────────────────────────
         total_duration = int(time.time()) - start_time
+        _status(
+            f"═══ Build loop complete: {self.built} built, {self.failed} failed, "
+            f"{self.skipped} skipped ({_format_duration(total_duration)}) ═══"
+        )
         logger.info(
             "═══ Build loop complete: %d built, %d failed, %d skipped (%s) ═══",
             self.built, self.failed, self.skipped,
@@ -733,6 +748,7 @@ class BuildLoopV2:
         last_gate_error: str = ""
         for attempt in range(self.max_retries + 1):
             if attempt > 0:
+                _status(f"RETRY {attempt}/{self.max_retries} for {feature.name}")
                 logger.info(
                     "Retry %d/%d for %s",
                     attempt, self.max_retries, feature.name,
@@ -779,6 +795,7 @@ class BuildLoopV2:
 
             # ── BUILD ────────────────────────────────────────────────
             # Agent runs with EG1 intercepting every tool call
+            _status(f"BUILD: invoking agent ({self.config.model})")
             logger.info("BUILD: invoking agent (%s)", self.config.model)
 
             agent_result: AgentResult = run_local_agent(
@@ -836,6 +853,7 @@ class BuildLoopV2:
             )
 
             if not gate.passed:
+                _status(f"GATE FAILED at {gate.failed_gate}: {gate.error[:200]}")
                 logger.warning(
                     "GATE FAILED at %s: %s", gate.failed_gate, gate.error,
                 )
@@ -998,6 +1016,7 @@ class BuildLoopV2:
             signals.feature_name, signals.spec_file,
             len(signals.source_files),
         )
+        _status(f"EG2 ✓ signals valid (sources={len(signals.source_files)})")
 
         # ── EG3: Build check ─────────────────────────────────────
         build_result = check_build(self.build_cmd, self.project_dir)
@@ -1008,6 +1027,8 @@ class BuildLoopV2:
             gate.error = f"Build failed: {build_result.output[-200:]}"
             return gate
 
+        _status("EG3 ✓ build passed")
+
         # ── EG4: Test check ──────────────────────────────────────
         test_result = check_tests(self.test_cmd, self.project_dir)
         gate.eg4_tests = test_result
@@ -1016,6 +1037,8 @@ class BuildLoopV2:
             gate.failed_gate = "EG4"
             gate.error = f"Tests failed: {test_result.output[-200:]}"
             return gate
+
+        _status(f"EG4 ✓ tests passed (count={test_result.test_count})")
 
         # ── EG5: Commit authorization ────────────────────────────
         commit_result = authorize_commit(
@@ -1031,12 +1054,15 @@ class BuildLoopV2:
             gate.error = commit_result.summary
             return gate
 
+        _status("EG5 ✓ commit authorized")
+
         # ── EG6: Spec adherence (reserved) ───────────────────────
         # Not yet implemented. Will be deterministic diff-based
         # static analysis when added.
 
         # All checks passed
         gate.passed = True
+        _status("GATE: all checks passed ✓")
         logger.info("GATE: all checks passed (%s)", commit_result.summary)
         return gate
 
@@ -1153,8 +1179,8 @@ def main() -> None:
     parser.add_argument(
         "--max-retries",
         type=int,
-        default=int(os.environ.get("MAX_RETRIES", "1")),
-        help="Max retries per feature (default: 1)",
+        default=int(os.environ.get("MAX_RETRIES", "2")),
+        help="Max retries per feature (default: 2)",
     )
     parser.add_argument(
         "--auto-approve",
