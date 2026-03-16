@@ -931,6 +931,11 @@ class BuildAgentExecutor:
         # Strip redundant cd <project_dir> && prefix (P8: generalizable).
         command = self._strip_cd_prefix(command)
 
+        # Strip || fallback chains. Models write "cmd1 || cmd2" as error
+        # handling. Run the primary command only — if it fails, the model
+        # sees the error and can call the fallback separately.
+        command = self._strip_fallback_chain(command)
+
         # Handle git add && git commit chains (P8: standard dev pattern).
         # Models write "git add -A && git commit -m '...'" because that's
         # how developers do it. Split and run sequentially.
@@ -1012,6 +1017,28 @@ class BuildAgentExecutor:
 
         return command
 
+    def _strip_fallback_chain(self, command: str) -> str:
+        """Strip || fallback from commands.
+
+        Models write 'cmd1 || cmd2' as error handling — try the primary
+        command, fall back if it fails. We run the primary command only.
+        If it fails, the model sees the error and can run the fallback
+        as a separate tool call.
+
+        Also strips '2>&1' and '2>/dev/null' stderr redirects since
+        subprocess.run captures stderr separately.
+        """
+        cmd = command.strip()
+        # Strip stderr redirects first
+        cmd = re.sub(r'\s*2>[>&]?[/\w]*', '', cmd).strip()
+        # Strip || fallback
+        if '||' in cmd:
+            primary = cmd.split('||')[0].strip()
+            if primary:
+                logger.debug("EG1: stripped fallback chain, keeping: %s", primary[:60])
+                return primary
+        return cmd
+
     def _split_git_chain(self, command: str) -> list[str] | None:
         """Split chained git commands into individual commands.
 
@@ -1083,10 +1110,21 @@ class BuildAgentExecutor:
             return
 
         # Git commands reference files but don't execute them.
-        # git add, git commit, git diff, git status, etc. are safe.
         cmd_stripped = command.strip()
         if cmd_stripped.startswith("git "):
             return
+
+        # Test runners load files in a sandbox, they don't execute them
+        # as scripts. The threat model is "agent writes malicious script
+        # and runs it" not "agent runs tests against code it wrote."
+        _TEST_RUNNERS = frozenset({
+            "vitest", "jest", "pytest", "mocha", "ava", "tap",
+            "npx vitest", "npx jest", "npx mocha",
+            "npm test", "npm run test",
+        })
+        for runner in _TEST_RUNNERS:
+            if cmd_stripped.startswith(runner):
+                return
 
         cmd_parts = cmd_stripped.split()
         for part in cmd_parts:

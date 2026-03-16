@@ -164,7 +164,7 @@ def run_local_agent(
     # Track consecutive turns without write_file to detect exploration loops.
     # After _READ_ONLY_NUDGE_THRESHOLD turns of reads with no writes,
     # inject a user message forcing the model to start implementing.
-    _READ_ONLY_NUDGE_THRESHOLD = 8
+    _READ_ONLY_NUDGE_THRESHOLD = 12
     turns_since_write = 0
     has_written = False
 
@@ -573,7 +573,7 @@ def _run_anthropic_agent(
     result = AgentResult()
     start_time = time.monotonic()
 
-    _READ_ONLY_NUDGE_THRESHOLD = 8
+    _READ_ONLY_NUDGE_THRESHOLD = 12
     turns_since_write = 0
     has_written = False
 
