@@ -170,6 +170,44 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 - `eaa2d7a` Anthropic API support + claude-sonnet.yaml
 - `43d9983` Fix AgentResult.success property assignment
 
+### Air run + Mac Studio continuation (session 7 continued, part 4)
+
+**Spec path fix** (`b988e5f`): Agent emitted `SPEC_FILE: Feature: Data Loader` instead of the actual path because the user prompt never included it. EG2 resolved to a nonexistent path. Fix: `_build_user_prompt` now includes `Spec file: .specs/features/core/data-loader.feature.md`.
+
+**Retry error feedback** (`7adfbe3`): When gates fail and retry starts, the error was logged but never fed back to the agent. Retry agent flew blind. Fix: inject previous gate/build error into user prompt on retry as `## PREVIOUS ATTEMPT FAILED` section. Agent reads its own broken code and the exact TypeScript error.
+
+**Retries bumped** (`7adfbe3`): Default 1→2 (3 total attempts). CLI default was overriding the class default — also fixed (`52896c3`).
+
+**codebase_summary fix** (`10c4752`): `run_local_agent()` doesn't accept `max_turns` kwarg. Changed `tools=[]` to `tools=None`. Summary now generates successfully — 1948 chars of project context.
+
+**Model string fix** (`a0ed623`): `claude-sonnet-4-20250514` → `claude-sonnet-4-6` (Sonnet 4.6, current generation).
+
+**Sonnet 4.6 API fix** (`d0ccc0d`): Cannot set both `temperature` and `top_p`. Removed `top_p` from Anthropic API kwargs and config.
+
+**First full gate pipeline pass** (on MacBook Air): Data Loader completed in 14 turns. EG2 passed (signals valid, spec path correct). EG3 passed (tsc --noEmit clean). EG4 passed (18 tests). EG5 blocked on `tsconfig.tsbuildinfo` (untracked build artifact). On retry: EG2-EG4 all passed again.
+
+**Status formatting** (`52896c3`): `_status()` function with `\n\n` padding around major state changes — feature start, gate pass/fail (each EG individually), feature result, retry, build invocation, build loop complete.
+
+**EG3 timeout** (`52896c3`): 120s→300s. First `npx tsc --noEmit` compiles all node_modules type definitions — easily exceeds 120s on first run.
+
+**cre-pulse fixes**: Added `vitest.config.ts` (test discovery paths), `tsconfig.tsbuildinfo` to gitignore, excluded `vitest.config.ts` from tsc, fixed duplicate entries in gitignore. Force-pushed clean main to origin.
+
+**Nudge threshold** (`1dd3fdc`): 8→12 turns. Claude Sonnet reads methodically — spec, seed data, package.json, tsconfig, vitest config. Useful context gathering, not aimless looping.
+
+**Fallback chain stripping** (`1dd3fdc`): Models write `cmd1 || cmd2` as error handling. `_strip_fallback_chain()` runs the primary command only, strips `2>&1` and `2>/dev/null` stderr redirects (subprocess captures separately).
+
+**Test runner exemption** (`1dd3fdc`): `vitest`, `jest`, `pytest`, `mocha`, `ava`, `tap` and their `npx`/`npm` variants exempt from write-then-exec detection. Test runners load files in a sandbox, not as raw script execution. Threat model is lazy hallucination not intentional malice.
+
+### Commits (session 7 continued, part 4)
+- `b988e5f` Spec file path in user prompt
+- `7adfbe3` Retry error feedback + retries bump
+- `10c4752` codebase_summary max_turns fix
+- `a0ed623` Model string claude-sonnet-4-6
+- `d0ccc0d` Sonnet 4.6 top_p fix
+- `d694a4f` CHANGELOG + SESSION-STATE update (first Claude run)
+- `52896c3` Status formatting + EG3 timeout + CLI retries default
+- `1dd3fdc` Nudge 12 turns + fallback chain strip + test runner exemption
+
 ---
 
 ## 2026-03-15 (session 6)

@@ -133,16 +133,25 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 - Orchestrator skip logic is inverted readability: `validate_X()` returning empty list means valid/skip. Could confuse a reader.
 - `prompts.py` templates are first-draft. Need tuning once an agent runs against them in real inference.
 - No tests for `runner.py`, `orchestrator.py`, or phase 1-5 wrappers. All depend on `run_local_agent` which needs the OpenAI client mock (pattern now established in `test_local_agent.py`).
-- **BUG**: `codebase_summary.py` passes `max_turns=1` to `run_local_agent` but the function doesn't accept that keyword arg. Fails silently (caught exception, returns empty summary). Fix: use config.max_turns or remove the kwarg.
+- ~~**BUG**: `codebase_summary.py` passes `max_turns=1` to `run_local_agent`~~ — **Fixed** (`10c4752`). Removed invalid kwarg, changed `tools=[]` to `tools=None`.
 
 ### Live campaign issues discovered
-- EG4 test check fails with exit code 127 on every feature (vitest not in PATH or not configured). Tests never run.
+- ~~EG4 test check fails with exit code 127~~ — **Fixed**: vitest.config.ts added, npm install required before first run.
 - `vision-input.txt` deleted by a failed branch cleanup — `cat` fails silently, pre-build skips vision phase because output already exists.
-- Auto-complete needs testing against real EG2/EG3/EG4 pipeline — signals are injected but downstream gates may still fail.
-- `codebase_summary.py` passes `max_turns=1` to `run_local_agent` — kwarg doesn't exist, fails silently.
+- ~~Auto-complete needs testing~~ — Not triggered with Claude Sonnet (model commits and signals natively).
+- ~~`codebase_summary.py` max_turns kwarg~~ — **Fixed** (`10c4752`).
+- EG3 `npx tsc --noEmit` requires `node_modules` installed. If `npm install` hasn't been run, tsc binary is missing and EG3 fails with "not the tsc command you are looking for." Build loop should verify `node_modules` exists at startup.
+- EG5 blocks on `tsconfig.tsbuildinfo` if not in gitignore. Added to cre-pulse gitignore.
+- Stale local commits from previous runs confuse the agent (reads pre-existing code, loops). Must `git reset --hard origin/main` not just `git checkout -- .` between runs.
 
 ### First successful build agent run
-Claude Sonnet completed Data Loader in 13 turns, 31.5 seconds. Zero EG1 blocks, no translation needed, no nudge fired. Model followed 3-tool schema natively with correct argument names. This validates the enforcement architecture end-to-end — the model was the only bottleneck, not the infrastructure. Local models (GPT-OSS-120B, Qwen3-Coder-Next, GLM-4.7-flash) all failed at tool-use compliance despite translation layer, nudge, and cross-feature learning. The Mac Studio runs the orchestrator, gates, tests, and git locally; only the creative work (code generation) routes through the API.
+Claude Sonnet 4 completed Data Loader in 14 turns, 55 seconds (MacBook Air). All five gates passed: EG2 signals valid, EG3 build passed, EG4 tests passed (18 tests), EG5 commit authorized. Feature merged to main. Model followed 3-tool schema natively — zero EG1 blocks on successful run.
+
+Sonnet 4.6 also completes builds but nudge fires at turn 12 (reads more thoroughly). Agent writes code, commits, and emits correct signals after nudge. EG3 requires node_modules installed and tsc warm — first-run compilation can take 60+ seconds.
+
+Local models (GPT-OSS-120B, Qwen3-Coder-Next, GLM-4.7-flash) all failed at tool-use compliance despite translation layer, nudge, and cross-feature learning. The Mac Studio runs the orchestrator, gates, tests, and git locally; only the creative work (code generation) routes through the API.
+
+Multi-feature campaigns partially succeed (2/7 on Air with Sonnet 4). Failures are TypeScript errors from missing cross-feature context (agent imports from modules not yet built). Retry with error feedback helps — agent reads the TS error and fixes it. Remaining failures are from dep chain features building before their dependencies merge.
 
 ### V1 port steps remaining
 | Step | What | Notes |
@@ -180,20 +189,25 @@ V1 port items must account for:
 - Gherkin/RED cycle restored from Adrian's auto-sdd. Implemented in `phase_red.py` (deterministic generator, no agent).
 - Structured error types (`GateError`) adopted for all new code; existing EG migration deferred.
 - EG1 tool set: hardcoded {write_file, read_file, run_command}. New tools require new EG1 code, not config.
-- Agent model: GLM-4.7-flash via LM Studio (localhost:1234) as current candidate. GPT-OSS-120B and Qwen3-Coder-Next both failed at tool-use compliance in live campaign. Harmony hierarchy provides no value when models ignore instructions. Re-evaluate as new open-weight models ship.
+- Agent model: Claude Sonnet 4.6 via Anthropic API (`claude-sonnet-4-6`). All three local models (GPT-OSS-120B, Qwen3-Coder-Next, GLM-4.7-flash) failed at tool-use compliance. Mac Studio runs orchestrator, gates, tests, git locally. API handles code generation only. Local model configs retained for future re-evaluation as open-weight tool-use improves.
 - Agent prompt: reveal boundaries (writable paths, allowed commands), conceal mechanism (EG1 internals). Few-shot examples attempted via explicit tool documentation in system prompt.
 - P8: fixes must generalize. Every bug fix evaluated against "will this class of failure recur?" Instance fixes are incomplete.
 - EG1 tool call translation: meet models where they are. When model intent is clear but tool name/schema is wrong, translate to correct call rather than blocking. Security unchanged — translated calls pass through full validation.
 - EG1 cd prefix stripping: `cd <project> && cmd` → `cmd`. Models write this habitually. run_command already has cwd.
 - EG1 git chain handling: `git add && git commit` split and executed sequentially. Each command validated individually.
 - EG1 write-then-exec git exemption: `git add file.ts` stages, doesn't execute. Git commands bypass write-then-exec detection.
-- Read-only nudge: after 8 consecutive turns without write_file, inject "Start implementing NOW" message.
+- Read-only nudge: after 12 consecutive turns without write_file, inject "Start implementing NOW" message. Threshold raised from 8 — Claude Sonnet reads methodically and the early reads are useful context gathering.
 - Auto-complete: when agent writes files but doesn't commit/signal, Python auto-commits and injects FEATURE_BUILT signals.
 - Cross-feature learning: EG1 blocked patterns accumulated across features, injected into next feature's system prompt.
 - Context window management: old tool results trimmed to metadata after 2 recent results. Individual reads return full content — capping reads caused re-read loops. Trimming stale history is the correct fix.
 - Gherkin parser: format-agnostic keyword extraction. No assumptions about LLM formatting.
 - Roadmap dep matching: 3-tier fuzzy resolution (exact → normalized → token subset). Models don't write dep names precisely.
 - EG1 runtime re-detection: writing a marker file (package.json, pyproject.toml, etc.) triggers re-scan. Handles project bootstrapping.
+- EG1 || fallback stripping: `cmd1 || cmd2` → run primary only. Also strips stderr redirects (`2>&1`, `2>/dev/null`). Model sees error from primary and can call fallback separately.
+- EG1 test runner exemption from write-then-exec: vitest, jest, pytest, mocha, ava, tap and npx/npm variants. Threat model is lazy hallucination not intentional malice.
+- Retry error feedback: gate/build errors injected into user prompt as `## PREVIOUS ATTEMPT FAILED` on retry. Agent reads its own broken code + the exact error.
+- Spec file path in user prompt: `_build_user_prompt` includes `Spec file: .specs/features/core/data-loader.feature.md` so agent can emit correct SPEC_FILE signal.
+- EG3 timeout: 300s (was 120s). First tsc run compiles all node_modules type defs.
 - 7d (prompt_builder.py) deferred: current inline prompts sufficient for first campaign. Tune fix/retry variants after real failure data.
 - Model configs: `config/models/` now has gpt-oss-120b.yaml, qwen3-coder-next.yaml, glm-4.7-flash.yaml, claude-sonnet.yaml. Model is a YAML config swap. Claude config uses Anthropic API via `${ANTHROPIC_API_KEY}` env var; all others are local via LM Studio at localhost:1234.
 - 422 tests total (112 EG1, 30 phase_red, 23 codebase_summary, 20 reliability, 16 branch_manager + others).
