@@ -96,6 +96,9 @@ def validate_roadmap(project_dir: Path) -> list[GateError]:
         cycle_errors = _check_dependency_cycles(features)
         errors.extend(cycle_errors)
 
+        entry_errors = _check_app_entry_point(features, project_dir)
+        errors.extend(entry_errors)
+
     return errors
 
 
@@ -335,6 +338,7 @@ def _parse_roadmap_table(
         status_cell = cells[6].strip()
 
         deps = [d.strip() for d in deps_str.split(",") if d.strip() and d.strip() != "-"]
+        notes = cells[5].strip() if len(cells) > 5 else ""
 
         # Validate status
         status_found = False
@@ -348,7 +352,7 @@ def _parse_roadmap_table(
                 f"Feature '{name}' (#{fid}): unrecognized status '{status_cell}'",
             ))
 
-        features[name] = {"id": fid, "deps": deps, "status": status_cell, "complexity": complexity}
+        features[name] = {"id": fid, "deps": deps, "status": status_cell, "complexity": complexity, "notes": notes}
 
     return features, errors
 
@@ -389,6 +393,55 @@ def _check_dependency_cycles(features: dict[str, dict]) -> list[GateError]:
         )]
 
     return []
+
+
+def _check_app_entry_point(
+    features: dict[str, dict], project_dir: Path,
+) -> list[GateError]:
+    """Warn if a web app project has no entry point feature in the roadmap.
+
+    Detects web apps by checking package.json for Next.js, React, Vue,
+    Angular, Svelte. If found, checks that at least one feature name or
+    notes suggest an app shell / entry point / layout / page.
+    """
+    import json
+
+    pkg_path = project_dir / "package.json"
+    if not pkg_path.exists():
+        return []
+
+    try:
+        pkg = json.loads(pkg_path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return []
+
+    all_deps = {}
+    all_deps.update(pkg.get("dependencies", {}))
+    all_deps.update(pkg.get("devDependencies", {}))
+
+    web_frameworks = {"next", "react", "vue", "@angular/core", "svelte"}
+    is_web_app = bool(web_frameworks & set(all_deps.keys()))
+    if not is_web_app:
+        return []
+
+    entry_keywords = {
+        "shell", "entry", "layout", "page", "app shell",
+        "main page", "root", "index", "scaffold",
+    }
+    for name, data in features.items():
+        name_lower = name.lower()
+        notes_lower = data.get("notes", "").lower() if isinstance(data.get("notes"), str) else ""
+        for kw in entry_keywords:
+            if kw in name_lower or kw in notes_lower:
+                return []
+
+    return [GateError(
+        "ROADMAP_NO_ENTRY_POINT",
+        "Web app detected but no feature creates an app entry point "
+        "(app/layout.tsx, app/page.tsx, index.html, etc.). Add an App "
+        "Shell feature that depends on all other features and creates "
+        "the application entry point.",
+    )]
 
 
 def _slugify(name: str) -> str:
