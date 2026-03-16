@@ -224,6 +224,8 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 
 **App entry point enforcement** (`2e8de53`): Pre-build roadmap phase now instructs the LLM to always include an App Shell as the final feature that creates the application entry point. Roadmap validator `_check_app_entry_point()` detects web apps (Next.js, React, Vue, Angular, Svelte via package.json) and returns GateError if no feature name or notes contains entry point keywords. Triggers retry with error context.
 
+**EG5 auto-clean** (`9a012dc`): When EG5 fails on `tree_clean`, check if all uncommitted files are known framework artifacts (`next-env.d.ts`, `tsconfig.tsbuildinfo`, `__pycache__`, `.next`, `.pytest_cache`, etc). If so, amend the agent's commit to include them and re-run the gate. Zero agent turns burned. Unknown files fall through to normal retry.
+
 **First complete V2 campaign**: 7/7 features built for cre-pulse (Next.js 14 CRE dashboard). 24 source files, 147 tests passing, ~36 minutes total. 4 first-try successes, 2 on retry 1, 1 on retry 2. EG3 caught hallucinated type properties. EG4 caught a real color token value mismatch. Both self-corrected on retry via error feedback.
 
 ### Commits (session 7 continued, part 5)
@@ -233,6 +235,7 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 - `0d910b4` Dep cascade skip + warmup + dynamic turns
 - `6e226e4` README rewrite
 - `2e8de53` App entry point enforcement in pre-build
+- `9a012dc` EG5 auto-clean framework artifacts without burning retries
 
 ---
 

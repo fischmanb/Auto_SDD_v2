@@ -141,7 +141,7 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 - ~~Auto-complete needs testing~~ — Not triggered with Claude Sonnet (model commits and signals natively).
 - ~~`codebase_summary.py` max_turns kwarg~~ — **Fixed** (`10c4752`).
 - ~~EG3 `npx tsc --noEmit` requires `node_modules` installed~~ — **Fixed** (`0d910b4`). `_warmup_project_deps()` runs before first feature, installs deps if marker file exists but install dir doesn't.
-- EG5 blocks on `tsconfig.tsbuildinfo` if not in gitignore. Added to cre-pulse gitignore.
+- ~~EG5 blocks on `tsconfig.tsbuildinfo` if not in gitignore~~ — **Fixed** (`9a012dc`). EG5 auto-clean commits known framework artifacts without burning retries. Also added `tsconfig.tsbuildinfo` and `next-env.d.ts` to cre-pulse gitignore.
 - Stale local commits from previous runs confuse the agent (reads pre-existing code, loops). Must `git reset --hard origin/main` not just `git checkout -- .` between runs.
 - Carpet-bombing project state between runs wastes money. When only the last feature needs a rerun, release the lock (`rm -f logs/.build-lock`) and rerun — resume state picks up where it left off. Do not nuke resume-state.json or source files unless truly needed.
 
@@ -224,6 +224,7 @@ V1 port items must account for:
 - Dep cascade skip: when a feature fails, all downstream dependents are skipped. Saves API cost.
 - Project dep warmup: _warmup_project_deps() at campaign start. Detects package.json/pyproject.toml/Cargo.toml/go.mod without install dirs and runs install.
 - App entry point enforcement: roadmap prompt instructs LLM to always include an App Shell feature. Roadmap validator checks web apps for entry point keywords, returns GateError if missing.
+- EG5 auto-clean: when tree_clean fails and all uncommitted files are known framework artifacts (next-env.d.ts, tsconfig.tsbuildinfo, __pycache__, .next, etc), amend agent's commit and re-run gate. Zero retries burned. Unknown files fall through to normal retry.
 - Resume state is sacred. Don't nuke `resume-state.json` between runs unless truly needed. Release lock only (`rm -f logs/.build-lock`).
 - 7d (prompt_builder.py) deferred: current inline prompts sufficient for first campaign. Tune fix/retry variants after real failure data.
 - Model configs: `config/models/` now has gpt-oss-120b.yaml, qwen3-coder-next.yaml, glm-4.7-flash.yaml, claude-sonnet.yaml. Model is a YAML config swap. Claude config uses Anthropic API via `${ANTHROPIC_API_KEY}` env var; all others are local via LM Studio at localhost:1234.
