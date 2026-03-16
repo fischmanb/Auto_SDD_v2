@@ -1,0 +1,28 @@
+# Claude Opus — API build agent (temporary, higher priority tier)
+#
+# Requires ANTHROPIC_API_KEY env var.
+
+name: claude-opus
+
+# ── Connection ───────────────────────────────────────────────
+base_url: "https://api.anthropic.com"
+model: "claude-opus-4-6"
+api_key: "${ANTHROPIC_API_KEY}"
+
+# ── Generation ───────────────────────────────────────────────
+max_tokens: 16384
+temperature: 0.7
+
+# ── Context management ───────────────────────────────────────
+strip_reasoning_older_turns: false
+
+# ── Loop limits ──────────────────────────────────────────────
+max_turns: 60
+timeout_seconds: 300
+
+# ── Role mapping ─────────────────────────────────────────────
+use_developer_role: false
+
+# ── Optional overrides ───────────────────────────────────────
+eos_token_ids: []
+extra_params: {}

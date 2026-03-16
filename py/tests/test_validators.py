@@ -411,32 +411,31 @@ class TestValidatePersonas:
 
     def test_missing_sections(self, project: Path):
         (project / ".specs" / "personas.md").write_text(
-            "# Personas\n## Sarah — Senior Analyst\n### Role\nSenior CRE Analyst.\n"
+            "# Personas\n## Power Analyst\n### Role\nSenior CRE Analyst.\n"
         )
         errors = validate_personas(project)
         missing = [e for e in errors if e.code == "PERSONAS_MISSING_SECTION"]
-        # Should flag goals, device, density, critical interactions
-        assert len(missing) == 4
+        # Should flag goals, device, density, critical interactions, design implication
+        assert len(missing) == 5
 
     def test_valid(self, project: Path):
         content = textwrap.dedent("""\
-            # User Personas
+            # User Archetypes
 
-            ## Sarah — Senior CRE Analyst
+            ## Power Analyst
             ### Role
-            Senior analyst at a mid-size CRE firm.
+            Senior analyst scanning dense data daily.
             ### Goals
-            Quickly assess lease expirations and market positioning.
-            ### Device & Environment
-            27-inch monitor, dark office, multi-tab workflow.
-            ### Data Density Tolerance
+            - Assess lease expirations quickly
+            - Compare rents against comp set
+            ### Device Context
+            27-inch monitor, multi-tab workflow.
+            ### Density Preference
             High — wants maximum data on screen.
             ### Critical Interactions
-            Sort tables, filter by date range, drill-down into tenant detail.
-            ### Frustration Triggers
-            Slow load, too much whitespace hiding data.
-            ### Accessibility Needs
-            High contrast for dark theme.
+            Sort tables, filter by date, drill-down into tenant detail.
+            ### Design Implication
+            Favor compact spacing (py-2 cells, p-3 cards) and tabular-nums for alignment.
         """)
         (project / ".specs" / "personas.md").write_text(content)
         errors = validate_personas(project)

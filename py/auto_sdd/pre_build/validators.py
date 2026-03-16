@@ -72,6 +72,7 @@ PERSONAS_REQUIRED_SECTIONS = [
     "device",
     "density",
     "critical interactions",
+    "design implication",
 ]
 
 
