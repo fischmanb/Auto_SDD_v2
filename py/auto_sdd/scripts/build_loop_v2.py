@@ -904,9 +904,11 @@ class BuildLoopV2:
                     f"\n\n## PREVIOUS ATTEMPT FAILED\n"
                     f"Your previous implementation failed verification:\n"
                     f"{last_gate_error[:2000]}\n\n"
-                    f"Fix these errors in your implementation. Read the files "
-                    f"you wrote previously to understand what went wrong, then "
-                    f"write corrected versions.\n"
+                    f"Fix ONLY the errors above. The import signatures for all "
+                    f"existing modules are already provided in this prompt. Do "
+                    f"NOT re-read files whose exports are listed above. Read "
+                    f"ONLY your own files if you need to see what you wrote, "
+                    f"then write corrected versions immediately.\n"
                 )
 
             # Create executor (EG1 gate) scoped to this feature
