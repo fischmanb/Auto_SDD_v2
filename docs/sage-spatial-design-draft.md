@@ -23,10 +23,10 @@ Define primary, secondary, and tertiary content zones. State how their relative
 proportions reinforce importance. Where proportion breaks from hierarchy, state why.
 
 ### Visual Harmony & Cohesion
-For each page layout, list every component pair that shares a visual context.
+For each page layout, list every component pair that shares a row, column or zone.
 For each pair, state their expected dimensional relationship (with units) and
-what happens when content sizes differ. Every pair from the Layout Grid must
-appear here.
+what happens when device or viewport sizes differ. Every pair from the Layout
+Grid must appear here.
 
 ---
 
@@ -44,19 +44,18 @@ appear here.
 
 ## Open questions
 
-- "Siblings" / "row" / "zone" are undefined terms. Current draft uses "component
-  pairs that share a visual context" which is more general but harder to validate
-  mechanically. The design agent must identify which pairs those are and what axis
-  the relationship operates on (horizontal, vertical, containment, cross-axis).
-  The validator checks coverage against Layout Grid, not against an undefined
-  concept of "siblings."
+- "Row, column or zone" is concrete for grid-based layouts. For non-grid
+  relationships (containment, cross-axis breaks like a full-width section
+  interrupting a multi-column grid), the design agent needs to identify those
+  as zone relationships. The validator checks coverage against Layout Grid
+  pairs regardless of axis.
 
 - Token cost: the Visual Harmony section asks the agent to enumerate pairs with
   measurements. For N components this is O(N^2) pairs in the worst case. In
-  practice, the Layout Grid constrains which pairs share a visual context, so
+  practice, the Layout Grid constrains which pairs share a row/column/zone, so
   the set is bounded by the grid structure, not the total component count.
 
-- Balance between enforcement and creativity: sections 1-3 are qualitative
-  design thinking (unconstrained). Section 4 is the enforcement gate (must
-  contain measurements). The agent can design however it wants; it just has to
-  show the receipt.
+- Mismatch handling now covers device/viewport variance (responsive) rather than
+  content variance. Content-driven height mismatches (e.g., one card has more
+  data than another) may need separate treatment or may be covered by the
+  responsive rules depending on how the agent interprets "viewport sizes differ."
