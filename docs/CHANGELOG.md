@@ -5,6 +5,69 @@
 
 ---
 
+## 2026-03-16 (session 8, continued)
+
+### SageGate spatial design — under consideration
+
+**S.A.G.E. = Simple. Actionable. Generalizable. Enforceable.**
+
+Draft saved to `docs/sage-spatial-design-draft.md`. Adds a `## Spatial Design`
+section to the design patterns prompt with four subsections:
+- **Positive Space** — how content-bearing areas relate locally
+- **Negative Space** — where whitespace is deliberate vs must not appear
+- **Spatial Hierarchy** — how proportion reinforces importance
+- **Visual Harmony & Cohesion** — comparative measurements for component pairs,
+  mismatch handling rules (enforcement gate)
+
+Validator would check: four headers present, >=3 measurements in Visual Harmony,
+cross-reference Layout Grid pairs, mismatch handling keywords. All DP-2 compliant.
+
+**Open:** Definition of "component pairs that share a visual context" — relationships
+are horizontal, vertical, containment, and cross-axis, not just DOM siblings.
+The design agent identifies which pairs matter; the validator checks coverage
+against what was declared in Layout Grid. Also: token cost of pair enumeration
+bounded by grid structure, not total component count.
+
+**Motivation:** V2 cre-pulse build had 160px dead space below lease velocity chart
+when comp set benchmarks card was taller. Prompt-level "avoid empty regions" was
+too vague. SageGate requires the design agent to declare every spatial relationship
+with measurements, then the validator holds it to those declarations.
+
+### Decision-relevant metrics in persona → spec pipeline
+
+- Personas prompt: new `Decision-relevant metrics` field per archetype.
+  What computed insights does this persona need alongside raw data to make
+  their actual decisions (buy/sell, renew/vacate, invest/divest)?
+- Spec prompt: new `COMPUTED INSIGHTS` section. Visualization features must
+  include Gherkin scenarios for supplementary metrics from persona decision-metrics.
+- Pipeline flow: personas define what matters → specs require it → build agent
+  implements it.
+
+### Prompt tightening across all pre-build phases
+
+- Systems design: tables over prose, contract signatures not full implementations,
+  150-250 line target.
+- Design patterns: tables for mappings, no ASCII art, no rationale paragraphs,
+  200-300 line target. Animation specs included for what improves feel (hover fades,
+  focus rings, loading skeletons); gratuitous animation excluded.
+- Feature specs: no prescriptive line budgets. Format constraint: no rationale
+  paragraphs or prose. Component mapping and data flow allowed as bare tables.
+- Layout grid: visual balance principle (avoid large empty regions adjacent to
+  content) — states the problem, does not prescribe a CSS fix.
+
+### CLI: --pre-build-only flag
+
+`--pre-build-only` runs phases 1-6 then exits. Prevents accidental build loop
+after pre-build. `--pre-build` retains existing behavior (phases then loop).
+
+### Renaming: ExecGate → SageGate
+
+Enforcement layer renamed to SageGate (S.A.G.E.). Previous name ExecGate was
+not confirmed. SageGate emphasizes the design philosophy: enforcement must be
+Simple, Actionable, Generalizable, Enforceable.
+
+---
+
 ## 2026-03-16 (session 8)
 
 ### Pre-build pipeline expansion: personas, design patterns, spec hardening
