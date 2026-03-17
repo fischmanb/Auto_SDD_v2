@@ -2,7 +2,7 @@
 
 > The single mandatory read for every new session.
 > Overwritten each session to reflect current truth.
-> Last updated: 2026-03-15 (session 7)
+> Last updated: 2026-03-17 (session 9)
 
 ## Read order
 
@@ -109,7 +109,7 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 |---|---|---|
 | test_eg1.py | eg1_tool_calls.py | 112 |
 | test_eg2.py | eg2_signal_parse.py | 24 |
-| test_eg3.py | eg3_build_check.py | 24 |
+| test_eg3.py | eg3_build_check.py | 25 |
 | test_eg4.py | eg4_test_check.py | 31 |
 | test_eg5.py | eg5_commit_auth.py | 19 |
 | test_model_config.py | model_config.py | 9 |
@@ -148,6 +148,7 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 - ~~EG5 blocks on `tsconfig.tsbuildinfo` if not in gitignore~~ — **Fixed** (`9a012dc`). EG5 auto-clean commits known framework artifacts without burning retries. Also added `tsconfig.tsbuildinfo` and `next-env.d.ts` to cre-pulse gitignore.
 - Stale local commits from previous runs confuse the agent (reads pre-existing code, loops). Must `git reset --hard origin/main` not just `git checkout -- .` between runs.
 - Carpet-bombing project state between runs wastes money. When only the last feature needs a rerun, release the lock (`rm -f logs/.build-lock`) and rerun — resume state picks up where it left off. Do not nuke resume-state.json or source files unless truly needed.
+- ~~EG3 `npm run build` fails before app dir exists~~ — **Fixed** (`c2365e3`). `detect_build_cmd` now checks for `app/`, `pages/`, `src/app/`, `src/pages/` before returning `npm run build`. Falls through to `npx tsc --noEmit` if none exist. Build loop re-detects build command before each EG3 gate so Dashboard Shell creating `app/` upgrades the check mid-campaign.
 
 ### First complete V2 campaign
 8/8 features built for cre-pulse (Next.js 14 CRE dashboard). 26 source files, 147 tests passing, 5 test suites. Claude Sonnet 4.6 via Anthropic API. App renders in browser at localhost:3000.
@@ -233,7 +234,7 @@ V1 port items must account for:
 - Resume state is sacred. Don't nuke `resume-state.json` between runs unless truly needed. Release lock only (`rm -f logs/.build-lock`).
 - 7d (prompt_builder.py) deferred: current inline prompts sufficient for first campaign. Tune fix/retry variants after real failure data.
 - Model configs: `config/models/` now has gpt-oss-120b.yaml, qwen3-coder-next.yaml, glm-4.7-flash.yaml, claude-sonnet.yaml. Model is a YAML config swap. Claude config uses Anthropic API via `${ANTHROPIC_API_KEY}` env var; all others are local via LM Studio at localhost:1234.
-- 422 tests total (112 EG1, 30 phase_red, 23 codebase_summary, 20 reliability, 16 branch_manager + others).
+- 436 tests total (112 EG1, 30 phase_red, 25 EG3, 23 codebase_summary, 20 reliability, 16 branch_manager + others).
 - Dep export scanner: `_scan_dep_exports()` scans src/ for all .ts/.tsx exports and injects them into the user prompt when a feature has deps. Agent sees exact import paths without burning turns reading files. Cut Dashboard Shell from 60+ turns to 16.
 - Retry prompt must not instruct exploration. Old prompt said "Read the files you wrote previously" which sent the agent into a 60-turn loop. New prompt: "Do NOT re-read files whose exports are listed above."
 - EG3 Next.js detection: also checks for `next` in package.json deps, not just `next.config.*` files. Next.js 14+ works without config files. Returns `npm run build` which catches server/client boundary violations that `npx tsc --noEmit` misses.
@@ -242,6 +243,22 @@ V1 port items must account for:
 - Phase 5 token enforcement: Gherkin scenarios for UI features must have >=3 backtick-wrapped token assertions in Then/And steps. Validator `SPEC_NO_TOKEN_ASSERTIONS` enforces mechanically.
 - Phase 5 interaction states: UI features must declare `interaction_states` in YAML front matter. Validator `SPEC_NO_INTERACTION_STATES` enforces.
 - EG6 deferred: analysis of cre-pulse campaign showed EG3/EG4 catch token violations transitively when specs encode them in Gherkin. Phase 5 prompt/validator hardening is the correct fix. Visual quality checks deferred to Auto-QA (Playwright post-render, v1 port item).
+- EG3 app dir gate (`c2365e3`): `detect_build_cmd` checks for `app/`/`pages/`/`src/app/`/`src/pages/` before returning `npm run build`. Without app dir, falls through to `npx tsc --noEmit`. Build loop re-detects per gate, not once at init. Fixes regression where all features before Dashboard Shell failed EG3.
+- Spatial design gaps (e.g., 160px dead space under lease velocity chart) are P7 gap. No deterministic visual evaluation exists. SageGate spatial design draft (`docs/sage-spatial-design-draft.md`) improves prompt quality but cannot enforce. Auto-QA (Playwright) is the only enforcement path, blocked until a deterministic rendered-layout evaluation method exists.
+- Per-phase model routing evaluated: Haiku 4.5 sufficient for vision and roadmap (structured extraction). Sonnet required for all design-adjacent phases (tokens, personas, patterns, specs) and build loop. Deferred — marginal savings, config complexity not worth it yet.
+- v2.1-test A/B experiment (session 9): prompt caching + no git in pre-build + parallel pre-build phases. **Result: v2 baseline won.** v2 finished at 01:16:03, v2.1-test at 01:18:32. Parallel API calls likely hit rate limits. Git stripping may have confused agent. Net negative.
+- v2.2 parallel feature builds: code written in `/Users/sorel/Auto_SDD_v2.2/`, **not yet tested in a live run**. Uses git worktrees for filesystem isolation. `_group_by_dep_level()` groups topo-sorted features into parallel-executable levels. Single-feature levels run sequential (no overhead). Multi-feature levels run via `ThreadPoolExecutor` + worktrees. branch_manager.py extended with `setup_feature_worktree`, `remove_worktree`, `link_deps_to_worktree`.
+
+## Filesystem clutter from session 9
+
+| Path | Status | Action |
+|---|---|---|
+| `/Users/sorel/Auto_SDD_v2.1-test/` | Dead. v2.1-test lost A/B. | Delete |
+| `/Users/sorel/cre-pulse-v2.1-test/` | Dead target for v2.1-test. | Delete |
+| `/Users/sorel/Auto_SDD_v2.2/` | Parallel builds code, untested. | Keep if testing v2.2, else delete |
+| `/Users/sorel/cre-pulse-v2.2/` | Target for v2.2 with specs copied from v2 run. | Keep if testing v2.2, else delete |
+| `/Users/sorel/cre-pulse-v2/` | 15-feature Opus run. Intact, untouched. | Keep |
+| `/Users/sorel/.zshenv` | Contains API key. **Key was leaked in session 9 chat. Rotate immediately.** | Rotate key, update file |
 
 ## References
 - `docs/architectural-inventory.md` — 12-phase pipeline (expanded: 3b personas, 3c design patterns)

@@ -5,6 +5,75 @@
 
 ---
 
+## 2026-03-17 (session 9)
+
+### EG3 Next.js app dir gate (`c2365e3`)
+
+**Bug**: `detect_build_cmd` returned `npm run build` for Next.js projects even before `app/` or `pages/` existed. Every feature before Dashboard Shell failed EG3 with "Couldn't find any pages or app directory", burned all retries, and failed.
+
+**Root cause**: Session 7 commit `3e3de59` switched Next.js projects from `npx tsc --noEmit` to `npm run build` to catch server/client boundary violations. But `npm run build` requires the app entry point to exist.
+
+**Fix (2 parts)**:
+- `detect_build_cmd`: checks for `app/`, `pages/`, `src/app/`, `src/pages/` before returning `npm run build`. Without app dir, falls through to `npx tsc --noEmit`.
+- `_run_gate`: re-detects build command before each EG3 check (only when not explicitly overridden via CLI). Dashboard Shell creating `app/` upgrades the check mid-campaign.
+
+1 new test (`test_nextjs_without_app_dir_falls_to_tsc`). Existing tests updated with `app/` dir. 436 tests total.
+
+### v2.1-test A/B experiment — failed
+
+Three structural speed changes tested against baseline:
+1. Prompt caching (Anthropic `cache_control` on system + first user message)
+2. Strip git ceremony from pre-build (write files only, single commit at end)
+3. Parallel pre-build phases (systems design, design system, roadmap concurrent)
+
+**Result**: v2 baseline finished first (01:16:03 vs 01:18:32). Parallel API calls likely hit rate limits. Git stripping may have confused the agent (tried to commit, wasted turns on errors). Prompt caching marginal. All three changes are net negative or neutral.
+
+Code lives in `/Users/sorel/Auto_SDD_v2.1-test/`. Dead — do not use.
+
+### v2.2 parallel feature builds — written, untested
+
+Parallel feature builds via git worktrees. Code in `/Users/sorel/Auto_SDD_v2.2/`.
+
+**Changes from v2**:
+- `_group_by_dep_level()`: groups topo-sorted features into dependency levels. Level 0 = no deps, Level N = all deps in levels < N. Features within a level build in parallel.
+- `branch_manager.py`: `setup_feature_worktree()`, `remove_worktree()`, `link_deps_to_worktree()`. Worktrees provide isolated filesystems sharing one `.git` database. Symlinks `node_modules` to avoid per-worktree installs.
+- `_run_locked()`: level-based loop. Single-feature levels use existing sequential path (no overhead). Multi-feature levels spawn `ThreadPoolExecutor` + worktrees. Merges happen sequentially after all parallel builds in a level complete.
+- `_build_feature()`: supports `_preset_branch` and `_skip_merge` flags for worktree mode. All `delete_feature_branch` calls guarded.
+- Includes EG3 app dir fix (`c2365e3`).
+
+**Expected for cre-pulse 10-feature roadmap**:
+```
+L0: Tailwind Config + TypeScript Types        → parallel (2)
+L1: Data Loader + Shared UI + Global Layout   → parallel (3)
+L2: Property Overview + Tenant Roster +       → parallel (4)
+    Lease Velocity + Comp Set
+L3: App Shell                                 → sequential (1)
+```
+Sequential estimate: ~25 min. Parallel estimate: ~12 min. Untested.
+
+436 tests pass. Not yet run against a live campaign.
+
+### Spatial design gap analysis
+
+The 160px dead space below the lease velocity chart in the cre-pulse dashboard is a P7 gap. Analysis:
+
+- **SageGate spatial design** (`docs/sage-spatial-design-draft.md`): forces design agent to declare spatial relationships with measurements. Improves prompt quality. Cannot enforce — the build agent can still produce incorrect CSS.
+- **Generic Playwright heuristics** (e.g., "sibling flex children must have heights within 10%"): only deterministic + autonomous option. Calibrating thresholds to avoid false positives on intentional spacing is the open problem.
+- **LLM-as-judge on screenshots**: violates DP-2. Eliminated.
+- **Screenshot diff against baseline**: requires human sign-off (violates DP-1 in critical path).
+- **Conclusion**: no enforcement path exists today. SageGate improves odds at the prompt level. Auto-QA remains blocked.
+
+### Per-phase model routing — evaluated, deferred
+
+Haiku 4.5 (training data July 2025, reliable cutoff Feb 2025) sufficient for vision and roadmap phases. Sonnet 4.6 (training data Jan 2026, reliable cutoff Aug 2025) required for all design-adjacent phases due to larger training set covering more design systems, UX patterns, and architectural approaches. The quality difference is in substance, not format compliance.
+
+Would require campaign config with per-phase model overrides. 2 phases on Haiku. Marginal savings, not worth config complexity now.
+
+### Commits
+- `c2365e3` Fix EG3: Next.js build requires app/ or pages/ to exist
+
+---
+
 ## 2026-03-16 (session 8, continued)
 
 ### SageGate spatial design — under consideration
