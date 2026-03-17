@@ -32,13 +32,12 @@ Grid must appear here.
 
 ## Proposed validator checks (all mechanical, DP-2 compliant)
 
-1. All four headers present under `## Spatial Design`
-2. Visual Harmony section contains >= 3 comparative measurements
-   (regex: digits + px/rem/%/ratio)
-3. Every component pair declared in Layout Grid appears in Visual Harmony
-   (string cross-reference)
-4. Every pair in Visual Harmony has a mismatch handling rule
-   (regex for keywords: stretches/fills/stacks/collapses/matches/independent)
+For every component pair declared in Layout Grid:
+1. The pair appears in Visual Harmony & Cohesion
+2. The entry contains a dimensional relationship (regex: digits + px/rem/%/ratio)
+3. The entry contains a viewport/device variance rule (what changes and when)
+
+That's the whole gate. Sections 1-3 are design thinking. Section 4 is the receipt.
 
 ---
 
