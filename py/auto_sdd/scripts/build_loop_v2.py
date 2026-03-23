@@ -56,6 +56,19 @@ from auto_sdd.lib.constants import BUILD_AGENT_TOOLS
 
 logger = logging.getLogger(__name__)
 
+# ── Optional KG integration (graceful degradation if unavailable) ─────────────
+try:
+    from auto_sdd_v2.knowledge_system.build_integration import (
+        detect_project_stack as _detect_project_stack,
+        inject_hardened_clues as _inject_hardened_clues,
+        inject_relevant_knowledge as _inject_relevant_knowledge,
+        init_store_optional as _init_store_optional,
+        kg_post_gate as _kg_post_gate_fn,
+    )
+    _KG_MODULE_AVAILABLE = True
+except Exception:
+    _KG_MODULE_AVAILABLE = False
+
 
 # ── Data types ───────────────────────────────────────────────────────────────
 
@@ -421,6 +434,8 @@ def _build_system_prompt(
     feature: Feature,
     project_dir: Path,
     blocked_patterns: list[str] | None = None,
+    *,
+    kg_clues: str = "",
 ) -> str:
     """Build the system prompt for the build agent.
 
@@ -470,11 +485,18 @@ def _build_system_prompt(
         for p in unique:
             prompt += f"- {p}\n"
 
+    if kg_clues:
+        prompt += kg_clues
+
     return prompt
 
 
 def _build_user_prompt(
-    feature: Feature, project_dir: Path, codebase_summary: str = "",
+    feature: Feature,
+    project_dir: Path,
+    codebase_summary: str = "",
+    *,
+    kg_section: str = "",
 ) -> str:
     """Build the user prompt with the feature spec and context."""
     spec_dir = project_dir / ".specs" / "features"
@@ -522,6 +544,9 @@ def _build_user_prompt(
                 "these files — their export signatures are already provided.\n"
             )
 
+    if kg_section:
+        parts.append(f"\n{kg_section}")
+
     return "\n".join(parts)
 
 
@@ -555,6 +580,16 @@ class BuildLoopV2:
         self.auto_approve = auto_approve
         self._codebase_summary: str = ""
         self._campaign_blocked: list[str] = []  # cross-feature EG1 rejections
+        self._campaign_id: str = ""
+
+        # KG integration — optional; None if unavailable
+        self._kg: Any = None  # KnowledgeStore | None
+        self._kg_stack: str | None = None
+        self._kg_injected_ids: list[str] = []
+        if _KG_MODULE_AVAILABLE:
+            kg_db = str(self.project_dir / ".sdd-knowledge" / "knowledge.db")
+            self._kg = _init_store_optional(kg_db)
+            self._kg_stack = _detect_project_stack(self.project_dir)
 
         # Results tracking
         self.records: list[FeatureRecord] = []
@@ -605,6 +640,7 @@ class BuildLoopV2:
                 campaign_id=new_campaign_id(),
                 started_at=datetime.now(timezone.utc).isoformat(),
             )
+        self._campaign_id = state.campaign_id
 
         # Filter out already-completed features
         completed_set = set(state.completed)
@@ -715,6 +751,9 @@ class BuildLoopV2:
         )
 
         self._write_summary(total_duration)
+        self._run_promotion()
+        if self._kg:
+            self._kg.close()
 
         # Post-campaign cleanup
         cleanup_merged_branches(self.project_dir, self.main_branch)
@@ -834,7 +873,11 @@ class BuildLoopV2:
             "Turn budget: %d (base=%d, complexity=%s)",
             scaled_turns, base_max_turns, feature.complexity,
         )
+        # Reset injected IDs once per feature (not per attempt) so retries
+        # that return no KG results still reference the first-attempt injection.
+        self._kg_injected_ids = []
         for attempt in range(self.max_retries + 1):
+            attempt_start = time.time()
             if attempt > 0:
                 _status(f"RETRY {attempt}/{self.max_retries} for {feature.name}")
                 logger.info(
@@ -850,12 +893,31 @@ class BuildLoopV2:
             )
             baseline_test_count = baseline_test_result.test_count
 
+            # KG: query for relevant knowledge (optional — silently skipped if unavailable)
+            kg_section = ""
+            kg_clues = ""
+            if _KG_MODULE_AVAILABLE and self._kg is not None:
+                error_for_query = last_gate_error if attempt > 0 else None
+                kg_section, new_ids = _inject_relevant_knowledge(
+                    self._kg,
+                    feature_spec=feature.name,
+                    stack=self._kg_stack,
+                    error_pattern=error_for_query,
+                )
+                # Only overwrite if this attempt returned results; otherwise
+                # keep IDs from the last successful query (preserves tracking).
+                if new_ids:
+                    self._kg_injected_ids = new_ids
+                kg_clues = _inject_hardened_clues(self._kg, self._kg_stack)
+
             # Build prompts
             system_prompt = _build_system_prompt(
                 feature, self.project_dir, self._campaign_blocked,
+                kg_clues=kg_clues,
             )
             user_prompt = _build_user_prompt(
                 feature, self.project_dir, self._codebase_summary,
+                kg_section=kg_section,
             )
 
             # Inject previous failure context so agent can self-correct
@@ -917,6 +979,15 @@ class BuildLoopV2:
                 last_gate_error = f"BUILD: {agent_result.error}"
                 self._record(feature, "failed", attempt,
                              error=agent_result.error)
+                self._kg_post_gate(
+                    feature=feature,
+                    attempt=attempt,
+                    outcome="failure",
+                    gate_failed="BUILD",
+                    error_pattern=agent_result.error,
+                    agent_output=agent_result.output or "",
+                    duration=time.time() - attempt_start,
+                )
                 if attempt < self.max_retries:
                     if attempt >= 1:
                         self._git_reset(head_before)
@@ -965,6 +1036,15 @@ class BuildLoopV2:
                 last_gate_error = f"{gate.failed_gate}: {gate.error}"
                 self._record(feature, "failed", attempt,
                              error=last_gate_error)
+                self._kg_post_gate(
+                    feature=feature,
+                    attempt=attempt,
+                    outcome="failure",
+                    gate_failed=gate.failed_gate,
+                    error_pattern=gate.error,
+                    agent_output=agent_result.output or "",
+                    duration=time.time() - attempt_start,
+                )
                 if attempt < self.max_retries:
                     if attempt >= 1:
                         self._git_reset(head_before)
@@ -995,6 +1075,13 @@ class BuildLoopV2:
                 feature, "built", attempt,
                 test_count=current_test_count,
             )
+            self._kg_post_gate(
+                feature=feature,
+                attempt=attempt,
+                outcome="success",
+                agent_output=agent_result.output or "",
+                duration=time.time() - attempt_start,
+            )
             return True
 
         # Exhausted all retries — clean up the feature branch
@@ -1002,6 +1089,63 @@ class BuildLoopV2:
             self.project_dir, branch_name, self.main_branch,
         )
         return False
+
+    # ── KG capture helper ─────────────────────────────────────────
+
+    def _kg_post_gate(
+        self,
+        feature: Feature,
+        attempt: int,
+        outcome: str,
+        *,
+        gate_failed: str | None = None,
+        error_pattern: str | None = None,
+        agent_output: str = "",
+        duration: float | None = None,
+    ) -> None:
+        """Record build outcome to KG. No-op if KG unavailable."""
+        if not _KG_MODULE_AVAILABLE or self._kg is None:
+            return
+        _kg_post_gate_fn(
+            self._kg,
+            feature_name=feature.name,
+            campaign_id=self._campaign_id or None,
+            injected_ids=self._kg_injected_ids,
+            attempt=attempt,
+            outcome=outcome,
+            gate_failed=gate_failed,
+            error_pattern=error_pattern,
+            duration=duration,
+            agent_output=agent_output,
+            stack=self._kg_stack,
+        )
+
+    # ── Post-campaign promotion ────────────────────────────────────
+
+    def _run_promotion(self) -> None:
+        """Run the KG promotion job after a campaign. No-op if KG unavailable."""
+        if not _KG_MODULE_AVAILABLE or self._kg is None:
+            return
+        try:
+            events = self._kg.promote()
+            if events:
+                promoted = sum(
+                    1 for e in events
+                    if e.get("from") == "active" and e.get("to") == "promoted"
+                )
+                hardened = sum(1 for e in events if e.get("to") == "hardened")
+                demoted = sum(
+                    1 for e in events
+                    if e.get("from") == "hardened" and e.get("to") == "promoted"
+                )
+                logger.info(
+                    "KG promotion: %d promoted, %d hardened, %d demoted",
+                    promoted, hardened, demoted,
+                )
+            else:
+                logger.info("KG promotion: no changes")
+        except Exception as exc:
+            logger.warning("KG promotion failed (continuing): %s", exc)
 
     # ── GATE: deterministic ExecGate checks (EG2–EG5) ─────────────
 

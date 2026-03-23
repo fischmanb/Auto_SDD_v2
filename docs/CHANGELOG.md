@@ -5,6 +5,78 @@
 
 ---
 
+## 2026-03-23 (session 12)
+
+### Knowledge system — final review fixes
+
+- `KnowledgeStore` explicitly closed at end of campaign in `BuildLoopV2._run_locked()` (S-1)
+- Promotion CLI distinguishes "no events" from error: error sets `"error": True` in return dict, prints warning to stderr, exits 1; zero-event success prints "No promotions needed" (S-2)
+- JSON containment check (`json_each()`) replaces LIKE pattern in `calculate_lift()` and `_outcome_stats()` — fixes ID substring collision at N > 99,999 nodes (S-3)
+- Migration uses public store API (`get_all_node_ids`, `edge_exists`, `get_nodes_by_type`, `update_node_type_batch`, `get_type_distribution`) — no more private `_conn` access (S-4)
+- `stats()["promotion_pipeline"]` is now a copy of `by_status`, not an alias (N-1)
+- CHANGELOG Stage 3 node count placeholders filled: active=169, promoted=0, hardened=0, deprecated=1 (N-2)
+- Comment added in `promote()` explaining re-hardening after demotion is intentional (N-3)
+- Boundary tests added: `lift=0.0` must not harden, demotion idempotency, re-hardening after demotion when lift recovers (N-4)
+- `LEARNING_CANDIDATE` content capped at 2000 chars before storing as node content (N-5)
+
+**Tests:** 185 knowledge system tests, 620 total — all passing.
+
+---
+
+## 2026-03-23 (session 11)
+
+### Knowledge system — Stage 3: promotion job
+
+Automated knowledge lifecycle: instance → validated → hardened clue.
+
+- **active → promoted** (fast track): ≥1 successful injection + well-defined scope (stack known OR content ≥ 20 chars). One successful application is all that's needed.
+- **promoted → hardened** (measured lift): ≥3 successful injections + lift > 0. Lift = success rate when injected minus baseline success rate across builds that did NOT use the node. Replaces the old "campaigns ≥ 2, rate ≥ 0.5" rule — lift is the single empirical gate.
+- **Demotion**: hardened → promoted when ≥5 total injections and lift ≤ 0. Hardened clues that stop helping get demoted automatically.
+- Lift calculation is deterministic SQL arithmetic (no LLM judgment).
+- Promotion runs automatically after each campaign via `BuildLoopV2._run_promotion()`.
+- Standalone CLI: `python -m auto_sdd_v2.knowledge_system.promotion [--db-path PATH]`.
+- `stats()` enhanced: `promotion_pipeline`, `promotion_candidates` (promoted nodes within 1 success of hardening), `hardened_with_lift` (lift scores for all hardened clues).
+
+**New file:** `py/auto_sdd_v2/knowledge_system/promotion.py` — standalone runner, `run_promotion(db_path)` function, `main()` CLI entry point. Returns all-zero summary on any error (KG failure never blocks builds).
+
+**Tests:** `py/tests/test_knowledge_system/test_promotion.py` (7 tests) + 30 new tests in `test_store.py` covering lift calculation, scope check, demotion, idempotency, enhanced stats, and edge cases. All existing tests updated to match new promotion rules.
+
+**Nodes at each status tier** (post-migration, pre-campaign): active=169, promoted=0, hardened=0, deprecated=1.
+
+---
+
+## 2026-03-23 (session 10)
+
+### Knowledge system — Stage 2: build loop integration
+
+Wired `KnowledgeStore` into the build pipeline at three injection points:
+- **Pre-build (spec generation):** Universal + hardened learnings injected into `spec_first_user_prompt()` to inform spec writing.
+- **Build prompt:** Relevant knowledge queried by stack + spec content, injected into `_build_user_prompt()`. On retry, error patterns narrow the query.
+- **System prompt:** Hardened clues injected alongside blocked patterns.
+
+Post-gate capture hook (`_kg_post_gate`) records build outcomes and extracts learnings from both success and failure paths. Mistake nodes created from gate errors with stack + error pattern for future matching.
+
+Migration run against existing learnings files (auto-sdd project): **170 nodes, 127 edges created**.
+
+All injection is optional — KG failure degrades gracefully without blocking builds.
+
+**New file:** `py/auto_sdd_v2/knowledge_system/build_integration.py` — all integration helpers (init, query, post-gate, candidate extraction). All functions are None-safe.
+
+**Tests:** `py/tests/test_knowledge_system/test_build_integration.py` — 28 tests covering all integration points, token caps, graceful degradation, and edge cases.
+
+### Knowledge system — Stage 2 fixes
+
+- Import guards widened to `except Exception` (S-1)
+- `spec_first_user_prompt()` accepts optional `knowledge_store` parameter; `close()` in `finally` (S-2)
+- Node re-typing: 49 universal, 13 mistake, 8 technology, 4 framework (95 remain instance, 1 meta) — 74/170 nodes upgraded (S-3)
+- Injection displays title instead of frontmatter / content first line (S-4)
+- Build duration captured in outcome records — computed from `attempt_start` wall clock (S-5)
+- Stack detection: "commit", "merge", "branch" replaced with "git commit", "git merge", "git branch" to prevent false positives (N-1)
+- Injection ID tracking preserved across retries — `_kg_injected_ids` reset once per feature, only updated when query returns results (N-2)
+- Three test gaps closed: `inject_spec_learnings` exception handling, `gate_failed=None` with `error_pattern` → no mistake node, failure + `LEARNING_CANDIDATE` → both mistake and instance nodes (N-3)
+
+---
+
 ## 2026-03-19 (session 9)
 
 ### Parallel feature builds — deferred EG3/EG4 architecture (Auto_SDD_v2.2)
