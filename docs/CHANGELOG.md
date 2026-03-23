@@ -5,6 +5,77 @@
 
 ---
 
+## 2026-03-19 (session 9)
+
+### Parallel feature builds — deferred EG3/EG4 architecture (Auto_SDD_v2.2)
+
+**Problem**: V2.2 introduced parallel builds via git worktrees. Failed because EG3/EG4 ran per-worktree. Each worktree is a snapshot of main at branch time — sibling features' output doesn't exist. `npm run build` validates the whole project, so worktrees with partial codebases always fail EG3.
+
+**Root cause analysis**: The expensive part is the agent (minutes of API calls). The gate is seconds of subprocess. Parallelize the expensive part, validate sequentially after merge.
+
+**Fix — three-phase parallel flow**:
+1. **Phase 1 — Parallel BUILD**: Agents build in worktrees concurrently. `_run_gate` runs EG2+EG5 only (`skip_build_test=True`). EG1 active per tool call.
+2. **Phase 2 — Sequential MERGE+GATE**: For each passing worktree, capture HEAD → merge to main → run EG3+EG4 on main (full project available) → if fail, `git reset` to pre-merge HEAD, add to retry list.
+3. **Phase 3 — Sequential retry**: Features that failed post-merge EG3/EG4 re-run via `_build_feature` on main with full gates and retries.
+
+**`_run_gate` changes** (`build_loop_v2.py`):
+- New `skip_build_test: bool = False` parameter. When True, EG3/EG4 skipped.
+- EG5 test regression handles None test count gracefully (already did).
+
+**`_build_feature` changes** (`build_loop_v2.py`):
+- Accepts and passes `skip_build_test` to both `_run_gate` calls (initial + auto-clean re-check).
+
+### EG5 no_contamination symlink false positive fix
+
+**Problem**: `_check_no_contamination` used `Path.resolve()` which follows symlinks. Orchestrator-created `node_modules` symlink in worktrees resolved to the main project directory, outside the worktree's `project_root`. EG5 flagged it as contamination.
+
+**Fix** (`eg5_commit_auth.py`): Replaced `resolve()`-based check with literal `..` traversal detection in path components. EG1 already prevents the agent from creating symlinks, so the symlink escape defense was redundant here. Removes false positives from orchestrator-created symlinks.
+
+### Merge conflict cascade fix
+
+**Problem**: When a merge fails (conflict), git stays mid-merge. All subsequent merge attempts fail with "you need to resolve your current index first."
+
+**Fix** (`branch_manager.py`): `merge_feature_branch` now runs `git merge --abort` before raising `BranchError`. Defense-in-depth — the scope enforcement fix below addresses the root cause.
+
+### EG1 scope enforcement for parallel builds
+
+**Problem**: Parallel agents all wrote `src/app/page.tsx` — a file belonging to App Shell. Merge conflicts when the first merged, siblings' versions conflicted. The class of problem: nothing enforced that an agent only writes files belonging to its feature.
+
+**Fix — two layers (P8: belt and suspenders)**:
+
+**EG1 `readonly_paths`** (`eg1_tool_calls.py`):
+- New parameter alongside `protected_paths`. Any file in the set is blocked with: "already exists and is outside this feature's scope."
+- `_discover_existing_source_files()` scans `src/` for `.ts/.tsx/.js/.jsx/.css` at executor creation time. Only active when `skip_build_test=True`.
+
+**Prompt injection** (`build_loop_v2.py`):
+- When readonly files exist, user prompt gets `## SCOPE CONSTRAINT (parallel build)` section listing every readonly file with "Do NOT write to them — writes will be rejected. Only create NEW files listed in your spec."
+
+### Context window trimming tuned
+
+**Problem**: `keep_recent=2` in `local_agent.py` was too aggressive. Agent reads spec, seed data, package.json, tsconfig, tokens.md (~5 files). By the 4th read, 1st and 2nd trimmed to `(trimmed)`. Agent re-reads. Loop.
+
+**Fix** (`local_agent.py`): Bumped `keep_recent` from 2 to 8 on both OpenAI and Anthropic paths. 8 retained tool results × ~50KB max each = ~400KB before trimming. Sonnet's 200K window has room.
+
+### First parallel campaign result (cre-pulse-ab-v2.2)
+
+14 features, Claude Sonnet 4.6, 49 minutes. 10/14 built. 3 failed (merge conflicts from scope violation — `page.tsx` collision), 1 skipped (App Shell, dep cascade). EG3/EG4 deferral worked correctly. Property Overview merged + validated on main. Scope enforcement and merge abort fixes applied post-campaign.
+
+### Persistent learning
+
+The user expressed a desire to revive the knowledge graph work in /superloop to enable compounding knowledge from project learnings.
+
+### Files changed (all in Auto_SDD_v2.2, uncommitted)
+- `py/auto_sdd/exec_gates/eg1_tool_calls.py` — `readonly_paths` enforcement
+- `py/auto_sdd/exec_gates/eg5_commit_auth.py` — symlink false positive fix
+- `py/auto_sdd/lib/branch_manager.py` — worktree support + `merge --abort`
+- `py/auto_sdd/lib/local_agent.py` — `keep_recent` 2→8
+- `py/auto_sdd/scripts/build_loop_v2.py` — deferred EG3/EG4, post-merge validation, sequential retry, readonly scope, prompt injection
+
+### Test status
+435 tests passing (unchanged count — no new tests this session, all changes in wiring/enforcement).
+
+---
+
 ## 2026-03-16 (session 8)
 
 ### Pre-build pipeline expansion: personas, design patterns, spec hardening

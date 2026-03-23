@@ -2,34 +2,47 @@
 
 > The single mandatory read for every new session.
 > Overwritten each session to reflect current truth.
-> Last updated: 2026-03-15 (session 7)
+> Last updated: 2026-03-19 (session 9)
 
 ## Read order
 
 1. This file
 2. `architectural-inventory.md` — 12-phase pipeline reference
-3. `architecture-principles.md` — P1–P7, DP-1, DP-2
+3. `architecture-principles.md` — P1–P8, DP-1, DP-2
 
 Read code files only when working on them. Don't front-load 2000 lines of Python you won't touch.
 
+## Active development: Auto_SDD_v2.2
+
+V2.2 lives at `/Users/BrianFischman/Auto_SDD_v2.2/`. It is a fork of v2 (`/Users/BrianFischman/Auto_SDD_v2/`) with parallel feature build support. V2.2 has uncommitted changes across 5 files — not yet merged back. V2 remains the canonical repo for docs (CHANGELOG, SESSION-STATE). V2.2 has no `.venv`; runs via `PYTHONPATH` pointing at v2.2's `py/` using v2's venv interpreter.
+
+Run command: `bash /Users/BrianFischman/Auto_SDD_v2.2/run_build.sh`
+
 ## What exists and works
 
-### Build loop (`py/auto_sdd/scripts/build_loop_v2.py`, ~970 lines)
+### Build loop (`py/auto_sdd/scripts/build_loop_v2.py`)
 - SELECT → BUILD → GATE → ADVANCE, end-to-end functional
-- Roadmap parser now uses shared `_parse_roadmap_table()` from `validators.py`, then does its own topo sort
+- **Parallel builds (v2.2)**: Features grouped by dep level. Same-level features build concurrently in git worktrees. Three-phase flow:
+  1. Parallel BUILD in worktrees (EG1+EG2+EG5 only, `skip_build_test=True`)
+  2. Sequential MERGE+GATE on main (EG3+EG4 post-merge, revert on fail)
+  3. Sequential retry on main for post-merge failures (full gates)
+- Single-feature levels use the original sequential path (no worktree overhead)
+- `_group_by_dep_level()` groups topo-sorted features into parallelizable levels
+- Roadmap parser uses shared `_parse_roadmap_table()` from `validators.py`, then does its own topo sort
 - Unified `_run_gate()` with `GateResult` dataclass, short-circuits on first failure
 - Retry logic: attempt 0 = fix-in-place, attempt 1+ = git reset
-- Campaign locking (fcntl.flock + PID stale detection) and resume state (skip completed features on crash recovery)
+- Campaign locking (fcntl.flock + PID stale detection) and resume state
 - Feature branches: setup from main, merge on success, delete on failure, post-campaign cleanup
+- Worktree support: `setup_feature_worktree`, `link_deps_to_worktree`, `remove_worktree` in `branch_manager.py`
 - Codebase summary generated once per campaign, injected into all feature prompts
-- Preflight summary printed to terminal, `--auto-approve` flag (default: require confirmation)
-- CLI: `--pre-build`, `--vision-input`, `--auto-approve` / `AUTO_APPROVE`
+- Preflight summary printed to terminal, `--auto-approve` flag
+- CLI: `--pre-build`, `--pre-build-only`, `--vision-input`, `--auto-approve` / `AUTO_APPROVE`
 
-### Pre-build phases (`py/auto_sdd/pre_build/`, new)
+### Pre-build phases (`py/auto_sdd/pre_build/`)
 | Module | Phase | Lines | What it does |
 |---|---|---|---|
-| `validators.py` | all | ~535 | Deterministic validators for phases 1-6. Shared `_parse_roadmap_table()` also used by build loop. New: `validate_personas()`, `validate_design_patterns()`, hardened `validate_feature_spec()` with `SPEC_NO_TOKEN_ASSERTIONS` and `SPEC_NO_INTERACTION_STATES`. |
-| `prompts.py` | 1-5 | ~344 | System/user prompt templates per phase. New: `personas_*_prompt()`, `design_patterns_*_prompt()`. Hardened `spec_first_user_prompt()` with token assertion requirement, interaction_states, patterns/personas inputs. |
+| `validators.py` | all | ~535 | Deterministic validators for phases 1-6. Shared `_parse_roadmap_table()` also used by build loop. |
+| `prompts.py` | 1-5 | ~344 | System/user prompt templates per phase. Hardened phase 5 with token assertion requirement, interaction_states, personas/patterns inputs. |
 | `runner.py` | 1-5 | 152 | Shared agent invocation + validate + retry pattern |
 | `phase_vision.py` | 1 | 29 | Generates `.specs/vision.md` from user input |
 | `phase_systems.py` | 2 | 31 | Generates `.specs/systems-design.md` from vision |
@@ -41,70 +54,30 @@ Read code files only when working on them. Don't front-load 2000 lines of Python
 | `phase_red.py` | 6 | 272 | Deterministic Gherkin→test scaffold generator (no agent) |
 | `orchestrator.py` | all | ~144 | Runs phases 1→3→3b→3c→4→5→6 sequentially, skips valid outputs (resume) |
 
-### Shared types (`py/auto_sdd/lib/types.py`, new)
-
-### Operational infrastructure (`py/auto_sdd/lib/`, new)
+### Operational infrastructure (`py/auto_sdd/lib/`)
 | Module | Lines | What it does |
 |---|---|---|
-| `reliability.py` | 202 | Campaign locking (fcntl.flock + PID stale detection), ResumeState persistence (atomic write via tempfile+rename), read/write/clean state, new_campaign_id |
-| `branch_manager.py` | 173 | Feature branch setup from main, merge (--no-ff) on success, force-delete on failure, cleanup_merged_branches post-campaign |
-| `codebase_summary.py` | 265 | File tree generation (excluded dirs per L-00227), git tree hash cache, agent-generated structural summary, recent learnings reader |
+| `reliability.py` | 202 | Campaign locking (fcntl.flock + PID stale detection), ResumeState persistence (atomic write via tempfile+rename) |
+| `branch_manager.py` | ~250 | Feature branch setup, merge (--no-ff + --abort on conflict), force-delete, cleanup. **v2.2**: worktree support (`setup_feature_worktree`, `link_deps_to_worktree`, `remove_worktree`). |
+| `codebase_summary.py` | 265 | File tree generation (excluded dirs), git tree hash cache, agent-generated structural summary |
+| `local_agent.py` | — | OpenAI + Anthropic agent loops. `keep_recent=8` for context trimming (bumped from 2 in session 9). |
 
 ### Shared types (`py/auto_sdd/lib/types.py`)
 - `GateError(code, detail)` — structured error type. Tests assert on `code` (stable contract), `detail` is free-form.
 - `PhaseResult(phase, passed, errors, artifacts)` — result type for pre-build phases.
-- Existing EG modules still use `list[str]` for errors — migration is separate work (~25 call sites, ~15 test assertions).
+- `WorktreeResult(branch_name, worktree_path)` — v2.2 worktree setup result.
 
 ### ExecGates (AgentSpec lineage — deterministic, agent-opaque, binary)
 | EG | Module | Trigger | Status |
 |---|---|---|---|
-| EG1 | `eg1_tool_calls.py` (827 lines) | `before_action` per tool call | All 7 checks reviewed+hardened, protected_paths support added |
-| EG2 | `eg2_signal_parse.py` (215 lines) | `agent_finish` | Reviewed — code block skip, spec content check, SOURCE_FILES disk validation added |
-| EG3 | `eg3_build_check.py` (155 lines) | `agent_finish` artifact | v1 detection ported, full framework coverage |
-| EG4 | `eg4_test_check.py` (185 lines) | `agent_finish` artifact | v1 detection ported, 6 framework parsers |
-| EG5 | `eg5_commit_auth.py` (216 lines) | `agent_finish` state | Reviewed — 4 checks assessed, untracked file warning added |
-| EG6 | reserved | `agent_finish` artifact+compliance | Design not started. Deterministic only. |
+| EG1 | `eg1_tool_calls.py` | `before_action` per tool call | All 7 checks reviewed+hardened. `protected_paths` (test files). **v2.2**: `readonly_paths` (existing source files in parallel builds). |
+| EG2 | `eg2_signal_parse.py` | `agent_finish` | Reviewed — code block skip, spec content check, SOURCE_FILES disk validation. |
+| EG3 | `eg3_build_check.py` | `agent_finish` artifact | v1 detection ported. **v2.2**: skippable via `skip_build_test`, runs post-merge instead. |
+| EG4 | `eg4_test_check.py` | `agent_finish` artifact | v1 detection ported, 6 framework parsers. **v2.2**: same skip/defer as EG3. |
+| EG5 | `eg5_commit_auth.py` | `agent_finish` state | Reviewed. **v2.2**: `_check_no_contamination` uses literal `..` check instead of `Path.resolve()` (symlink false positive fix). |
+| EG6 | reserved | `agent_finish` artifact+compliance | Deferred. |
 
-### Other completed work
-- `model_config.py`, `local_agent.py`, YAML configs (step 1)
-- `validate_tool_calling.py` — validated on Mac Studio, 14/15 pass (step 2)
-- `module-map.md` — v1 function classification (step 3)
-- `system-inventory.md` — codebase metrics + evaluation framework
-
-## EG review status
-
-Review protocol: for each check, state logic → classify (A/B/C) → identify gaps → decide (fix/defer/accept) → smoke test.
-
-### EG1 — reviewed checks:
-1. ✅ Command blocklist + first-token matching (26 tests)
-2. ✅ Command allowlist, stack-aware (42 tests)
-3. ✅ Path validation + containment (32 tests)
-4. ✅ Command argument containment (32 tests)
-5. ✅ Git branch protection (42 tests)
-6. ✅ Unknown tool rejection — hardcoded else clause, sound (82 tests total)
-7. ✅ Malformed argument rejection — added isinstance(str) checks on path for write_file + read_file (82 tests total)
-
-### EG1 — not yet reviewed:
-(none — all 7 checks reviewed)
-
-### EG2 — reviewed:
-1. ✅ Signal in code blocks — was matching inside fenced code blocks. Added ``` tracking, lines inside blocks skipped. 3 new tests.
-2. ✅ SPEC_FILE content validation — now checks >25 chars (stripped). Empty/placeholder specs fail the gate. 3 new tests. Pre-build phases 1–5 generate specs; phase 6 scaffolds tests.
-3. ✅ SOURCE_FILES disk validation — now gate-fails if any listed file doesn't exist or resolves outside project. Triggers retry. 3 new tests.
-
-### EG3/EG4 — reviewed (v1 port complete):
-- EG3: `detect_build_cmd()` ported from v1 with full framework detection (Next.js priority per L-00177, tsconfig.build.json, tsconfig.json, pyproject/setup.py, Cargo.toml, go.mod, package.json). 14 detection tests.
-- EG4: `detect_test_cmd()` ported from v1 (package.json with "no test specified" filter, pytest.ini, pyproject.toml, setup.cfg, Cargo.toml, go.mod). 13 detection tests.
-- EG4: `_parse_test_count` expanded with mocha (`N passing`), cargo test (`test result:...N passed`), go verbose (`--- PASS:` line counting). 7 new parse tests.
-- Build loop stubs (`_detect_build_cmd`, `_detect_test_cmd`) removed, replaced with imports from EG modules.
-
-### EG5 — reviewed:
-1. ✅ HEAD advanced — sound. Amend-to-same-hash impossible (new hash always). Empty commits caught by EG3/EG4.
-2. ✅ Tree clean — was silently ignoring untracked files. Added warning log. Gate still passes (untracked may be legitimate).
-3. ✅ No contamination — sound. Defense-in-depth with EG1 path checks. Catches symlink escapes.
-4. ✅ Test regression — count comparison works as implemented. Resolved: test files are write-protected via EG1 `protected_paths`.
-
-### Unit test coverage
+### Unit test coverage (435 tests, all passing)
 | Test file | Module | Tests |
 |---|---|---|
 | test_eg1.py | eg1_tool_calls.py | 112 |
@@ -123,125 +96,53 @@ Review protocol: for each check, state logic → classify (A/B/C) → identify g
 
 ## Open items
 
-### Design work needed (no code exists)
-- ~~RED phase scaffolder (phase 6)~~ — **Done**: `phase_red.py` (deterministic Gherkin→test generator, pytest + vitest, format-agnostic parser, 30 tests)
-- ~~EG6 spec adherence checker~~ — **Deferred**: Analysis showed most EG6 checks are already covered transitively by EG3/EG4 when specs encode token assertions in Gherkin. Phase 5 prompt hardening + validator now enforces token assertions and interaction states in specs. Remaining visual quality checks (overlap, spacing, clipping) deferred to Auto-QA (Playwright post-render).
-- Build loop metrics (phases 7–12): all blank in `architectural-inventory.md`
-- Structured error types: replace `errors: list[str]` with `errors: list[GateError]` across EG2, EG5, GateResult. ~25 call sites, ~15 test assertions. New pre-build code uses `GateError` natively; EG migration remains. Est. 2–3 hours.
-- Auto-QA post-render validation (Playwright screenshots): v1 port item. Covers visual bugs that deterministic code analysis cannot catch.
+### Code changes needed
+- Structured error types: replace `errors: list[str]` with `errors: list[GateError]` across EG2, EG5, GateResult. ~25 call sites, ~15 test assertions.
+- Auto-QA post-render validation (Playwright screenshots): v1 port item. Visual bugs that deterministic code analysis cannot catch.
+- `runner.py` duplicates `BUILD_AGENT_TOOLS` from `build_loop_v2.py`. Should be single constant.
+- `phase_spec.py` re-scans roadmap for domain. Parser should add domain to return dict.
+- No tests for `runner.py`, `orchestrator.py`, or phase 1-5 wrappers.
+- V2.2 changes uncommitted — need to merge back or formalize v2.2 as the active repo.
+- `test_count` is null across all campaign runs — either `test_cmd` empty/skip or parser mismatch. Not yet investigated.
 
-### Pre-build known issues
-- `runner.py` duplicates `BUILD_AGENT_TOOLS` array from `build_loop_v2.py`. Should be a single constant imported by both.
-- `phase_spec.py` re-scans roadmap text line by line to extract domain because `_parse_roadmap_table()` doesn't return it. Parser should add domain to its return dict.
-- Orchestrator skip logic is inverted readability: `validate_X()` returning empty list means valid/skip. Could confuse a reader.
-- ~~`prompts.py` templates are first-draft. Need tuning once an agent runs against them in real inference.~~ **Done**: Phase 5 prompts hardened with token assertion requirements, interaction_states, personas/patterns inputs. Phases 3b/3c prompts written.
-- No tests for `runner.py`, `orchestrator.py`, or phase 1-5 wrappers. All depend on `run_local_agent` which needs the OpenAI client mock (pattern now established in `test_local_agent.py`).
-- ~~**BUG**: `codebase_summary.py` passes `max_turns=1` to `run_local_agent`~~ — **Fixed** (`10c4752`). Removed invalid kwarg, changed `tools=[]` to `tools=None`.
-- Auto-QA post-render validation (Playwright screenshots + visual regression): planned for v1 port. Will handle visual bugs (overlap, spacing, element clipping) that can't be caught by deterministic code analysis. **OPEN ITEM** — not yet implemented.
+### Persistent learning
+The user expressed a desire to revive the knowledge graph work in /superloop to enable compounding knowledge from project learnings.
 
-### Live campaign issues discovered
-- ~~EG4 test check fails with exit code 127~~ — **Fixed**: vitest.config.ts added, npm install required before first run.
-- `vision-input.txt` deleted by a failed branch cleanup — `cat` fails silently, pre-build skips vision phase because output already exists.
-- ~~Auto-complete needs testing~~ — Not triggered with Claude Sonnet (model commits and signals natively).
-- ~~`codebase_summary.py` max_turns kwarg~~ — **Fixed** (`10c4752`).
-- ~~EG3 `npx tsc --noEmit` requires `node_modules` installed~~ — **Fixed** (`0d910b4`). `_warmup_project_deps()` runs before first feature, installs deps if marker file exists but install dir doesn't.
-- ~~EG5 blocks on `tsconfig.tsbuildinfo` if not in gitignore~~ — **Fixed** (`9a012dc`). EG5 auto-clean commits known framework artifacts without burning retries. Also added `tsconfig.tsbuildinfo` and `next-env.d.ts` to cre-pulse gitignore.
-- Stale local commits from previous runs confuse the agent (reads pre-existing code, loops). Must `git reset --hard origin/main` not just `git checkout -- .` between runs.
-- Carpet-bombing project state between runs wastes money. When only the last feature needs a rerun, release the lock (`rm -f logs/.build-lock`) and rerun — resume state picks up where it left off. Do not nuke resume-state.json or source files unless truly needed.
+## Campaign history
 
-### First complete V2 campaign
-8/8 features built for cre-pulse (Next.js 14 CRE dashboard). 26 source files, 147 tests passing, 5 test suites. Claude Sonnet 4.6 via Anthropic API. App renders in browser at localhost:3000.
+### V2 sequential: cre-pulse (session 7)
+8/8 features, Claude Sonnet 4.6, ~90 min. Full dashboard renders at localhost:3000.
 
-| Feature | Attempts | Tests | Failure Mode |
-|---------|----------|-------|--------------|
-| Data Loader | 1 | -- | -- |
-| Global Layout & Theming | 1 | 23 | -- |
-| Shared UI Components | 2 | 65 | EG4: ColorTokens.accent value mismatch |
-| Property Overview Card | 3 | 65 | 40-turn limit, then EG3 hallucinated types |
-| Tenant Roster Table | 1 | 94 | -- |
-| Lease Velocity Timeline | 1 | 120 | -- |
-| Comp Set Benchmarks | 2 | 147 | 60-turn limit on first attempt |
-| Dashboard Shell | 2 | 147 | EG3: implicit any types on callbacks |
+### V2.2 sequential baseline: cre-pulse-ab-v2 (session 9, 2026-03-17)
+15/15 features, Claude Opus 4.6, 87 min. All `test_count` null.
 
-EG3 caught hallucinated `startingRent`/`effectiveRent` properties on `Property` type — they don't exist in seed data. Retry read the exact TypeScript error and fixed it. EG4 caught a real color token value mismatch. Both self-corrected via error feedback injection.
+### V2.2 parallel (first attempt): cre-pulse-ab-v2.2 (session 9, 2026-03-17)
+Multiple failed runs. Root causes: EG3/EG4 ran per-worktree (no full project), EG5 symlink false positive, merge conflicts from scope collision (`page.tsx` written by multiple agents), Opus 500 errors.
 
-App renders full dashboard: property overview card, tenant roster table, lease velocity timeline chart, comp set benchmarks chart and table. Manual fix required post-campaign: DataLoader used `fs.readFileSync` (Node.js server-only) in a client component. `npx tsc --noEmit` missed this because `fs` is valid TypeScript — only the Next.js bundler catches server/client boundary violations. EG3 detection fixed to use `npm run build` for Next.js projects.
-
-Local models (GPT-OSS-120B, Qwen3-Coder-Next, GLM-4.7-flash) all failed at tool-use compliance. Mac Studio runs orchestrator, gates, tests, git locally. API handles code generation only.
-
-### V1 port steps remaining
-| Step | What | Notes |
-|---|---|---|
-| 6a | Unit tests for EGs + model_config + local_agent | **Done**. EG1–EG5 + model_config + local_agent all covered. 284 tests total. |
-| 6b | Integration tests | **Done**. 41 tests: BuildLoopV2 end-to-end (9), gate pipeline short-circuit (4), EG1 executor (5), roadmap parsing (5), test file discovery (3), EG2 disk validation (3), EG3/EG4 subprocess (5), EG5 git state (3), config/limits (4). 325 tests total. |
-| 7a | reliability.py — resume state, locking | **Done**. fcntl.flock + PID stale detection, ResumeState, atomic write. Wired into build loop (lock/resume/clean). 20 tests. |
-| 7b | branch_manager.py — feature branches, cleanup | **Done**. setup_feature_branch, merge_feature_branch, delete, cleanup_merged. allowed_branch wired to EG1. 16 tests. |
-| 7c | build_gates.py → EG3/EG4 | **Done**: detect_build_cmd, detect_test_cmd ported; _parse_test_count expanded (mocha, cargo, go); build loop stubs removed. 24+31 tests. |
-| 7d | prompt_builder.py — fix/retry variants | Deferred. Current inline prompts sufficient for first campaign. Tune after real run. |
-| 7e | codebase_summary.py — agent summary, git tree cache | **Done**. File tree + cache + learnings + agent call. Preflight summary with --auto-approve. 23 tests. |
-
-All v1 modules that referenced `claude_wrapper.py` or agent-reported results need adaptation for V2 architecture (P1: orchestrator runs tests, P4: tool calls through EG1).
-
-### Design questions (undecided)
-1. ~~Test content integrity~~ — **Resolved**: test files are write-protected via EG1 `protected_paths`. Agent cannot modify or delete them. EG5 count check remains as defense-in-depth.
-2. ~~EG1 tool set extensibility~~ — **Resolved**: keep hardcoded {write_file, read_file, run_command}. Three tools cover any file-based build task. New tools require new EG1 validation code, not config. The else-clause rejection of unknown tools is a strength.
-3. ~~Agent prompt awareness of EG constraints~~ — **Resolved**: reveal boundaries, conceal mechanism. System prompt tells the agent what it can do (writable paths, allowed commands) but not how EG1 validates. Reduces wasted tool calls without exposing internals.
-
-## GPT-OSS implementation constraints (V1 port)
-
-Model choice: **gpt-oss-120b** — selected for Harmony instruction hierarchy (system > developer > user > assistant > tool), a trained-in conflict resolution order unique to this model. No other competitive open-weight model has an equivalent. Evaluated against Qwen3-Coder-Next (stronger coding benchmarks, no hierarchy). Decision: Harmony's architectural enforcement properties outweigh unquantified coding gap. Re-evaluate with empirical data after first campaign.
-
-V1 port items must account for:
-- **7d (prompt_builder.py)**: Deferred. Current inline prompts sufficient for first campaign. Use `developer` role for orchestrator instructions, `user` role for task content when implemented.
-- **7e (codebase_summary.py)**: **Done**. Budget concern noted — exclude SDD metadata from summaries (handled via _EXCLUDED_DIRS).
-- **7a, 7b (reliability.py, branch_manager.py)**: **Done**. Model-agnostic.
-- **local_agent.py** already handles: reasoning_content stripping (older turns), parallel tool call defense (sequential processing + warning), finish_reason routing (stop/tool_calls/length), defensive JSON parsing. 31 tests cover these paths.
-- Serving: LM Studio on Mac Studio M3 Ultra 256GB at localhost:1234. Model ID: gpt-oss-120b-mlx.
+### V2.2 parallel (post-fix): cre-pulse-ab-v2.2 (session 9, 2026-03-19)
+14 features, Claude Sonnet 4.6, 49 min. 10/14 built. 3 failed (merge conflict cascade — `page.tsx` scope collision, before scope enforcement fix). 1 skipped (App Shell dep cascade). EG3/EG4 deferral and post-merge validation worked correctly. Scope enforcement (`readonly_paths` + prompt injection) applied after this run.
 
 ## Key decisions in effect
-- Pre-build test generation: Response B (structured Gherkin → deterministic scaffolding). No LLM in verification. Response A (LLM-authored frozen tests) eliminated as DP-2 adjacent.
-- GATE short-circuits on first failure (Option A). No flat run of all checks.
-- ExecGates are an expansion of AgentSpec (Wang et al., arXiv:2503.18666). Same pattern: trigger at agent boundary → deterministic predicate → binary enforce.
-- Gherkin/RED cycle restored from Adrian's auto-sdd. Implemented in `phase_red.py` (deterministic generator, no agent).
-- Structured error types (`GateError`) adopted for all new code; existing EG migration deferred.
-- EG1 tool set: hardcoded {write_file, read_file, run_command}. New tools require new EG1 code, not config.
-- Agent model: Claude Sonnet 4.6 via Anthropic API (`claude-sonnet-4-6`). All three local models (GPT-OSS-120B, Qwen3-Coder-Next, GLM-4.7-flash) failed at tool-use compliance. Mac Studio runs orchestrator, gates, tests, git locally. API handles code generation only. Local model configs retained for future re-evaluation as open-weight tool-use improves.
-- Agent prompt: reveal boundaries (writable paths, allowed commands), conceal mechanism (EG1 internals). Few-shot examples attempted via explicit tool documentation in system prompt.
-- P8: fixes must generalize. Every bug fix evaluated against "will this class of failure recur?" Instance fixes are incomplete.
-- EG1 tool call translation: meet models where they are. When model intent is clear but tool name/schema is wrong, translate to correct call rather than blocking. Security unchanged — translated calls pass through full validation.
-- EG1 cd prefix stripping: `cd <project> && cmd` → `cmd`. Models write this habitually. run_command already has cwd.
-- EG1 git chain handling: `git add && git commit` split and executed sequentially. Each command validated individually.
-- EG1 write-then-exec git exemption: `git add file.ts` stages, doesn't execute. Git commands bypass write-then-exec detection.
-- Read-only nudge: after 12 consecutive turns without write_file, inject "Start implementing NOW" message. Threshold raised from 8 — Claude Sonnet reads methodically and the early reads are useful context gathering.
-- Auto-complete: when agent writes files but doesn't commit/signal, Python auto-commits and injects FEATURE_BUILT signals.
-- Cross-feature learning: EG1 blocked patterns accumulated across features, injected into next feature's system prompt.
-- Context window management: old tool results trimmed to metadata after 2 recent results. Individual reads return full content — capping reads caused re-read loops. Trimming stale history is the correct fix.
-- Gherkin parser: format-agnostic keyword extraction. No assumptions about LLM formatting.
-- Roadmap dep matching: 3-tier fuzzy resolution (exact → normalized → token subset). Models don't write dep names precisely.
-- EG1 runtime re-detection: writing a marker file (package.json, pyproject.toml, etc.) triggers re-scan. Handles project bootstrapping.
-- EG1 || fallback stripping: `cmd1 || cmd2` → run primary only. Also strips stderr redirects (`2>&1`, `2>/dev/null`). Model sees error from primary and can call fallback separately.
-- EG1 test runner exemption from write-then-exec: vitest, jest, pytest, mocha, ava, tap and npx/npm variants. Threat model is lazy hallucination not intentional malice.
-- Retry error feedback: gate/build errors injected into user prompt as `## PREVIOUS ATTEMPT FAILED` on retry. Agent reads its own broken code + the exact error.
-- Spec file path in user prompt: `_build_user_prompt` includes `Spec file: .specs/features/core/data-loader.feature.md` so agent can emit correct SPEC_FILE signal.
-- EG3 timeout: 300s (was 120s). First tsc run compiles all node_modules type defs.
-- EG1 safe chain execution: `find X && find Y` (all read-only commands) split, validated, ALL executed, all results returned. Non-read-only `&&` chains still blocked.
-- Dynamic turn budget: S = base config max_turns, M = 1.5x, L/XL = 2x. Complex features need more turns.
-- Dep cascade skip: when a feature fails, all downstream dependents are skipped. Saves API cost.
-- Project dep warmup: _warmup_project_deps() at campaign start. Detects package.json/pyproject.toml/Cargo.toml/go.mod without install dirs and runs install.
-- App entry point enforcement: roadmap prompt instructs LLM to always include an App Shell feature. Roadmap validator checks web apps for entry point keywords, returns GateError if missing.
-- EG5 auto-clean: when tree_clean fails and all uncommitted files are known framework artifacts (next-env.d.ts, tsconfig.tsbuildinfo, __pycache__, .next, etc), amend agent's commit and re-run gate. Zero retries burned. Unknown files fall through to normal retry.
-- Resume state is sacred. Don't nuke `resume-state.json` between runs unless truly needed. Release lock only (`rm -f logs/.build-lock`).
-- 7d (prompt_builder.py) deferred: current inline prompts sufficient for first campaign. Tune fix/retry variants after real failure data.
-- Model configs: `config/models/` now has gpt-oss-120b.yaml, qwen3-coder-next.yaml, glm-4.7-flash.yaml, claude-sonnet.yaml. Model is a YAML config swap. Claude config uses Anthropic API via `${ANTHROPIC_API_KEY}` env var; all others are local via LM Studio at localhost:1234.
-- 422 tests total (112 EG1, 30 phase_red, 23 codebase_summary, 20 reliability, 16 branch_manager + others).
-- Dep export scanner: `_scan_dep_exports()` scans src/ for all .ts/.tsx exports and injects them into the user prompt when a feature has deps. Agent sees exact import paths without burning turns reading files. Cut Dashboard Shell from 60+ turns to 16.
-- Retry prompt must not instruct exploration. Old prompt said "Read the files you wrote previously" which sent the agent into a 60-turn loop. New prompt: "Do NOT re-read files whose exports are listed above."
-- EG3 Next.js detection: also checks for `next` in package.json deps, not just `next.config.*` files. Next.js 14+ works without config files. Returns `npm run build` which catches server/client boundary violations that `npx tsc --noEmit` misses.
-- Cross-feature learning dead code: `_build_system_prompt` had a `return` before the `blocked_patterns` injection. Fixed by assigning to variable first. Blocked patterns were never reaching the agent in any previous campaign.
-- Pre-build pipeline expanded: 1 → 2 → 3(tokens) → 3b(personas) → 3c(design patterns) → 4 → 5(hardened) → 6. Personas written after tokens are set. Design patterns reference both tokens and personas.
-- Phase 5 token enforcement: Gherkin scenarios for UI features must have >=3 backtick-wrapped token assertions in Then/And steps. Validator `SPEC_NO_TOKEN_ASSERTIONS` enforces mechanically.
-- Phase 5 interaction states: UI features must declare `interaction_states` in YAML front matter. Validator `SPEC_NO_INTERACTION_STATES` enforces.
-- EG6 deferred: analysis of cre-pulse campaign showed EG3/EG4 catch token violations transitively when specs encode them in Gherkin. Phase 5 prompt/validator hardening is the correct fix. Visual quality checks deferred to Auto-QA (Playwright post-render, v1 port item).
+
+All session 7 decisions remain. Additions from session 9:
+
+- **Parallel builds: deferred EG3/EG4**. Agents don't need the full project to write code. They need it to validate. Parallelize the expensive part (agent), validate sequentially after merge.
+- **EG1 `readonly_paths`**: Parallel agents can only create new files. Existing source files are read-only. Prevents scope collisions (e.g. multiple agents writing `page.tsx`).
+- **Prompt scope constraint**: When `readonly_paths` active, user prompt lists all read-only files with "writes will be rejected." Belt and suspenders with EG1 enforcement.
+- **`git merge --abort` on conflict**: Prevents stale merge state from poisoning subsequent merges.
+- **EG5 literal `..` check**: Replaced `Path.resolve()` with `..` traversal detection. EG1 blocks symlink creation; `resolve()` was causing false positives on orchestrator-created symlinks.
+- **`keep_recent=8`**: Context trimming in `local_agent.py` bumped from 2 to 8. Agents read 5+ files before writing; aggressive trimming caused re-read loops.
+
+Prior session decisions still in effect (non-exhaustive, see CHANGELOG for full lineage):
+- GATE short-circuits on first failure. ExecGates follow AgentSpec pattern (Wang et al., arXiv:2503.18666).
+- Agent model: Claude Sonnet 4.6 via Anthropic API. Local models all failed tool-use compliance.
+- EG1: hardcoded {write_file, read_file, run_command}. Tool call translation, cd stripping, git chain handling, safe && chains, runtime re-detection.
+- P8: fixes must generalize. Instance fixes are incomplete.
+- Dynamic turn budget: S = base, M = 1.5x, L/XL = 2x. Dep cascade skip. Project dep warmup.
+- Cross-feature learning: blocked patterns injected into next feature's system prompt.
+- Dep export scanner: injects import signatures into prompt. Cut Dashboard Shell from 60+ to 16 turns.
+- Resume state is sacred. Don't nuke between runs.
+- Pre-build pipeline: 1 → 2 → 3 → 3b → 3c → 4 → 5(hardened) → 6. Phase 5 enforces token assertions + interaction states.
 
 ## References
 - `docs/architectural-inventory.md` — 12-phase pipeline (expanded: 3b personas, 3c design patterns)
