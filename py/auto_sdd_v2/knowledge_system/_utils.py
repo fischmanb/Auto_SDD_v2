@@ -8,7 +8,7 @@ _STACK_PATTERNS: list[tuple[str, list[str]]] = [
     ("typescript", ["typescript", "type error", ".ts", ".tsx"]),
     ("python",     ["python", ".py", "pytest", "mypy", "pydantic", "fastapi"]),
     ("sqlite",     ["sqlite", "sqlite3", "fts5", "pragma"]),
-    ("git",        ["git ", "commit", "branch", "merge", "rebase", "stash"]),
+    ("git",        ["git ", "git commit", "git branch", "git merge", "rebase", "stash"]),
 ]
 
 

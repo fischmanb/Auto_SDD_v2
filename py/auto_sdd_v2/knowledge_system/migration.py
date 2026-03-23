@@ -327,6 +327,112 @@ def migrate(
     return {"inserted": inserted, "skipped": skipped, "edges_added": edges_added}
 
 
+# ── Node re-typing ────────────────────────────────────────────────────────────
+
+# Keyword sets for deterministic type classification (no LLM judgment).
+# Priority order: mistake > universal > framework > technology > instance (no change).
+
+_RETYPE_MISTAKE: list[str] = [
+    "failure", "error", "bug", "broke", "crash", "regression",
+    "failed", "broken", "incorrect", "pitfall", "trap",
+]
+
+_RETYPE_UNIVERSAL: list[str] = [
+    "always", "never", "every", "any project", "any feature",
+    "constitutional", "all projects", "regardless",
+    "any stack", "any codebase", "universal principle",
+]
+
+_RETYPE_FRAMEWORK: list[str] = [
+    "next.js", "nextjs", "next/", "react", "prisma", "tailwind",
+    "django", "fastapi", "remix", "nuxt", "sveltekit",
+    "angular", "vue.js", "vuejs", "flask", "express.js",
+    "expressjs", "gatsby", "astro",
+]
+
+_RETYPE_TECHNOLOGY: list[str] = [
+    "sqlite", "postgres", "postgresql", "redis", "docker",
+    "kubernetes", "webpack", "vite", "eslint", "typescript",
+    "pytest", "jest", "mypy", "pip install", "npm install",
+    "yarn", "github actions", "ci/cd", "fts5",
+]
+
+
+def _classify_node_type(title: str, content: str) -> str | None:
+    """Return the reclassified type for a node, or None to leave as 'instance'.
+
+    Priority: mistake > universal > framework > technology > None.
+    Uses keyword matching on title (full) and first 500 chars of content only.
+    Deterministic — no LLM judgment.
+    """
+    lower_title = title.lower()
+    # Combine title + beginning of content for matching
+    lower_combined = (title + " " + content[:500]).lower()
+
+    # mistake: title must contain a keyword (primary-topic check)
+    if any(kw in lower_title for kw in _RETYPE_MISTAKE):
+        return "mistake"
+
+    # universal: title or early content contains broad-applicability signals
+    if any(kw in lower_combined for kw in _RETYPE_UNIVERSAL):
+        return "universal"
+
+    # framework: title or early content names a specific framework
+    if any(kw in lower_combined for kw in _RETYPE_FRAMEWORK):
+        return "framework"
+
+    # technology: title or early content names a specific technology
+    if any(kw in lower_combined for kw in _RETYPE_TECHNOLOGY):
+        return "technology"
+
+    return None
+
+
+def retype_nodes(
+    store: KnowledgeStore,
+    *,
+    verbose: bool = False,
+) -> dict[str, int]:
+    """Reclassify 'instance' nodes to more specific types using keyword analysis.
+
+    Idempotent: only processes nodes currently typed 'instance'. Nodes already
+    typed universal/framework/technology/mistake/meta are left unchanged.
+
+    Returns the full type distribution after retyping.
+    """
+    rows = store._conn.execute(
+        "SELECT id, title, content FROM nodes WHERE node_type = 'instance'"
+    ).fetchall()
+
+    updates: list[tuple[str, str]] = []  # (new_type, node_id)
+    for row in rows:
+        node_id = row["id"]
+        title = row["title"] or ""
+        content = row["content"] or ""
+        new_type = _classify_node_type(title, content)
+        if new_type is not None:
+            updates.append((new_type, node_id))
+            if verbose:
+                logger.info("  RETYPE %s → %s", node_id, new_type)
+
+    if updates:
+        store._conn.executemany(
+            "UPDATE nodes SET node_type = ? WHERE id = ?",
+            updates,
+        )
+        store._conn.commit()
+
+    logger.info(
+        "retype_nodes: %d/%d instance nodes retyped",
+        len(updates), len(rows),
+    )
+
+    dist_rows = store._conn.execute(
+        "SELECT node_type, COUNT(*) AS cnt FROM nodes GROUP BY node_type"
+    ).fetchall()
+    return {row["node_type"]: row["cnt"] for row in dist_rows}
+
+
 # ── Default search paths ──────────────────────────────────────────────────────
 
 _DEFAULT_PATHS = [
@@ -384,28 +490,51 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Print per-entry progress.",
     )
+    parser.add_argument(
+        "--retype",
+        action="store_true",
+        help=(
+            "Reclassify 'instance' nodes to universal/framework/technology/mistake "
+            "using keyword matching. Can be run standalone (skips migration) or "
+            "combined with a migration run."
+        ),
+    )
     args = parser.parse_args(argv)
 
-    files: list[str] = args.files or find_learnings_files(args.base_dir)
-
-    if not files:
-        logger.warning("No learnings files found. Nothing to migrate.")
-        return 0
-
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
-    logger.info("Migrating %d file(s) into %s", len(files), args.db)
 
     store = KnowledgeStore(args.db)
-    entries = parse_files(files)
-    logger.info("Parsed %d entries from %d file(s).", len(entries), len(files))
 
-    stats = migrate(store, entries, verbose=args.verbose)
+    if not args.retype:
+        # Normal migration path
+        files: list[str] = args.files or find_learnings_files(args.base_dir)
+
+        if not files:
+            logger.warning("No learnings files found. Nothing to migrate.")
+            store.close()
+            return 0
+
+        logger.info("Migrating %d file(s) into %s", len(files), args.db)
+
+        entries = parse_files(files)
+        logger.info("Parsed %d entries from %d file(s).", len(entries), len(files))
+
+        stats = migrate(store, entries, verbose=args.verbose)
+
+        logger.info(
+            "Done. inserted=%d skipped=%d edges_added=%d",
+            stats["inserted"], stats["skipped"], stats["edges_added"],
+        )
+
+    # Run retype if --retype flag set (can combine with migration above)
+    if args.retype:
+        logger.info("Running retype_nodes against %s", args.db)
+        dist = retype_nodes(store, verbose=args.verbose)
+        logger.info("Type distribution after retype:")
+        for node_type, count in sorted(dist.items()):
+            logger.info("  %-12s %d", node_type, count)
+
     store.close()
-
-    logger.info(
-        "Done. inserted=%d skipped=%d edges_added=%d",
-        stats["inserted"], stats["skipped"], stats["edges_added"],
-    )
     return 0
 
 

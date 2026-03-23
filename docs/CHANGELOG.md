@@ -24,6 +24,17 @@ All injection is optional — KG failure degrades gracefully without blocking bu
 
 **Tests:** `py/tests/test_knowledge_system/test_build_integration.py` — 28 tests covering all integration points, token caps, graceful degradation, and edge cases.
 
+### Knowledge system — Stage 2 fixes
+
+- Import guards widened to `except Exception` (S-1)
+- `spec_first_user_prompt()` accepts optional `knowledge_store` parameter; `close()` in `finally` (S-2)
+- Node re-typing: 49 universal, 13 mistake, 8 technology, 4 framework (95 remain instance, 1 meta) — 74/170 nodes upgraded (S-3)
+- Injection displays title instead of frontmatter / content first line (S-4)
+- Build duration captured in outcome records — computed from `attempt_start` wall clock (S-5)
+- Stack detection: "commit", "merge", "branch" replaced with "git commit", "git merge", "git branch" to prevent false positives (N-1)
+- Injection ID tracking preserved across retries — `_kg_injected_ids` reset once per feature, only updated when query returns results (N-2)
+- Three test gaps closed: `inject_spec_learnings` exception handling, `gate_failed=None` with `error_pattern` → no mistake node, failure + `LEARNING_CANDIDATE` → both mistake and instance nodes (N-3)
+
 ---
 
 ## 2026-03-19 (session 9)

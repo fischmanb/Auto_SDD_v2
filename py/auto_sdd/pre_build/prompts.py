@@ -7,6 +7,10 @@ no prompts.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from auto_sdd_v2.knowledge_system.store import KnowledgeStore
 
 # Optional KG integration for spec-first learnings injection
 try:
@@ -16,7 +20,7 @@ try:
         inject_spec_learnings as _inject_spec_learnings,
     )
     _KG_MODULE_AVAILABLE = True
-except ImportError:
+except Exception:
     _KG_MODULE_AVAILABLE = False
 
 
@@ -307,6 +311,8 @@ def spec_first_user_prompt(
     feature_domain: str,
     feature_deps: list[str],
     feature_complexity: str,
+    *,
+    knowledge_store: "KnowledgeStore | None" = None,
 ) -> str:
     vision = _read_if_exists(project_dir / ".specs" / "vision.md")
     systems = _read_if_exists(project_dir / ".specs" / "systems-design.md")
@@ -323,12 +329,18 @@ def spec_first_user_prompt(
     # KG: inject relevant learnings for spec writing (optional)
     kg_learnings = ""
     if _KG_MODULE_AVAILABLE:
-        kg_db = str(project_dir / ".sdd-knowledge" / "knowledge.db")
-        kg = _init_store_optional(kg_db)
+        _own_store = knowledge_store is None
+        kg: Any = knowledge_store
+        if kg is None:
+            kg_db = str(project_dir / ".sdd-knowledge" / "knowledge.db")
+            kg = _init_store_optional(kg_db)
         if kg is not None:
-            stack = _detect_project_stack(project_dir)
-            kg_learnings = _inject_spec_learnings(kg, stack)
-            kg.close()
+            try:
+                stack = _detect_project_stack(project_dir)
+                kg_learnings = _inject_spec_learnings(kg, stack)
+            finally:
+                if _own_store:
+                    kg.close()
 
     return (
         f"Create .specs/features/{feature_domain}/"

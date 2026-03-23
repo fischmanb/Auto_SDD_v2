@@ -66,7 +66,7 @@ try:
         kg_post_gate as _kg_post_gate_fn,
     )
     _KG_MODULE_AVAILABLE = True
-except ImportError:
+except Exception:
     _KG_MODULE_AVAILABLE = False
 
 
@@ -870,7 +870,11 @@ class BuildLoopV2:
             "Turn budget: %d (base=%d, complexity=%s)",
             scaled_turns, base_max_turns, feature.complexity,
         )
+        # Reset injected IDs once per feature (not per attempt) so retries
+        # that return no KG results still reference the first-attempt injection.
+        self._kg_injected_ids = []
         for attempt in range(self.max_retries + 1):
+            attempt_start = time.time()
             if attempt > 0:
                 _status(f"RETRY {attempt}/{self.max_retries} for {feature.name}")
                 logger.info(
@@ -887,17 +891,20 @@ class BuildLoopV2:
             baseline_test_count = baseline_test_result.test_count
 
             # KG: query for relevant knowledge (optional — silently skipped if unavailable)
-            self._kg_injected_ids = []
             kg_section = ""
             kg_clues = ""
             if _KG_MODULE_AVAILABLE and self._kg is not None:
                 error_for_query = last_gate_error if attempt > 0 else None
-                kg_section, self._kg_injected_ids = _inject_relevant_knowledge(
+                kg_section, new_ids = _inject_relevant_knowledge(
                     self._kg,
                     feature_spec=feature.name,
                     stack=self._kg_stack,
                     error_pattern=error_for_query,
                 )
+                # Only overwrite if this attempt returned results; otherwise
+                # keep IDs from the last successful query (preserves tracking).
+                if new_ids:
+                    self._kg_injected_ids = new_ids
                 kg_clues = _inject_hardened_clues(self._kg, self._kg_stack)
 
             # Build prompts
@@ -976,7 +983,7 @@ class BuildLoopV2:
                     gate_failed="BUILD",
                     error_pattern=agent_result.error,
                     agent_output=agent_result.output or "",
-                    duration=None,
+                    duration=time.time() - attempt_start,
                 )
                 if attempt < self.max_retries:
                     if attempt >= 1:
@@ -1033,7 +1040,7 @@ class BuildLoopV2:
                     gate_failed=gate.failed_gate,
                     error_pattern=gate.error,
                     agent_output=agent_result.output or "",
-                    duration=None,
+                    duration=time.time() - attempt_start,
                 )
                 if attempt < self.max_retries:
                     if attempt >= 1:
@@ -1070,6 +1077,7 @@ class BuildLoopV2:
                 attempt=attempt,
                 outcome="success",
                 agent_output=agent_result.output or "",
+                duration=time.time() - attempt_start,
             )
             return True
 

@@ -120,11 +120,9 @@ def inject_relevant_knowledge(
         node_ids = [r["id"] for r in results]
         lines: list[str] = ["## Relevant Knowledge\n"]
         for r in results:
-            # One line of content so the section stays scannable
-            content_first_line = r["content"].split("\n")[0][:300]
+            title = r.get("title") or r["content"].split("\n")[0][:300]
             lines.append(
-                f"**{r['id']}** ({r['node_type']}, {r['status']}): "
-                f"{r['title']}\n{content_first_line}"
+                f"**{r['id']}** ({r['node_type']}, {r['status']}): {title}"
             )
         section = "\n\n".join(lines) + "\n"
         section = _truncate(section, _USER_PROMPT_MAX_TOKENS)
@@ -159,7 +157,7 @@ def inject_hardened_clues(
 
         lines: list[str] = ["\nHARDENED RULES (validated across multiple builds):"]
         for r in results:
-            rule = r["content"].split("\n")[0][:200]
+            rule = r.get("title") or r["content"].split("\n")[0][:200]
             lines.append(f"- {rule}")
         section = "\n".join(lines) + "\n"
         return _truncate(section, _SYSTEM_PROMPT_MAX_TOKENS)
@@ -192,8 +190,8 @@ def inject_spec_learnings(
 
         lines: list[str] = ["\n## Project Learnings\n"]
         for r in results:
-            first_line = r["content"].split("\n")[0][:300]
-            lines.append(f"- **{r['id']}**: {first_line}")
+            title = r.get("title") or r["content"].split("\n")[0][:300]
+            lines.append(f"- **{r['id']}**: {title}")
         section = "\n".join(lines) + "\n"
         return _truncate(section, _SPEC_PROMPT_MAX_TOKENS)
 

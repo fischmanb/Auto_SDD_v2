@@ -223,9 +223,9 @@ def test_inject_hardened_clues_only_returns_hardened_nodes(
     store_with_nodes: KnowledgeStore,
 ) -> None:
     clues = inject_hardened_clues(store_with_nodes, stack="nextjs")
-    # "active" node should not appear; only hardened
+    # "active" node should not appear; only hardened (identified by its title)
     assert "HARDENED RULES" in clues
-    assert "server-only" in clues.lower() or "use-client" in clues.lower()
+    assert "next.js client boundary rule" in clues.lower()
 
 
 def test_inject_hardened_clues_empty_when_no_hardened_nodes(
@@ -394,6 +394,51 @@ def test_kg_post_gate_records_injected_ids(store: KnowledgeStore) -> None:
     assert row is not None
     import json
     assert node_id in json.loads(row[0])
+
+
+def test_inject_spec_learnings_handles_store_exception() -> None:
+    """Exception in store.query must not propagate — matches inject_hardened_clues pattern."""
+    bad_store = MagicMock()
+    bad_store.query.side_effect = RuntimeError("db locked")
+    assert inject_spec_learnings(bad_store, stack=None) == ""
+
+
+def test_kg_post_gate_no_mistake_node_when_gate_failed_is_none(
+    store: KnowledgeStore,
+) -> None:
+    """gate_failed=None with error_pattern set → no mistake node created."""
+    kg_post_gate(
+        store,
+        feature_name="Dashboard",
+        campaign_id="camp-001",
+        injected_ids=[],
+        attempt=0,
+        outcome="failure",
+        gate_failed=None,
+        error_pattern="something went wrong",
+    )
+    stats = store.stats()
+    assert stats["nodes"] == 0
+
+
+def test_kg_post_gate_both_mistake_and_instance_nodes(store: KnowledgeStore) -> None:
+    """Failure with LEARNING_CANDIDATE creates both a mistake node and an instance node."""
+    output = "LEARNING_CANDIDATE: Always check environment variables before build\n"
+    kg_post_gate(
+        store,
+        feature_name="Auth: Login",
+        campaign_id="camp-001",
+        injected_ids=[],
+        attempt=0,
+        outcome="failure",
+        gate_failed="EG4",
+        error_pattern="Tests failed: 3 errors",
+        agent_output=output,
+    )
+    stats = store.stats()
+    assert stats["nodes"] == 2
+    assert stats["by_type"].get("mistake", 0) == 1
+    assert stats["by_type"].get("instance", 0) == 1
 
 
 # ── Token cap with large content ──────────────────────────────────────────────
