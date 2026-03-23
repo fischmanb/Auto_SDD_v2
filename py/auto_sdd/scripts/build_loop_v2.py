@@ -751,6 +751,7 @@ class BuildLoopV2:
         )
 
         self._write_summary(total_duration)
+        self._run_promotion()
 
         # Post-campaign cleanup
         cleanup_merged_branches(self.project_dir, self.main_branch)
@@ -1116,6 +1117,33 @@ class BuildLoopV2:
             agent_output=agent_output,
             stack=self._kg_stack,
         )
+
+    # ── Post-campaign promotion ────────────────────────────────────
+
+    def _run_promotion(self) -> None:
+        """Run the KG promotion job after a campaign. No-op if KG unavailable."""
+        if not _KG_MODULE_AVAILABLE or self._kg is None:
+            return
+        try:
+            events = self._kg.promote()
+            if events:
+                promoted = sum(
+                    1 for e in events
+                    if e.get("from") == "active" and e.get("to") == "promoted"
+                )
+                hardened = sum(1 for e in events if e.get("to") == "hardened")
+                demoted = sum(
+                    1 for e in events
+                    if e.get("from") == "hardened" and e.get("to") == "promoted"
+                )
+                logger.info(
+                    "KG promotion: %d promoted, %d hardened, %d demoted",
+                    promoted, hardened, demoted,
+                )
+            else:
+                logger.info("KG promotion: no changes")
+        except Exception as exc:
+            logger.warning("KG promotion failed (continuing): %s", exc)
 
     # ── GATE: deterministic ExecGate checks (EG2–EG5) ─────────────
 

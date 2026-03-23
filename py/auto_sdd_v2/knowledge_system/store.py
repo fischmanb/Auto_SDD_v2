@@ -428,55 +428,145 @@ class KnowledgeStore:
     def promote(self) -> list[dict[str, Any]]:
         """
         Run promotion rules and return a list of promotion event records.
+        Idempotent: running twice produces the same result.
 
         Rules:
-          active   → promoted : node was injected in ≥1 successful build
-          promoted → hardened : node was injected in ≥3 successful builds
-                                across ≥2 distinct campaigns
-                                with overall success_rate ≥ 0.5
+          active   → promoted : ≥1 successful injection + well-defined scope
+                                (scope: stack is not None OR content length ≥ 20)
+          promoted → hardened : ≥3 successful injections + lift > 0
+          hardened → promoted : ≥5 total injections + lift ≤ 0  (demotion)
         """
         events: list[dict[str, Any]] = []
 
-        # Collect per-node outcome statistics
-        all_nodes = self._conn.execute(
-            "SELECT id, status FROM nodes WHERE status IN ('active', 'promoted')"
+        # Promotion candidates (active and promoted nodes)
+        promotable = self._conn.execute(
+            "SELECT id, status, stack, content FROM nodes WHERE status IN ('active', 'promoted')"
         ).fetchall()
 
-        for node_row in all_nodes:
+        for node_row in promotable:
             node_id = node_row["id"]
             current_status = node_row["status"]
+            stack = node_row["stack"]
+            content = node_row["content"] or ""
 
             stats = self._outcome_stats(node_id)
             total = stats["total"]
             successes = stats["successes"]
-            campaigns = stats["distinct_campaigns"]
 
             if total == 0:
                 continue
 
-            success_rate = successes / total
-
             if current_status == "active" and successes >= 1:
-                self._apply_promotion(
-                    node_id,
-                    from_status="active",
-                    to_status="promoted",
-                    rule="active→promoted: ≥1 successful injection",
-                    evidence=stats,
-                )
-                events.append({"node_id": node_id, "from": "active", "to": "promoted"})
+                # Scope check: stack known OR content is substantive (≥ 20 chars)
+                scope_ok = (stack is not None) or (len(content.strip()) >= 20)
+                if scope_ok:
+                    self._apply_promotion(
+                        node_id,
+                        from_status="active",
+                        to_status="promoted",
+                        rule="active→promoted: ≥1 successful injection, scope well-defined",
+                        evidence=stats,
+                    )
+                    events.append({"node_id": node_id, "from": "active", "to": "promoted"})
 
-            elif current_status == "promoted" and successes >= 3 and campaigns >= 2 and success_rate >= 0.5:
+            elif current_status == "promoted" and successes >= 3:
+                lift = self.calculate_lift(node_id)
+                if lift > 0:
+                    self._apply_promotion(
+                        node_id,
+                        from_status="promoted",
+                        to_status="hardened",
+                        rule=f"promoted→hardened: ≥3 successes, lift={lift:.4f}",
+                        evidence={**stats, "lift": lift},
+                    )
+                    events.append(
+                        {"node_id": node_id, "from": "promoted", "to": "hardened", "lift": lift}
+                    )
+
+        # Demotion: hardened → promoted when lift ≤ 0 after ≥5 injections
+        hardened_nodes = self._conn.execute(
+            "SELECT id FROM nodes WHERE status = 'hardened'"
+        ).fetchall()
+
+        for node_row in hardened_nodes:
+            node_id = node_row["id"]
+            stats = self._outcome_stats(node_id)
+            if stats["total"] < 5:
+                continue
+            lift = self.calculate_lift(node_id)
+            if lift <= 0:
                 self._apply_promotion(
                     node_id,
-                    from_status="promoted",
-                    to_status="hardened",
-                    rule="promoted→hardened: ≥3 successes, ≥2 campaigns, rate≥0.5",
-                    evidence=stats,
+                    from_status="hardened",
+                    to_status="promoted",
+                    rule=f"hardened→promoted (demotion): ≥5 injections, lift={lift:.4f}",
+                    evidence={**stats, "lift": lift},
                 )
-                events.append({"node_id": node_id, "from": "promoted", "to": "hardened"})
+                events.append(
+                    {"node_id": node_id, "from": "hardened", "to": "promoted", "lift": lift}
+                )
 
         return events
+
+    def calculate_lift(self, node_id: str) -> float:
+        """Calculate success rate lift when this node was injected vs baseline.
+
+        lift = with_rate - baseline_rate
+
+        where:
+          with_rate     = success rate across builds where node_id was injected
+          baseline_rate = success rate across builds where node_id was NOT injected
+
+        Returns 0.0 if no outcomes exist with this node injected.
+        When no baseline builds exist (all recorded builds used this node),
+        baseline_rate is treated as 0.0 so lift equals with_rate.
+
+        Deterministic pure SQL arithmetic — no LLM judgment.
+        """
+        like_pattern = f'%"{node_id}"%'
+
+        # Success rate when node was injected
+        with_row = self._conn.execute(
+            """
+            SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN outcome = 'success' THEN 1 ELSE 0 END) AS successes
+            FROM build_outcomes
+            WHERE node_ids_injected LIKE ?
+            """,
+            (like_pattern,),
+        ).fetchone()
+
+        with_total = with_row["total"] or 0
+        with_successes = int(with_row["successes"] or 0)
+
+        if with_total == 0:
+            return 0.0
+
+        with_rate = with_successes / with_total
+
+        # Baseline: all outcomes where this node was NOT injected
+        baseline_row = self._conn.execute(
+            """
+            SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN outcome = 'success' THEN 1 ELSE 0 END) AS successes
+            FROM build_outcomes
+            WHERE node_ids_injected IS NULL
+               OR node_ids_injected NOT LIKE ?
+            """,
+            (like_pattern,),
+        ).fetchone()
+
+        baseline_total = baseline_row["total"] or 0
+        baseline_successes = int(baseline_row["successes"] or 0)
+
+        if baseline_total == 0:
+            # No baseline builds — return with_rate (baseline treated as 0.0)
+            return with_rate
+
+        baseline_rate = baseline_successes / baseline_total
+        return with_rate - baseline_rate
 
     def _apply_promotion(
         self,
@@ -555,7 +645,15 @@ class KnowledgeStore:
     # ── Diagnostics ───────────────────────────────────────────────────────────
 
     def stats(self) -> dict[str, Any]:
-        """Return graph statistics for diagnostics and health checks."""
+        """Return graph statistics for diagnostics and health checks.
+
+        Includes:
+          - node/edge/outcome/promotion counts
+          - by_status / by_type breakdowns
+          - promotion_pipeline: alias of by_status for clarity
+          - promotion_candidates: promoted nodes close to hardening threshold
+          - hardened_with_lift: hardened nodes with their measured lift scores
+        """
         node_count = self._conn.execute("SELECT COUNT(*) FROM nodes").fetchone()[0]
         edge_count = self._conn.execute("SELECT COUNT(*) FROM edges").fetchone()[0]
         outcome_count = self._conn.execute("SELECT COUNT(*) FROM build_outcomes").fetchone()[0]
@@ -573,6 +671,39 @@ class KnowledgeStore:
         ).fetchall():
             by_type[row["node_type"]] = row["cnt"]
 
+        # Promotion candidates: promoted nodes with ≥2 successes (1 away from threshold)
+        promoted_rows = self._conn.execute(
+            "SELECT id, title FROM nodes WHERE status = 'promoted'"
+        ).fetchall()
+        promotion_candidates: list[dict[str, Any]] = []
+        for prow in promoted_rows:
+            pstats = self._outcome_stats(prow["id"])
+            if pstats["successes"] >= 2:
+                lift = self.calculate_lift(prow["id"])
+                promotion_candidates.append({
+                    "id": prow["id"],
+                    "title": (prow["title"] or "")[:100],
+                    "successes": pstats["successes"],
+                    "lift": round(lift, 4),
+                })
+        promotion_candidates.sort(
+            key=lambda x: (x["successes"], x["lift"]), reverse=True
+        )
+
+        # Hardened nodes with lift scores
+        hardened_rows = self._conn.execute(
+            "SELECT id, title FROM nodes WHERE status = 'hardened'"
+        ).fetchall()
+        hardened_with_lift: list[dict[str, Any]] = []
+        for hrow in hardened_rows:
+            lift = self.calculate_lift(hrow["id"])
+            hardened_with_lift.append({
+                "id": hrow["id"],
+                "title": (hrow["title"] or "")[:100],
+                "lift": round(lift, 4),
+            })
+        hardened_with_lift.sort(key=lambda x: x["lift"], reverse=True)
+
         return {
             "nodes": node_count,
             "edges": edge_count,
@@ -580,6 +711,9 @@ class KnowledgeStore:
             "promotions": promotion_count,
             "by_status": by_status,
             "by_type": by_type,
+            "promotion_pipeline": by_status,
+            "promotion_candidates": promotion_candidates,
+            "hardened_with_lift": hardened_with_lift,
         }
 
     # ── Internal helpers ──────────────────────────────────────────────────────

@@ -255,7 +255,8 @@ class TestPromote:
         assert events == []
 
     def test_active_to_promoted_on_success(self, store):
-        store.add_node("instance", "A", "A", node_id="L-00001")
+        # Node with a stack satisfies the scope check
+        store.add_node("instance", "A", "A", node_id="L-00001", stack="python")
         store.record_outcome(
             "feature", 1, "success",
             campaign_id="c1",
@@ -296,9 +297,10 @@ class TestPromote:
         assert node is not None
         assert node["status"] == "hardened"
 
-    def test_promoted_not_hardened_without_enough_campaigns(self, store):
+    def test_promoted_to_hardened_single_campaign(self, store):
+        # Campaign diversity is no longer required — lift > 0 is the sole gate.
+        # 3 successes from 1 campaign, no baseline → lift = 1.0 > 0 → hardens.
         store.add_node("instance", "A", "A", node_id="L-00001", status="promoted")
-        # 3 successes but only 1 campaign
         for i in range(3):
             store.record_outcome(
                 "feature", i + 1, "success",
@@ -306,7 +308,10 @@ class TestPromote:
                 node_ids_injected=["L-00001"],
             )
         events = store.promote()
-        assert not any(e.get("to") == "hardened" for e in events)
+        assert any(e["node_id"] == "L-00001" and e["to"] == "hardened" for e in events)
+        node = store.get_node("L-00001")
+        assert node is not None
+        assert node["status"] == "hardened"
 
     def test_hardened_node_not_re_promoted(self, store):
         store.add_node("instance", "A", "A", node_id="L-00001", status="hardened")
@@ -319,7 +324,7 @@ class TestPromote:
         assert events == []  # hardened is not in promotion candidates
 
     def test_promotion_recorded_in_promotions_table(self, store):
-        store.add_node("instance", "A", "A", node_id="L-00001")
+        store.add_node("instance", "A", "A", node_id="L-00001", stack="python")
         store.record_outcome(
             "feature", 1, "success",
             campaign_id="c1",
@@ -330,3 +335,232 @@ class TestPromote:
             "SELECT COUNT(*) FROM promotions WHERE node_id = 'L-00001'"
         ).fetchone()[0]
         assert count == 1
+
+
+# ── Stage 3: calculate_lift ───────────────────────────────────────────────────
+
+
+class TestCalculateLift:
+    def test_zero_when_no_outcomes(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001")
+        assert store.calculate_lift("L-00001") == 0.0
+
+    def test_equals_with_rate_when_no_baseline(self, store):
+        # All 3 builds used L-00001 → baseline is empty → lift = with_rate = 1.0
+        store.add_node("instance", "A", "A", node_id="L-00001")
+        for i in range(3):
+            store.record_outcome(
+                "feat", i + 1, "success",
+                node_ids_injected=["L-00001"],
+            )
+        lift = store.calculate_lift("L-00001")
+        assert lift == pytest.approx(1.0)
+
+    def test_positive_when_injected_beats_baseline(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001")
+        # 3 successes when injected (100%)
+        for i in range(3):
+            store.record_outcome("feat", i + 1, "success", node_ids_injected=["L-00001"])
+        # 1 success, 1 failure without this node (50%)
+        store.record_outcome("other-feat", 1, "success")
+        store.record_outcome("other-feat", 2, "failure")
+        lift = store.calculate_lift("L-00001")
+        # with_rate=1.0, baseline_rate=0.5 → lift=0.5
+        assert lift == pytest.approx(0.5)
+
+    def test_negative_when_injected_underperforms_baseline(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001")
+        # 1 success, 3 failures when injected (25%)
+        for i in range(3):
+            store.record_outcome("feat", i + 1, "failure", node_ids_injected=["L-00001"])
+        store.record_outcome("feat", 4, "success", node_ids_injected=["L-00001"])
+        # 4 successes without this node (100%)
+        for i in range(4):
+            store.record_outcome("other-feat", i + 1, "success")
+        lift = store.calculate_lift("L-00001")
+        # with_rate=0.25, baseline_rate=1.0 → lift=-0.75
+        assert lift == pytest.approx(-0.75)
+
+    def test_zero_when_never_injected_but_outcomes_exist(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001")
+        store.record_outcome("other-feat", 1, "success")  # no node_ids_injected
+        lift = store.calculate_lift("L-00001")
+        assert lift == 0.0
+
+    def test_deterministic_on_repeated_calls(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001")
+        store.record_outcome("feat", 1, "success", node_ids_injected=["L-00001"])
+        store.record_outcome("other", 1, "failure")
+        lift1 = store.calculate_lift("L-00001")
+        lift2 = store.calculate_lift("L-00001")
+        assert lift1 == lift2
+
+
+# ── Stage 3: scope check (active → promoted) ─────────────────────────────────
+
+
+class TestPromoteScopeCheck:
+    def test_not_promoted_without_stack_and_short_content(self, store):
+        # No stack, content < 20 chars — scope check fails
+        store.add_node("instance", "T", "short", node_id="L-00001")
+        store.record_outcome("feat", 1, "success", node_ids_injected=["L-00001"])
+        events = store.promote()
+        assert events == []
+        node = store.get_node("L-00001")
+        assert node is not None
+        assert node["status"] == "active"
+
+    def test_promoted_with_stack_regardless_of_content_length(self, store):
+        # Stack present → scope check passes even with short content
+        store.add_node("instance", "T", "x", node_id="L-00001", stack="python")
+        store.record_outcome("feat", 1, "success", node_ids_injected=["L-00001"])
+        events = store.promote()
+        assert any(e["node_id"] == "L-00001" and e["to"] == "promoted" for e in events)
+
+    def test_promoted_with_long_content_no_stack(self, store):
+        # No stack but content >= 20 chars → scope check passes
+        store.add_node(
+            "instance", "Title", "This content is long enough to pass", node_id="L-00001"
+        )
+        store.record_outcome("feat", 1, "success", node_ids_injected=["L-00001"])
+        events = store.promote()
+        assert any(e["node_id"] == "L-00001" and e["to"] == "promoted" for e in events)
+
+
+# ── Stage 3: demotion (hardened → promoted) ──────────────────────────────────
+
+
+class TestPromoteDemotion:
+    def _make_hardened(self, store: "KnowledgeStore") -> None:
+        store.add_node("instance", "A", "A", node_id="L-00001", status="hardened")
+
+    def test_hardened_demoted_when_lift_drops(self, store):
+        self._make_hardened(store)
+        # 1 success, 4 failures when injected (20%)
+        store.record_outcome("feat", 1, "success", node_ids_injected=["L-00001"])
+        for i in range(4):
+            store.record_outcome("feat", i + 2, "failure", node_ids_injected=["L-00001"])
+        # 5 successes in baseline (100%)
+        for i in range(5):
+            store.record_outcome("other", i + 1, "success")
+        # lift = 0.2 - 1.0 = -0.8 ≤ 0, total = 5 ≥ 5 → demote
+        events = store.promote()
+        assert any(
+            e["node_id"] == "L-00001" and e["from"] == "hardened" and e["to"] == "promoted"
+            for e in events
+        )
+        node = store.get_node("L-00001")
+        assert node is not None
+        assert node["status"] == "promoted"
+
+    def test_hardened_not_demoted_with_fewer_than_5_injections(self, store):
+        self._make_hardened(store)
+        # Only 4 builds with this node — threshold not met
+        for i in range(4):
+            store.record_outcome("feat", i + 1, "failure", node_ids_injected=["L-00001"])
+        for i in range(4):
+            store.record_outcome("other", i + 1, "success")
+        events = store.promote()
+        demotions = [e for e in events if e.get("from") == "hardened"]
+        assert demotions == []
+        node = store.get_node("L-00001")
+        assert node is not None
+        assert node["status"] == "hardened"
+
+    def test_hardened_not_demoted_when_lift_positive(self, store):
+        self._make_hardened(store)
+        # 5 successes when injected (100%)
+        for i in range(5):
+            store.record_outcome("feat", i + 1, "success", node_ids_injected=["L-00001"])
+        # 5 failures in baseline (0%)
+        for i in range(5):
+            store.record_outcome("other", i + 1, "failure")
+        # lift = 1.0 - 0.0 = 1.0 > 0 → no demotion
+        events = store.promote()
+        demotions = [e for e in events if e.get("from") == "hardened"]
+        assert demotions == []
+
+    def test_demotion_recorded_in_promotions_table(self, store):
+        self._make_hardened(store)
+        for i in range(5):
+            store.record_outcome("feat", i + 1, "failure", node_ids_injected=["L-00001"])
+        for i in range(5):
+            store.record_outcome("other", i + 1, "success")
+        store.promote()
+        rows = store._conn.execute(
+            "SELECT * FROM promotions WHERE node_id='L-00001' AND to_status='promoted'"
+        ).fetchall()
+        assert len(rows) == 1
+        assert rows[0]["from_status"] == "hardened"
+
+
+# ── Stage 3: idempotency ──────────────────────────────────────────────────────
+
+
+class TestPromoteIdempotency:
+    def test_double_run_no_duplicate_events(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001", stack="python")
+        store.record_outcome("feat", 1, "success", node_ids_injected=["L-00001"])
+        events1 = store.promote()
+        events2 = store.promote()
+        assert len(events1) == 1
+        assert len(events2) == 0  # Already promoted; no new events
+
+    def test_already_promoted_stays_promoted(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001", stack="python")
+        store.record_outcome("feat", 1, "success", node_ids_injected=["L-00001"])
+        store.promote()
+        node = store.get_node("L-00001")
+        assert node is not None
+        assert node["status"] == "promoted"
+        store.promote()
+        node = store.get_node("L-00001")
+        assert node is not None
+        assert node["status"] == "promoted"
+
+    def test_hardened_stays_hardened_when_lift_positive(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001", status="promoted")
+        for i in range(3):
+            store.record_outcome("feat", i + 1, "success", node_ids_injected=["L-00001"])
+        store.promote()
+        store.promote()  # second run
+        node = store.get_node("L-00001")
+        assert node is not None
+        assert node["status"] == "hardened"
+
+
+# ── Stage 3: enhanced stats ───────────────────────────────────────────────────
+
+
+class TestStatsEnhanced:
+    def test_stats_includes_hardened_with_lift(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001", status="hardened")
+        store.record_outcome("feat", 1, "success", node_ids_injected=["L-00001"])
+        s = store.stats()
+        assert "hardened_with_lift" in s
+        assert isinstance(s["hardened_with_lift"], list)
+        assert len(s["hardened_with_lift"]) == 1
+        entry = s["hardened_with_lift"][0]
+        assert entry["id"] == "L-00001"
+        assert "lift" in entry
+
+    def test_stats_includes_promotion_candidates(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001", status="promoted")
+        for i in range(2):
+            store.record_outcome("feat", i + 1, "success", node_ids_injected=["L-00001"])
+        s = store.stats()
+        assert "promotion_candidates" in s
+        ids = [c["id"] for c in s["promotion_candidates"]]
+        assert "L-00001" in ids
+
+    def test_stats_promotion_pipeline_matches_by_status(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001", status="hardened")
+        store.add_node("instance", "B", "B", node_id="L-00002", status="promoted")
+        s = store.stats()
+        assert s["promotion_pipeline"] == s["by_status"]
+
+    def test_stats_empty_store(self, store):
+        s = store.stats()
+        assert s["hardened_with_lift"] == []
+        assert s["promotion_candidates"] == []
+        assert s["promotion_pipeline"] == {}

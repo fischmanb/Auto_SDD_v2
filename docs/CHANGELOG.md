@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-03-23 (session 11)
+
+### Knowledge system — Stage 3: promotion job
+
+Automated knowledge lifecycle: instance → validated → hardened clue.
+
+- **active → promoted** (fast track): ≥1 successful injection + well-defined scope (stack known OR content ≥ 20 chars). One successful application is all that's needed.
+- **promoted → hardened** (measured lift): ≥3 successful injections + lift > 0. Lift = success rate when injected minus baseline success rate across builds that did NOT use the node. Replaces the old "campaigns ≥ 2, rate ≥ 0.5" rule — lift is the single empirical gate.
+- **Demotion**: hardened → promoted when ≥5 total injections and lift ≤ 0. Hardened clues that stop helping get demoted automatically.
+- Lift calculation is deterministic SQL arithmetic (no LLM judgment).
+- Promotion runs automatically after each campaign via `BuildLoopV2._run_promotion()`.
+- Standalone CLI: `python -m auto_sdd_v2.knowledge_system.promotion [--db-path PATH]`.
+- `stats()` enhanced: `promotion_pipeline`, `promotion_candidates` (promoted nodes within 1 success of hardening), `hardened_with_lift` (lift scores for all hardened clues).
+
+**New file:** `py/auto_sdd_v2/knowledge_system/promotion.py` — standalone runner, `run_promotion(db_path)` function, `main()` CLI entry point. Returns all-zero summary on any error (KG failure never blocks builds).
+
+**Tests:** `py/tests/test_knowledge_system/test_promotion.py` (7 tests) + 30 new tests in `test_store.py` covering lift calculation, scope check, demotion, idempotency, enhanced stats, and edge cases. All existing tests updated to match new promotion rules.
+
+**Nodes at each status tier** (populated on first campaign run after migration): active=N, promoted=N, hardened=N.
+
+---
+
 ## 2026-03-23 (session 10)
 
 ### Knowledge system — Stage 2: build loop integration
