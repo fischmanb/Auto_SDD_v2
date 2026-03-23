@@ -5,6 +5,27 @@
 
 ---
 
+## 2026-03-23 (session 10)
+
+### Knowledge system — Stage 2: build loop integration
+
+Wired `KnowledgeStore` into the build pipeline at three injection points:
+- **Pre-build (spec generation):** Universal + hardened learnings injected into `spec_first_user_prompt()` to inform spec writing.
+- **Build prompt:** Relevant knowledge queried by stack + spec content, injected into `_build_user_prompt()`. On retry, error patterns narrow the query.
+- **System prompt:** Hardened clues injected alongside blocked patterns.
+
+Post-gate capture hook (`_kg_post_gate`) records build outcomes and extracts learnings from both success and failure paths. Mistake nodes created from gate errors with stack + error pattern for future matching.
+
+Migration run against existing learnings files (auto-sdd project): **170 nodes, 127 edges created**.
+
+All injection is optional — KG failure degrades gracefully without blocking builds.
+
+**New file:** `py/auto_sdd_v2/knowledge_system/build_integration.py` — all integration helpers (init, query, post-gate, candidate extraction). All functions are None-safe.
+
+**Tests:** `py/tests/test_knowledge_system/test_build_integration.py` — 28 tests covering all integration points, token caps, graceful degradation, and edge cases.
+
+---
+
 ## 2026-03-19 (session 9)
 
 ### Parallel feature builds — deferred EG3/EG4 architecture (Auto_SDD_v2.2)
