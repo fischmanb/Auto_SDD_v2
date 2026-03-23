@@ -266,7 +266,7 @@ def kg_post_gate(
                 node_id = store.add_node(
                     node_type="instance",
                     title=candidate_text[:200],
-                    content=candidate_text,
+                    content=candidate_text[:2000],
                     stack=stack,
                     campaign_id=campaign_id,
                     metadata={

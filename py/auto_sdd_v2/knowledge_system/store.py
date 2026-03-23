@@ -483,7 +483,10 @@ class KnowledgeStore:
                         {"node_id": node_id, "from": "promoted", "to": "hardened", "lift": lift}
                     )
 
-        # Demotion: hardened → promoted when lift ≤ 0 after ≥5 injections
+        # Demotion: hardened → promoted when lift ≤ 0 after ≥5 injections.
+        # Re-hardening after demotion is intentional — the lift gate is authoritative.
+        # If a demoted node accumulates enough successful injections to push lift > 0
+        # again, it will reharden on the next promotion run without any special case.
         hardened_nodes = self._conn.execute(
             "SELECT id FROM nodes WHERE status = 'hardened'"
         ).fetchall()
@@ -523,7 +526,8 @@ class KnowledgeStore:
 
         Deterministic pure SQL arithmetic — no LLM judgment.
         """
-        like_pattern = f'%"{node_id}"%'
+        # Use json_each() for exact element membership — avoids substring collision
+        # when IDs share a prefix (e.g. L-00001 vs L-000010).
 
         # Success rate when node was injected
         with_row = self._conn.execute(
@@ -532,9 +536,11 @@ class KnowledgeStore:
                 COUNT(*) AS total,
                 SUM(CASE WHEN outcome = 'success' THEN 1 ELSE 0 END) AS successes
             FROM build_outcomes
-            WHERE node_ids_injected LIKE ?
+            WHERE EXISTS (
+                SELECT 1 FROM json_each(node_ids_injected) WHERE value = ?
+            )
             """,
-            (like_pattern,),
+            (node_id,),
         ).fetchone()
 
         with_total = with_row["total"] or 0
@@ -553,9 +559,11 @@ class KnowledgeStore:
                 SUM(CASE WHEN outcome = 'success' THEN 1 ELSE 0 END) AS successes
             FROM build_outcomes
             WHERE node_ids_injected IS NULL
-               OR node_ids_injected NOT LIKE ?
+               OR NOT EXISTS (
+                   SELECT 1 FROM json_each(node_ids_injected) WHERE value = ?
+               )
             """,
-            (like_pattern,),
+            (node_id,),
         ).fetchone()
 
         baseline_total = baseline_row["total"] or 0
@@ -593,20 +601,20 @@ class KnowledgeStore:
     def _outcome_stats(self, node_id: str) -> dict[str, Any]:
         """Compute success/failure stats for a node across all recorded outcomes.
 
-        Uses SQL filtering on the JSON array column to avoid a full Python-side
-        table scan (O(N) per node instead of O(N×M)).
+        Uses json_each() for exact element membership — avoids substring collision
+        when IDs share a prefix (e.g. L-00001 vs L-000010).
         """
-        like_pattern = f'%"{node_id}"%'
-
         counts_row = self._conn.execute(
             """
             SELECT
                 COUNT(*) AS total,
                 SUM(CASE WHEN outcome = 'success' THEN 1 ELSE 0 END) AS successes
             FROM build_outcomes
-            WHERE node_ids_injected LIKE ?
+            WHERE EXISTS (
+                SELECT 1 FROM json_each(node_ids_injected) WHERE value = ?
+            )
             """,
-            (like_pattern,),
+            (node_id,),
         ).fetchone()
 
         total = counts_row["total"] or 0
@@ -616,11 +624,13 @@ class KnowledgeStore:
             """
             SELECT DISTINCT campaign_id
             FROM build_outcomes
-            WHERE node_ids_injected LIKE ?
+            WHERE EXISTS (
+                SELECT 1 FROM json_each(node_ids_injected) WHERE value = ?
+            )
               AND outcome = 'success'
               AND campaign_id IS NOT NULL
             """,
-            (like_pattern,),
+            (node_id,),
         ).fetchall()
         distinct_campaigns = len(campaigns_rows)
 
@@ -711,10 +721,50 @@ class KnowledgeStore:
             "promotions": promotion_count,
             "by_status": by_status,
             "by_type": by_type,
-            "promotion_pipeline": by_status,
+            "promotion_pipeline": dict(by_status),
             "promotion_candidates": promotion_candidates,
             "hardened_with_lift": hardened_with_lift,
         }
+
+    # ── Public migration helpers ──────────────────────────────────────────────
+
+    def get_all_node_ids(self) -> set[str]:
+        """Return the set of all node IDs currently in the store."""
+        rows = self._conn.execute("SELECT id FROM nodes").fetchall()
+        return {row["id"] for row in rows}
+
+    def edge_exists(self, source_id: str, target_id: str, edge_type: str) -> bool:
+        """Return True if a directed edge (source→target, type) already exists."""
+        row = self._conn.execute(
+            "SELECT id FROM edges WHERE source_id=? AND target_id=? AND edge_type=?",
+            (source_id, target_id, edge_type),
+        ).fetchone()
+        return row is not None
+
+    def get_nodes_by_type(self, node_type: str) -> list[dict[str, Any]]:
+        """Return all nodes with the given node_type as a list of dicts."""
+        rows = self._conn.execute(
+            "SELECT id, title, content FROM nodes WHERE node_type = ?",
+            (node_type,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+    def update_node_type_batch(self, updates: list[tuple[str, str]]) -> None:
+        """Bulk-update node types. *updates* is a list of (new_type, node_id) tuples."""
+        if not updates:
+            return
+        self._conn.executemany(
+            "UPDATE nodes SET node_type = ? WHERE id = ?",
+            updates,
+        )
+        self._conn.commit()
+
+    def get_type_distribution(self) -> dict[str, int]:
+        """Return a mapping of node_type → count across all nodes."""
+        rows = self._conn.execute(
+            "SELECT node_type, COUNT(*) AS cnt FROM nodes GROUP BY node_type"
+        ).fetchall()
+        return {row["node_type"]: row["cnt"] for row in rows}
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 

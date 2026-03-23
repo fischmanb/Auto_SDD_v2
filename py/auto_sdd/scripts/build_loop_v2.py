@@ -752,6 +752,8 @@ class BuildLoopV2:
 
         self._write_summary(total_duration)
         self._run_promotion()
+        if self._kg:
+            self._kg.close()
 
         # Post-campaign cleanup
         cleanup_merged_branches(self.project_dir, self.main_branch)

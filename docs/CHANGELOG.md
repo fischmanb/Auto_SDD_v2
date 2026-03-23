@@ -5,6 +5,24 @@
 
 ---
 
+## 2026-03-23 (session 12)
+
+### Knowledge system — final review fixes
+
+- `KnowledgeStore` explicitly closed at end of campaign in `BuildLoopV2._run_locked()` (S-1)
+- Promotion CLI distinguishes "no events" from error: error sets `"error": True` in return dict, prints warning to stderr, exits 1; zero-event success prints "No promotions needed" (S-2)
+- JSON containment check (`json_each()`) replaces LIKE pattern in `calculate_lift()` and `_outcome_stats()` — fixes ID substring collision at N > 99,999 nodes (S-3)
+- Migration uses public store API (`get_all_node_ids`, `edge_exists`, `get_nodes_by_type`, `update_node_type_batch`, `get_type_distribution`) — no more private `_conn` access (S-4)
+- `stats()["promotion_pipeline"]` is now a copy of `by_status`, not an alias (N-1)
+- CHANGELOG Stage 3 node count placeholders filled: active=169, promoted=0, hardened=0, deprecated=1 (N-2)
+- Comment added in `promote()` explaining re-hardening after demotion is intentional (N-3)
+- Boundary tests added: `lift=0.0` must not harden, demotion idempotency, re-hardening after demotion when lift recovers (N-4)
+- `LEARNING_CANDIDATE` content capped at 2000 chars before storing as node content (N-5)
+
+**Tests:** 185 knowledge system tests, 620 total — all passing.
+
+---
+
 ## 2026-03-23 (session 11)
 
 ### Knowledge system — Stage 3: promotion job
@@ -23,7 +41,7 @@ Automated knowledge lifecycle: instance → validated → hardened clue.
 
 **Tests:** `py/tests/test_knowledge_system/test_promotion.py` (7 tests) + 30 new tests in `test_store.py` covering lift calculation, scope check, demotion, idempotency, enhanced stats, and edge cases. All existing tests updated to match new promotion rules.
 
-**Nodes at each status tier** (populated on first campaign run after migration): active=N, promoted=N, hardened=N.
+**Nodes at each status tier** (post-migration, pre-campaign): active=169, promoted=0, hardened=0, deprecated=1.
 
 ---
 

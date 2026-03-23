@@ -55,7 +55,7 @@ def run_promotion(db_path: str) -> dict[str, int]:
 
     except Exception as exc:
         logger.warning("Promotion run failed (non-fatal): %s", exc)
-        return {"promoted": 0, "hardened": 0, "demoted": 0, "total": 0}
+        return {"promoted": 0, "hardened": 0, "demoted": 0, "total": 0, "error": True}
 
 
 def main() -> None:
@@ -83,13 +83,19 @@ def main() -> None:
     )
 
     summary = run_promotion(args.db_path)
-    print(
-        f"Promotion complete: "
-        f"{summary['promoted']} promoted, "
-        f"{summary['hardened']} hardened, "
-        f"{summary['demoted']} demoted "
-        f"({summary['total']} total events)"
-    )
+    if summary.get("error"):
+        print("WARNING: promotion run failed — check logs for details", file=sys.stderr)
+        sys.exit(1)
+    if summary["total"] == 0:
+        print("No promotions needed")
+    else:
+        print(
+            f"Promotion complete: "
+            f"{summary['promoted']} promoted, "
+            f"{summary['hardened']} hardened, "
+            f"{summary['demoted']} demoted "
+            f"({summary['total']} total events)"
+        )
     sys.exit(0)
 
 

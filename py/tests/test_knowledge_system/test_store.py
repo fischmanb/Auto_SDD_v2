@@ -564,3 +564,69 @@ class TestStatsEnhanced:
         assert s["hardened_with_lift"] == []
         assert s["promotion_candidates"] == []
         assert s["promotion_pipeline"] == {}
+
+
+# ── N-4: Boundary tests ───────────────────────────────────────────────────────
+
+
+class TestPromoteBoundary:
+    """Boundary conditions for promotion rules."""
+
+    def test_promoted_not_hardened_when_lift_is_exactly_zero(self, store):
+        # lift > 0 is required for hardening; lift = 0.0 exactly must NOT harden.
+        store.add_node("instance", "A", "A", node_id="L-00001", status="promoted")
+        # 3 successes when injected → with_rate = 1.0
+        for i in range(3):
+            store.record_outcome("feat", i + 1, "success", node_ids_injected=["L-00001"])
+        # 3 successes without injection → baseline_rate = 1.0
+        for i in range(3):
+            store.record_outcome("base", i + 1, "success")
+        # lift = 1.0 - 1.0 = 0.0 — not strictly > 0
+        assert store.calculate_lift("L-00001") == 0.0
+        events = store.promote()
+        assert not any(e.get("to") == "hardened" for e in events)
+        assert store.get_node("L-00001")["status"] == "promoted"  # type: ignore[index]
+
+    def test_demotion_idempotent(self, store):
+        # Calling promote() twice after demotion conditions are met leaves the
+        # node at "promoted" on both the first and second run.
+        store.add_node("instance", "A", "A", node_id="L-00001", status="hardened")
+        # 5 failures injected + 5 successes baseline → lift = -1.0 ≤ 0 → demote
+        for i in range(5):
+            store.record_outcome("feat", i + 1, "failure", node_ids_injected=["L-00001"])
+        for i in range(5):
+            store.record_outcome("base", i + 1, "success")
+        events1 = store.promote()
+        assert any(
+            e.get("from") == "hardened" and e.get("to") == "promoted" for e in events1
+        )
+        assert store.get_node("L-00001")["status"] == "promoted"  # type: ignore[index]
+        # Second run: node is already "promoted"; demotion only applies to hardened nodes
+        events2 = store.promote()
+        assert not any(e.get("from") == "hardened" for e in events2)
+        assert store.get_node("L-00001")["status"] == "promoted"  # type: ignore[index]
+
+    def test_rehardens_after_demotion_when_lift_improves(self, store):
+        # Re-hardening after demotion is intentional — the lift gate is authoritative.
+        # A node that was hardened, demoted, then accumulates enough positive outcomes
+        # will reharden on the next promotion run without any special case.
+        store.add_node("instance", "A", "A", node_id="L-00001", status="hardened")
+        # Phase 1: 5 failures injected + 10 successes baseline → lift = -1.0 → demote
+        for i in range(5):
+            store.record_outcome("feat1", i + 1, "failure", node_ids_injected=["L-00001"])
+        for i in range(10):
+            store.record_outcome("base1", i + 1, "success")
+        events1 = store.promote()
+        assert any(e.get("from") == "hardened" and e.get("to") == "promoted" for e in events1)
+        assert store.get_node("L-00001")["status"] == "promoted"  # type: ignore[index]
+        # Phase 2: 10 successes injected + 9 baseline failures
+        #   with: 15 total, 10 success → rate ≈ 0.667
+        #   baseline: 19 total, 10 success → rate ≈ 0.526
+        #   lift ≈ 0.141 > 0, successes ≥ 3 → reharden
+        for i in range(10):
+            store.record_outcome("feat2", i + 1, "success", node_ids_injected=["L-00001"])
+        for i in range(9):
+            store.record_outcome("base2", i + 1, "failure")
+        events2 = store.promote()
+        assert any(e.get("to") == "hardened" for e in events2)
+        assert store.get_node("L-00001")["status"] == "hardened"  # type: ignore[index]

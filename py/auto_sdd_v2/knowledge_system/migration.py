@@ -259,10 +259,7 @@ def migrate(
     edges_added = 0
 
     # Build ID set of nodes already in the store
-    existing = {
-        row["id"]
-        for row in store._conn.execute("SELECT id FROM nodes").fetchall()
-    }
+    existing = store.get_all_node_ids()
 
     for entry in entries:
         if entry.entry_id in existing:
@@ -313,11 +310,7 @@ def migrate(
         for related_id in entry.related:
             if entry.entry_id in existing and related_id in existing:
                 # Avoid duplicate edges: check first
-                dup = store._conn.execute(
-                    "SELECT id FROM edges WHERE source_id=? AND target_id=? AND edge_type='co_occurs'",
-                    (entry.entry_id, related_id),
-                ).fetchone()
-                if dup is None:
+                if not store.edge_exists(entry.entry_id, related_id, "co_occurs"):
                     try:
                         store.add_edge(entry.entry_id, related_id, "co_occurs")
                         edges_added += 1
@@ -400,9 +393,7 @@ def retype_nodes(
 
     Returns the full type distribution after retyping.
     """
-    rows = store._conn.execute(
-        "SELECT id, title, content FROM nodes WHERE node_type = 'instance'"
-    ).fetchall()
+    rows = store.get_nodes_by_type("instance")
 
     updates: list[tuple[str, str]] = []  # (new_type, node_id)
     for row in rows:
@@ -415,22 +406,14 @@ def retype_nodes(
             if verbose:
                 logger.info("  RETYPE %s → %s", node_id, new_type)
 
-    if updates:
-        store._conn.executemany(
-            "UPDATE nodes SET node_type = ? WHERE id = ?",
-            updates,
-        )
-        store._conn.commit()
+    store.update_node_type_batch(updates)
 
     logger.info(
         "retype_nodes: %d/%d instance nodes retyped",
         len(updates), len(rows),
     )
 
-    dist_rows = store._conn.execute(
-        "SELECT node_type, COUNT(*) AS cnt FROM nodes GROUP BY node_type"
-    ).fetchall()
-    return {row["node_type"]: row["cnt"] for row in dist_rows}
+    return store.get_type_distribution()
 
 
 # ── Default search paths ──────────────────────────────────────────────────────

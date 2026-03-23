@@ -71,10 +71,14 @@ class TestRunPromotion:
         assert summary == {"promoted": 0, "hardened": 0, "demoted": 0, "total": 0}
 
     def test_handles_bad_db_path_gracefully(self):
-        # Non-existent parent dir — should NOT raise, returns zero summary
+        # Non-existent parent dir — should NOT raise, returns zero summary with error flag
         # (SQLite will create the file, so we test with a genuinely bad path)
         summary = run_promotion("/dev/null/impossible/path/knowledge.db")
-        assert summary == {"promoted": 0, "hardened": 0, "demoted": 0, "total": 0}
+        assert summary["promoted"] == 0
+        assert summary["hardened"] == 0
+        assert summary["demoted"] == 0
+        assert summary["total"] == 0
+        assert summary.get("error") is True
 
     def test_idempotent_consecutive_runs(self, db_path, store):
         store.add_node("instance", "T", "A", node_id="L-00001", stack="python")
