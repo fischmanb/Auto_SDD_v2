@@ -326,6 +326,81 @@ class TestMigrateFunction:
         assert "L-00001" in ids
 
 
+# ── S-6: Integration test against real core.md / type-specific file format ───
+
+class TestRealFormatIntegration:
+    """S-6: Verify parser behaviour against the actual learnings file format."""
+
+    _CORE_MD_SNIPPET = textwrap.dedent("""\
+        ## L-00001 — Agent self-assessments are unreliable
+        **Source:** `failure-patterns.md`
+        **Why core:** Foundation learning.
+
+        Agent self-assessments have proven unreliable in practice.
+        Always use machine-checkable gates.
+    """)
+
+    _RICH_SNIPPET = textwrap.dedent("""\
+        ## L-00001 — Agent self-assessments are unreliable
+        type: instance
+        tags: reliability, agent-behavior
+        status: hardened
+        related: L-00016
+
+        Agent self-assessments have proven unreliable in practice.
+        Always use machine-checkable gates.
+    """)
+
+    def test_title_extracted_from_header(self, tmp_path):
+        """S-1: title after em-dash in header must be captured, not discarded."""
+        md = tmp_path / "core.md"
+        md.write_text(self._CORE_MD_SNIPPET)
+        entries = parse_file(str(md))
+        assert len(entries) == 1
+        e = entries[0]
+        assert e.entry_id == "L-00001"
+        assert e.title == "Agent self-assessments are unreliable"
+
+    def test_title_used_in_migration_not_source_line(self, store, tmp_path):
+        """S-1: migrate() must use header title, not '**Source:** failure-patterns'."""
+        md = tmp_path / "core.md"
+        md.write_text(self._CORE_MD_SNIPPET)
+        entries = parse_file(str(md))
+        migrate(store, entries)
+        node = store.get_node("L-00001")
+        assert node is not None
+        assert node["title"] == "Agent self-assessments are unreliable"
+        assert "Source" not in node["title"]
+
+    def test_rich_entry_wins_over_core_md_inline(self, tmp_path):
+        """B-1: type-specific file with tags/status/related must win over core.md inline."""
+        core = tmp_path / "core.md"
+        rich = tmp_path / "failure-patterns.md"
+        # core.md has the stripped inline format (no tags/status/related)
+        core.write_text("**L-00001:** Agent self-assessments are unreliable.\n")
+        # failure-patterns.md has the full graph-schema format
+        rich.write_text(self._RICH_SNIPPET)
+
+        # Parse core.md first (as _DEFAULT_PATHS orders it), then rich file
+        entries = parse_files([str(core), str(rich)])
+        l_entries = [e for e in entries if e.entry_id == "L-00001"]
+        assert len(l_entries) == 1
+        winner = l_entries[0]
+        # The richer entry must win
+        assert winner.status_hint == "hardened"
+        assert "reliability" in winner.tags
+        assert "L-00016" in winner.related
+
+    def test_content_parsed_correctly_from_real_format(self, tmp_path):
+        """Block body must not start with the **Source:** frontmatter line."""
+        md = tmp_path / "core.md"
+        md.write_text(self._CORE_MD_SNIPPET)
+        entries = parse_file(str(md))
+        assert len(entries) == 1
+        # Content should contain the actual learning text
+        assert "Agent self-assessments have proven unreliable" in entries[0].content
+
+
 # ── find_learnings_files ──────────────────────────────────────────────────────
 
 class TestFindLearningsFiles:

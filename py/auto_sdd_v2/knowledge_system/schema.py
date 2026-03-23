@@ -16,7 +16,7 @@ FTS:
 import sqlite3
 from datetime import datetime, timezone
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 # Valid enum values — checked by application layer (SQLite CHECK constraints duplicate here)
 NODE_TYPES = frozenset({"universal", "framework", "technology", "instance", "mistake", "meta"})
@@ -58,7 +58,8 @@ CREATE TABLE IF NOT EXISTS edges (
                         CHECK(edge_type IN ('generalizes','contradicts','supersedes','co_occurs','caused_by','resolved_by')),
     weight      REAL    NOT NULL DEFAULT 1.0,
     context     TEXT,
-    created_at  TEXT    NOT NULL
+    created_at  TEXT    NOT NULL,
+    UNIQUE(source_id, target_id, edge_type)
 );
 
 CREATE TABLE IF NOT EXISTS promotions (
@@ -120,6 +121,31 @@ CREATE INDEX IF NOT EXISTS idx_outcomes_node ON build_outcomes(node_ids_injected
 CREATE INDEX IF NOT EXISTS idx_outcomes_feat ON build_outcomes(feature_name);
 """
 
+# Migration from schema version 1 → 2:
+# Adds UNIQUE(source_id, target_id, edge_type) to the edges table.
+# SQLite does not support ADD CONSTRAINT, so we use the rename-copy method.
+_MIGRATION_V1_TO_V2 = """
+PRAGMA foreign_keys=OFF;
+ALTER TABLE edges RENAME TO edges_v1;
+CREATE TABLE edges (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_id   TEXT    NOT NULL REFERENCES nodes(id),
+    target_id   TEXT    NOT NULL REFERENCES nodes(id),
+    edge_type   TEXT    NOT NULL
+                        CHECK(edge_type IN ('generalizes','contradicts','supersedes','co_occurs','caused_by','resolved_by')),
+    weight      REAL    NOT NULL DEFAULT 1.0,
+    context     TEXT,
+    created_at  TEXT    NOT NULL,
+    UNIQUE(source_id, target_id, edge_type)
+);
+INSERT OR IGNORE INTO edges(id, source_id, target_id, edge_type, weight, context, created_at)
+    SELECT id, source_id, target_id, edge_type, weight, context, created_at FROM edges_v1;
+DROP TABLE edges_v1;
+CREATE INDEX IF NOT EXISTS idx_edges_source ON edges(source_id);
+CREATE INDEX IF NOT EXISTS idx_edges_target ON edges(target_id);
+PRAGMA foreign_keys=ON;
+"""
+
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -133,6 +159,7 @@ def init_db(db_path: str) -> sqlite3.Connection:
     Idempotent: safe to call on an existing database.
     """
     conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row  # set before any queries (N-4)
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
 
@@ -142,7 +169,11 @@ def init_db(db_path: str) -> sqlite3.Connection:
     # Record schema version if not already present
     row = conn.execute("SELECT MAX(version) FROM schema_version").fetchone()
     current = row[0] if row and row[0] is not None else 0
+
     if current < SCHEMA_VERSION:
+        if current == 1:
+            # Upgrade existing v1 database: add UNIQUE constraint to edges
+            conn.executescript(_MIGRATION_V1_TO_V2)
         conn.execute(
             "INSERT INTO schema_version(version, applied_at) VALUES (?, ?)",
             (SCHEMA_VERSION, _now()),

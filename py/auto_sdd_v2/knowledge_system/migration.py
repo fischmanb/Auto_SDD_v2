@@ -8,7 +8,7 @@ Supported formats
      **M-00042:** Meta entry text.
 
 2. Full graph-schema format (block entries with optional frontmatter fields):
-     ## L-00001
+     ## L-00001 — Optional title here
      type: instance
      tags: reliability, agent-behavior
      confidence: 0.95
@@ -34,6 +34,7 @@ Idempotent: nodes already present (matched by ID) are silently skipped.
 
 import argparse
 import json
+import logging
 import os
 import re
 import sys
@@ -41,7 +42,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from auto_sdd_v2.knowledge_system._utils import detect_stack
 from auto_sdd_v2.knowledge_system.store import KnowledgeStore
+
+logger = logging.getLogger(__name__)
 
 # ── Data structures ───────────────────────────────────────────────────────────
 
@@ -49,6 +53,7 @@ from auto_sdd_v2.knowledge_system.store import KnowledgeStore
 class RawEntry:
     entry_id: str           # e.g. "L-00001"
     content: str            # full text body
+    title: str | None = None            # captured from block header (S-1)
     tags: list[str] = field(default_factory=list)
     node_type_hint: str | None = None   # from 'type:' field if present
     status_hint: str | None = None      # from 'status:' field
@@ -75,28 +80,6 @@ _STATUS_MAP: dict[str, str] = {
     "instance":   "active",     # old type-as-status labels
 }
 
-# ── Stack detection keywords ──────────────────────────────────────────────────
-
-_STACK_PATTERNS: list[tuple[str, list[str]]] = [
-    ("nextjs",     ["next.js", "nextjs", "next/", "app router", "use client", "use server"]),
-    ("react",      ["react", "jsx", "tsx", "usestate", "useffect", "component"]),
-    ("prisma",     ["prisma", "prisma client", "prisma schema"]),
-    ("tailwind",   ["tailwind", "tw-", "classname", "className"]),
-    ("typescript", ["typescript", "type error", ".ts", ".tsx", "mypy"]),
-    ("python",     ["python", ".py", "pytest", "mypy", "pydantic", "fastapi"]),
-    ("sqlite",     ["sqlite", "sqlite3", "fts5", "pragma"]),
-    ("git",        ["git ", "commit", "branch", "merge", "rebase", "stash"]),
-]
-
-
-def _detect_stack(text: str) -> str | None:
-    lower = text.lower()
-    for stack_name, hints in _STACK_PATTERNS:
-        if any(h in lower for h in hints):
-            return stack_name
-    return None
-
-
 # ── Parser ────────────────────────────────────────────────────────────────────
 
 # Matches: **L-00001:** or **M-00042:** (compressed inline format)
@@ -106,9 +89,10 @@ _INLINE_RE = re.compile(
     re.MULTILINE,
 )
 
-# Matches: ## L-00001 or # L-00001 (block format header)
+# Matches: ## L-00001 or ## L-00001 — Optional title here (block format header)
+# group(1) = ID, group(2) = optional title after em-dash/hyphen (S-1)
 _BLOCK_HEADER_RE = re.compile(
-    r"^#{1,3}\s+([LMUK]-\d{5})\b",
+    r"^#{1,3}\s+([LMUK]-\d{5})(?:\s+[—\-–]\s+(.+))?$",
     re.MULTILINE,
 )
 
@@ -117,6 +101,9 @@ _FIELD_RE = re.compile(
     r"^(type|tags|confidence|status|date|related)\s*:\s*(.+)$",
     re.IGNORECASE,
 )
+
+# Matches leading separator lines (--- or ----) (N-1)
+_SEPARATOR_RE = re.compile(r"^---+\s*\n?")
 
 
 def parse_file(path: str) -> list[RawEntry]:
@@ -158,6 +145,10 @@ def parse_file(path: str) -> list[RawEntry]:
         if entry_id in seen_ids:
             continue  # already captured inline
 
+        # Capture optional title from header (S-1)
+        raw_title = header_match.group(2)
+        entry_title = raw_title.strip() if raw_title else None
+
         # Segment: from end of header line to start of next header (or EOF)
         start = header_match.end()
         end = headers[i + 1].start() if i + 1 < len(headers) else len(text)
@@ -175,9 +166,9 @@ def parse_file(path: str) -> list[RawEntry]:
             elif line.strip() and not line.strip().startswith("#"):
                 break
 
-        # Body = lines after frontmatter, stripped of leading separators
+        # Body = lines after frontmatter, stripped of leading separator lines (N-1)
         body_lines = lines[body_start:]
-        body = "\n".join(body_lines).strip().lstrip("-").strip()
+        body = _SEPARATOR_RE.sub("", "\n".join(body_lines).strip()).strip()
 
         if not body:
             body = segment  # fallback: use full segment
@@ -208,6 +199,7 @@ def parse_file(path: str) -> list[RawEntry]:
         entries.append(RawEntry(
             entry_id=entry_id,
             content=body,
+            title=entry_title,
             tags=tags,
             node_type_hint=type_hint,
             status_hint=status_hint,
@@ -218,16 +210,33 @@ def parse_file(path: str) -> list[RawEntry]:
     return entries
 
 
+def _entry_richness(entry: RawEntry) -> int:
+    """Score an entry's metadata richness for deduplication preference (B-1)."""
+    score = 0
+    if entry.status_hint and entry.status_hint != "active":
+        score += 1
+    if entry.tags:
+        score += 1
+    if entry.related:
+        score += 1
+    return score
+
+
 def parse_files(paths: list[str]) -> list[RawEntry]:
-    """Parse multiple markdown files and return all entries (deduplicated by ID)."""
-    all_entries: list[RawEntry] = []
-    seen: set[str] = set()
+    """
+    Parse multiple markdown files and return all entries deduplicated by ID.
+
+    When the same ID appears in multiple files, the entry with more metadata
+    (non-default status, tags, related IDs) is kept over the stripped-down one.
+    This ensures richer entries from type-specific files win over core.md summaries.
+    """
+    by_id: dict[str, RawEntry] = {}
     for path in paths:
         for entry in parse_file(path):
-            if entry.entry_id not in seen:
-                seen.add(entry.entry_id)
-                all_entries.append(entry)
-    return all_entries
+            existing = by_id.get(entry.entry_id)
+            if existing is None or _entry_richness(entry) > _entry_richness(existing):
+                by_id[entry.entry_id] = entry
+    return list(by_id.values())
 
 
 # ── Migration runner ──────────────────────────────────────────────────────────
@@ -259,16 +268,19 @@ def migrate(
         if entry.entry_id in existing:
             skipped += 1
             if verbose:
-                print(f"  SKIP  {entry.entry_id} (already present)")
+                logger.info("  SKIP  %s (already present)", entry.entry_id)
             continue
 
         node_type = entry.node_type_hint or "instance"
         status = entry.status_hint or "active"
-        stack = _detect_stack(entry.content)
+        stack = detect_stack(entry.content)
 
-        # Build title from first sentence (≤80 chars)
-        first_sentence = re.split(r"[.!?\n]", entry.content)[0].strip()
-        title = first_sentence[:80] if first_sentence else entry.entry_id
+        # Build title: prefer header title (S-1), fall back to first sentence
+        if entry.title:
+            title = entry.title[:80]
+        else:
+            first_sentence = re.split(r"[.!?\n]", entry.content)[0].strip()
+            title = first_sentence[:80] if first_sentence else entry.entry_id
 
         metadata: dict[str, Any] = {}
         if entry.tags:
@@ -290,10 +302,9 @@ def migrate(
             existing.add(entry.entry_id)
             inserted += 1
             if verbose:
-                print(f"  INSERT {entry.entry_id}: {title[:60]}")
+                logger.info("  INSERT %s: %s", entry.entry_id, title[:60])
         except Exception as exc:
-            if verbose:
-                print(f"  ERROR  {entry.entry_id}: {exc}", file=sys.stderr)
+            logger.error("  ERROR  %s: %s", entry.entry_id, exc)
 
     # Create edges for 'related' references (only if both nodes now exist)
     for entry in entries:
@@ -378,21 +389,22 @@ def main(argv: list[str] | None = None) -> int:
     files: list[str] = args.files or find_learnings_files(args.base_dir)
 
     if not files:
-        print("No learnings files found. Nothing to migrate.", file=sys.stderr)
+        logger.warning("No learnings files found. Nothing to migrate.")
         return 0
 
-    print(f"Migrating {len(files)} file(s) into {args.db}")
+    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
+    logger.info("Migrating %d file(s) into %s", len(files), args.db)
 
     store = KnowledgeStore(args.db)
     entries = parse_files(files)
-    print(f"Parsed {len(entries)} entries from {len(files)} file(s).")
+    logger.info("Parsed %d entries from %d file(s).", len(entries), len(files))
 
     stats = migrate(store, entries, verbose=args.verbose)
     store.close()
 
-    print(
-        f"Done. inserted={stats['inserted']} skipped={stats['skipped']} "
-        f"edges_added={stats['edges_added']}"
+    logger.info(
+        "Done. inserted=%d skipped=%d edges_added=%d",
+        stats["inserted"], stats["skipped"], stats["edges_added"],
     )
     return 0
 

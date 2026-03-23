@@ -10,6 +10,7 @@ import sqlite3
 from datetime import datetime, timezone
 from typing import Any
 
+from auto_sdd_v2.knowledge_system._utils import detect_stack as _detect_stack_fn
 from auto_sdd_v2.knowledge_system.schema import (
     EDGE_TYPES,
     NODE_TYPES,
@@ -24,7 +25,6 @@ _TYPE_WEIGHT: dict[str, float] = {
     "universal":   5.0,
     "framework":   4.0,
     "technology":  3.0,
-    "hardened":    3.0,  # treated as a pseudo-type in scoring (status)
     "mistake":     2.0,
     "instance":    1.0,
     "meta":        0.5,
@@ -91,8 +91,7 @@ class KnowledgeStore:
     def __init__(self, db_path: str) -> None:
         """Open (or create) the store at *db_path*."""
         self._db_path = db_path
-        self._conn = init_db(db_path)
-        self._conn.row_factory = sqlite3.Row
+        self._conn = init_db(db_path)  # row_factory set inside init_db
 
     def close(self) -> None:
         self._conn.close()
@@ -190,7 +189,7 @@ class KnowledgeStore:
 
         cursor = self._conn.execute(
             """
-            INSERT INTO edges(source_id, target_id, edge_type, weight, context, created_at)
+            INSERT OR IGNORE INTO edges(source_id, target_id, edge_type, weight, context, created_at)
             VALUES (?, ?, ?, ?, ?, ?)
             """,
             (
@@ -502,37 +501,44 @@ class KnowledgeStore:
         self._conn.commit()
 
     def _outcome_stats(self, node_id: str) -> dict[str, Any]:
-        """Compute success/failure stats for a node across all recorded outcomes."""
-        rows = self._conn.execute(
-            "SELECT outcome, campaign_id, node_ids_injected FROM build_outcomes"
+        """Compute success/failure stats for a node across all recorded outcomes.
+
+        Uses SQL filtering on the JSON array column to avoid a full Python-side
+        table scan (O(N) per node instead of O(N×M)).
+        """
+        like_pattern = f'%"{node_id}"%'
+
+        counts_row = self._conn.execute(
+            """
+            SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN outcome = 'success' THEN 1 ELSE 0 END) AS successes
+            FROM build_outcomes
+            WHERE node_ids_injected LIKE ?
+            """,
+            (like_pattern,),
+        ).fetchone()
+
+        total = counts_row["total"] or 0
+        successes = int(counts_row["successes"] or 0)
+
+        campaigns_rows = self._conn.execute(
+            """
+            SELECT DISTINCT campaign_id
+            FROM build_outcomes
+            WHERE node_ids_injected LIKE ?
+              AND outcome = 'success'
+              AND campaign_id IS NOT NULL
+            """,
+            (like_pattern,),
         ).fetchall()
-
-        total = 0
-        successes = 0
-        campaigns: set[str] = set()
-
-        for row in rows:
-            injected_raw = row["node_ids_injected"]
-            if not injected_raw:
-                continue
-            try:
-                injected: list[str] = json.loads(injected_raw)
-            except (json.JSONDecodeError, TypeError):
-                continue
-            if node_id not in injected:
-                continue
-
-            total += 1
-            if row["outcome"] == "success":
-                successes += 1
-                if row["campaign_id"]:
-                    campaigns.add(row["campaign_id"])
+        distinct_campaigns = len(campaigns_rows)
 
         return {
             "total": total,
             "successes": successes,
             "failures": total - successes,
-            "distinct_campaigns": len(campaigns),
+            "distinct_campaigns": distinct_campaigns,
         }
 
     def _compute_success_ratios(self, node_ids: list[str]) -> dict[str, float]:
@@ -612,20 +618,4 @@ class KnowledgeStore:
     @staticmethod
     def _detect_stack(feature_spec: str | None) -> str | None:
         """Heuristic stack detection from feature spec text."""
-        if not feature_spec:
-            return None
-        text = feature_spec.lower()
-        # Order matters — more specific first
-        stack_hints = [
-            ("nextjs", ["next.js", "nextjs", "next/", "app router"]),
-            ("react", ["react", "jsx", "tsx", "usestate", "useffect"]),
-            ("prisma", ["prisma", "prisma client"]),
-            ("tailwind", ["tailwind", "tw-", "classname"]),
-            ("typescript", ["typescript", ".ts", ".tsx"]),
-            ("python", ["python", ".py", "pytest", "mypy"]),
-            ("sqlite", ["sqlite", "sqlite3"]),
-        ]
-        for stack_name, hints in stack_hints:
-            if any(hint in text for hint in hints):
-                return stack_name
-        return None
+        return _detect_stack_fn(feature_spec)
