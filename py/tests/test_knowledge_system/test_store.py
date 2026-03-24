@@ -564,6 +564,19 @@ class TestStatsEnhanced:
         assert s["hardened_with_lift"] == []
         assert s["promotion_candidates"] == []
         assert s["promotion_pipeline"] == {}
+        assert s["generalization_clusters"] == []
+
+    def test_stats_includes_generalization_clusters(self, store):
+        for i in range(3):
+            store.add_node(
+                "instance",
+                f"Import validation error case {i}",
+                f"The import validation check failed because module resolution wrong #{i}",
+                node_id=f"L-{i+1:05d}",
+            )
+        s = store.stats()
+        assert "generalization_clusters" in s
+        assert isinstance(s["generalization_clusters"], list)
 
 
 # ── N-4: Boundary tests ───────────────────────────────────────────────────────
@@ -742,6 +755,20 @@ class TestLinkToUniversals:
 
     def test_returns_empty_for_nonexistent_node(self, store):
         assert store.link_to_universals("L-99999") == []
+
+    def test_case_insensitive_keyword_matching(self, store):
+        """Keywords like 'VALIDATE' and 'validate' should match."""
+        store.add_node(
+            "universal", "VALIDATE Import Paths Always",
+            "Always VALIDATE that IMPORT paths resolve correctly",
+            node_id="U-00001",
+        )
+        instance_id = store.add_node(
+            "instance", "validate import paths for modules",
+            "Need to validate import paths before running the test suite",
+        )
+        linked = store.link_to_universals(instance_id)
+        assert "U-00001" in linked
 
 
 class TestFindGeneralizationClusters:

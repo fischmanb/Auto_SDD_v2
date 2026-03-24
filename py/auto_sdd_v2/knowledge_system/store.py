@@ -714,6 +714,9 @@ class KnowledgeStore:
             })
         hardened_with_lift.sort(key=lambda x: x["lift"], reverse=True)
 
+        # Generalization clusters: unlinked nodes that could form new universals
+        generalization_clusters = self.find_generalization_clusters()
+
         return {
             "nodes": node_count,
             "edges": edge_count,
@@ -724,6 +727,7 @@ class KnowledgeStore:
             "promotion_pipeline": dict(by_status),
             "promotion_candidates": promotion_candidates,
             "hardened_with_lift": hardened_with_lift,
+            "generalization_clusters": generalization_clusters,
         }
 
     # ── Public migration helpers ──────────────────────────────────────────────
@@ -785,9 +789,9 @@ class KnowledgeStore:
         if node is None:
             return []
 
-        # Extract keywords from the new node
+        # Extract keywords from the new node (lowercased for case-insensitive overlap)
         node_text = f"{node.get('title', '')} {node.get('content', '')}"
-        node_keywords = set(self._extract_keywords(node_text, None, None))
+        node_keywords = {kw.lower() for kw in self._extract_keywords(node_text, None, None)}
         if not node_keywords:
             return []
 
@@ -807,7 +811,7 @@ class KnowledgeStore:
         linked: list[str] = []
         for urow in universal_rows:
             u_text = f"{urow['title'] or ''} {urow['content'] or ''}"
-            u_keywords = set(self._extract_keywords(u_text, None, None))
+            u_keywords = {kw.lower() for kw in self._extract_keywords(u_text, None, None)}
             overlap = node_keywords & u_keywords
             if len(overlap) >= min_keyword_overlap:
                 # generalizes: universal → instance
@@ -858,7 +862,7 @@ class KnowledgeStore:
         node_keywords_map: dict[str, set[str]] = {}
         for row in unlinked_rows:
             text = f"{row['title'] or ''} {row['content'] or ''}"
-            keywords = set(self._extract_keywords(text, None, None))
+            keywords = {kw.lower() for kw in self._extract_keywords(text, None, None)}
             node_keywords_map[row["id"]] = keywords
             for kw in keywords:
                 keyword_index.setdefault(kw, []).append(row["id"])
