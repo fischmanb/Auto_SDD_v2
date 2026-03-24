@@ -100,6 +100,8 @@ class FeatureRecord:
     attempt: int = 0
     error: str = ""
     test_count: int | None = None
+    turn_count: int = 0
+    tool_call_count: int = 0
     timestamp: str = ""
 
 
@@ -1269,7 +1271,10 @@ class BuildLoopV2:
                     agent_result.output or "",
                 )
                 self._record(feature, "failed", attempt,
-                             error=agent_result.error)
+                             error=agent_result.error,
+                             duration=int(time.time() - attempt_start),
+                             turn_count=agent_result.turn_count,
+                             tool_call_count=len(agent_result.tool_calls))
                 self._kg_post_gate(
                     feature=feature,
                     attempt=attempt,
@@ -1338,7 +1343,10 @@ class BuildLoopV2:
                     agent_result.output or "",
                 )
                 self._record(feature, "failed", attempt,
-                             error=last_gate_error)
+                             error=last_gate_error,
+                             duration=int(time.time() - attempt_start),
+                             turn_count=agent_result.turn_count,
+                             tool_call_count=len(agent_result.tool_calls))
                 self._kg_post_gate(
                     feature=feature,
                     attempt=attempt,
@@ -1368,7 +1376,10 @@ class BuildLoopV2:
                 )
             except BranchError as exc:
                 logger.error("Merge failed for %s: %s", feature.name, exc)
-                self._record(feature, "failed", attempt, error=str(exc))
+                self._record(feature, "failed", attempt, error=str(exc),
+                             duration=int(time.time() - attempt_start),
+                             turn_count=agent_result.turn_count,
+                             tool_call_count=len(agent_result.tool_calls))
                 self._kg_post_gate(
                     feature=feature,
                     attempt=attempt,
@@ -1385,7 +1396,20 @@ class BuildLoopV2:
             self._record(
                 feature, "built", attempt,
                 test_count=current_test_count,
+                duration=int(time.time() - attempt_start),
+                turn_count=agent_result.turn_count,
+                tool_call_count=len(agent_result.tool_calls),
             )
+
+            # Refresh codebase summary after merge so the next feature
+            # sees an up-to-date view of the project (new modules, exports).
+            try:
+                self._codebase_summary = generate_codebase_summary(
+                    self.project_dir, self.config,
+                )
+            except Exception as exc:
+                logger.warning("Codebase summary refresh failed (continuing): %s", exc)
+
             self._kg_post_gate(
                 feature=feature,
                 attempt=attempt,
@@ -1730,6 +1754,9 @@ class BuildLoopV2:
         attempt: int,
         error: str = "",
         test_count: int | None = None,
+        duration: int = 0,
+        turn_count: int = 0,
+        tool_call_count: int = 0,
     ) -> None:
         """Record a feature build result."""
         self.records.append(FeatureRecord(
@@ -1738,6 +1765,9 @@ class BuildLoopV2:
             attempt=attempt,
             error=error,
             test_count=test_count,
+            duration=duration,
+            turn_count=turn_count,
+            tool_call_count=tool_call_count,
             timestamp=datetime.now(timezone.utc).isoformat(),
         ))
 
@@ -1848,6 +1878,10 @@ class BuildLoopV2:
                     "name": r.name,
                     "status": r.status,
                     "attempt": r.attempt,
+                    "duration_seconds": r.duration,
+                    "duration_human": _format_duration(r.duration),
+                    "turn_count": r.turn_count,
+                    "tool_call_count": r.tool_call_count,
                     "test_count": r.test_count,
                     "error": r.error,
                     "timestamp": r.timestamp,
