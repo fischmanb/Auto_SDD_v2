@@ -222,6 +222,21 @@ def _get_diff(project_dir: Path, base_commit: str) -> str:
         return ""
 
 
+def _smart_truncate(text: str, max_len: int) -> str:
+    """Truncate text keeping both start and end for context.
+
+    If the text exceeds max_len, keeps the first 60% and last 40%
+    with an elision marker in the middle. This preserves the error
+    summary (usually at the start) and the specific failure details
+    (usually at the end).
+    """
+    if len(text) <= max_len:
+        return text
+    head = int(max_len * 0.6)
+    tail = max_len - head - 30  # 30 chars for marker
+    return f"{text[:head]}\n\n... ({len(text) - max_len} chars elided) ...\n\n{text[-tail:]}"
+
+
 def _extract_error_codes(gate: "GateResult") -> list[str]:
     """Extract structured error codes from a failed GateResult."""
     codes: list[str] = []
@@ -1205,7 +1220,7 @@ class BuildLoopV2:
                 user_prompt += (
                     f"\n\n## PREVIOUS ATTEMPT FAILED\n"
                     f"Your previous implementation failed verification:\n"
-                    f"{last_gate_error[:2000]}\n\n"
+                    f"{_smart_truncate(last_gate_error, 5000)}\n\n"
                 )
                 # Show agent what it wrote so it doesn't waste turns re-reading
                 if last_diff:
@@ -1692,7 +1707,7 @@ class BuildLoopV2:
 
         if not build_result.passed:
             gate.failed_gate = "EG3"
-            gate.error = f"Build failed: {build_result.output[-200:]}"
+            gate.error = f"Build failed: {build_result.output[-2000:]}"
             return gate
 
         _status("EG3 ✓ build passed")
@@ -1703,7 +1718,7 @@ class BuildLoopV2:
 
         if not test_result.passed:
             gate.failed_gate = "EG4"
-            gate.error = f"Tests failed: {test_result.output[-200:]}"
+            gate.error = f"Tests failed: {test_result.output[-2000:]}"
             return gate
 
         _status(f"EG4 ✓ tests passed (count={test_result.test_count})")

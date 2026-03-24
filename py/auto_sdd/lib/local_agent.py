@@ -164,8 +164,11 @@ def run_local_agent(
     # Track consecutive turns without write_file to detect exploration loops.
     # After _READ_ONLY_NUDGE_THRESHOLD turns of reads with no writes,
     # inject a user message forcing the model to start implementing.
+    # After _MAX_NUDGES without any write, hard-stop the agent.
     _READ_ONLY_NUDGE_THRESHOLD = 12
+    _MAX_NUDGES = 2
     turns_since_write = 0
+    nudge_count = 0
     has_written = False
 
     for turn in range(config.max_turns):
@@ -244,15 +247,33 @@ def run_local_agent(
             else:
                 turns_since_write += 1
 
-            # Nudge: if stuck reading without writing, inject a redirect
+            # Nudge: if stuck reading without writing, inject a redirect.
+            # After _MAX_NUDGES without any write, hard-stop — the agent
+            # is stuck in an exploration loop and burning turns.
             if turns_since_write >= _READ_ONLY_NUDGE_THRESHOLD and not has_written:
+                nudge_count += 1
+                if nudge_count > _MAX_NUDGES:
+                    result.finish_reason = "error"
+                    result.error = (
+                        f"Agent stuck: {nudge_count} nudges given over "
+                        f"{turn + 1} turns with no writes. Hard-stopping."
+                    )
+                    result.output = assistant_msg.content or ""
+                    logger.warning(
+                        "Hard-stop: agent stuck after %d nudges, %d turns, 0 writes",
+                        nudge_count, turn + 1,
+                    )
+                    break
                 nudge = (
                     "You have spent several turns reading files without writing any code. "
                     "You have enough context. Start implementing NOW by using write_file "
                     "to create the source files for this feature. Do not read any more files."
                 )
                 messages.append({"role": "user", "content": nudge})
-                logger.info("Nudge injected at turn %d (no writes in %d turns)", turn, turns_since_write)
+                logger.info(
+                    "Nudge %d/%d injected at turn %d (no writes in %d turns)",
+                    nudge_count, _MAX_NUDGES, turn, turns_since_write,
+                )
                 turns_since_write = 0  # reset so we don't spam
 
         elif choice.finish_reason == "length":
@@ -574,7 +595,9 @@ def _run_anthropic_agent(
     start_time = time.monotonic()
 
     _READ_ONLY_NUDGE_THRESHOLD = 12
+    _MAX_NUDGES = 2
     turns_since_write = 0
+    nudge_count = 0
     has_written = False
 
     for turn in range(config.max_turns):
@@ -680,13 +703,29 @@ def _run_anthropic_agent(
                 turns_since_write += 1
 
             if turns_since_write >= _READ_ONLY_NUDGE_THRESHOLD and not has_written:
+                nudge_count += 1
+                if nudge_count > _MAX_NUDGES:
+                    result.finish_reason = "error"
+                    result.error = (
+                        f"Agent stuck: {nudge_count} nudges given over "
+                        f"{turn + 1} turns with no writes. Hard-stopping."
+                    )
+                    result.output = "\n".join(text_parts)
+                    logger.warning(
+                        "Hard-stop: agent stuck after %d nudges, %d turns, 0 writes",
+                        nudge_count, turn + 1,
+                    )
+                    break
                 nudge = (
                     "You have spent several turns reading files without writing any code. "
                     "You have enough context. Start implementing NOW by using write_file "
                     "to create the source files for this feature. Do not read any more files."
                 )
                 messages.append({"role": "user", "content": nudge})
-                logger.info("Nudge injected at turn %d (no writes in %d turns)", turn, turns_since_write)
+                logger.info(
+                    "Nudge %d/%d injected at turn %d (no writes in %d turns)",
+                    nudge_count, _MAX_NUDGES, turn, turns_since_write,
+                )
                 turns_since_write = 0
 
         elif response.stop_reason == "max_tokens":
