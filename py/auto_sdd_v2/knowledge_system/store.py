@@ -951,13 +951,43 @@ class KnowledgeStore:
 
     # ── Internal helpers ──────────────────────────────────────────────────────
 
+    # Synonym groups for FTS keyword expansion. Each group is a set of
+    # terms that describe the same concept — if any term from a group
+    # appears in the input, all terms from that group are added to the
+    # FTS query. This bridges the vocabulary gap between how errors are
+    # described vs. how knowledge nodes are titled.
+    _SYNONYM_GROUPS: list[set[str]] = [
+        {"import", "module", "resolution", "require", "resolve"},
+        {"type", "typescript", "types", "typing", "typecheck"},
+        {"build", "compile", "compilation", "compiler", "tsc"},
+        {"test", "tests", "testing", "spec", "jest", "vitest", "pytest"},
+        {"path", "route", "routing", "navigation", "paths"},
+        {"export", "exports", "exported", "exporting"},
+        {"missing", "undefined", "notfound", "absent"},
+        {"error", "failure", "failed", "exception", "crash"},
+        {"component", "widget", "element", "render"},
+        {"auth", "authentication", "login", "session", "token"},
+        {"fetch", "request", "response", "endpoint", "http"},
+        {"state", "store", "context", "redux", "zustand"},
+        {"style", "styles", "styling", "tailwind", "className"},
+        {"config", "configuration", "settings", "setup"},
+        {"commit", "staging", "uncommitted", "dirty"},
+        {"signal", "signals", "emit", "emitted"},
+    ]
+
+    # Build reverse lookup: word → set of synonyms (built once per class)
+    _SYNONYM_MAP: dict[str, set[str]] = {}
+    for _group in _SYNONYM_GROUPS:
+        for _word in _group:
+            _SYNONYM_MAP[_word] = _group
+
     @staticmethod
     def _extract_keywords(
         feature_spec: str | None,
         error_pattern: str | None,
         file_patterns: list[str] | None,
     ) -> list[str]:
-        """Extract FTS-safe keywords from query context."""
+        """Extract FTS-safe keywords from query context, with synonym expansion."""
         tokens: list[str] = []
 
         for text in [feature_spec, error_pattern]:
@@ -973,10 +1003,17 @@ class KnowledgeStore:
                 stem = re.sub(r"[^a-zA-Z0-9]", " ", pat)
                 tokens.extend(w for w in stem.split() if len(w) >= 4)
 
+        # Synonym expansion: for each token, add related terms
+        expanded: list[str] = list(tokens)
+        for t in tokens:
+            synonyms = KnowledgeStore._SYNONYM_MAP.get(t.lower())
+            if synonyms:
+                expanded.extend(synonyms)
+
         # Deduplicate while preserving order
         seen: set[str] = set()
         result: list[str] = []
-        for t in tokens:
+        for t in expanded:
             if t.lower() not in seen:
                 seen.add(t.lower())
                 result.append(t)

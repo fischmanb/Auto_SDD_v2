@@ -63,6 +63,7 @@ try:
         detect_project_stack as _detect_project_stack,
         format_reflection_for_prompt as _format_reflection_for_prompt,
         inject_hardened_clues as _inject_hardened_clues,
+        inject_knowledge_combined as _inject_knowledge_combined,
         inject_relevant_knowledge as _inject_relevant_knowledge,
         init_store_optional as _init_store_optional,
         kg_post_gate as _kg_post_gate_fn,
@@ -1137,7 +1138,7 @@ class BuildLoopV2:
 
             # ── SELECT ───────────────────────────────────────────────
 
-            # KG: query for relevant knowledge (optional — silently skipped if unavailable)
+            # KG: single query for both relevant knowledge and hardened clues
             kg_section = ""
             kg_clues = ""
             if _KG_MODULE_AVAILABLE and self._kg is not None:
@@ -1146,7 +1147,7 @@ class BuildLoopV2:
                     f"{feature.name}\n{feature_spec_content}"
                     if feature_spec_content else feature.name
                 )
-                kg_section, new_ids = _inject_relevant_knowledge(
+                kg_section, kg_clues, new_ids = _inject_knowledge_combined(
                     self._kg,
                     feature_spec=_spec_query,
                     stack=self._kg_stack,
@@ -1156,7 +1157,6 @@ class BuildLoopV2:
                 # keep IDs from the last successful query (preserves tracking).
                 if new_ids:
                     self._kg_injected_ids = new_ids
-                kg_clues = _inject_hardened_clues(self._kg, self._kg_stack)
 
             # Build prompts
             system_prompt = _build_system_prompt(

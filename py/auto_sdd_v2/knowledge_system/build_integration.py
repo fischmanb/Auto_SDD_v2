@@ -178,6 +178,79 @@ def inject_hardened_clues(
         return ""
 
 
+def inject_knowledge_combined(
+    store: "KnowledgeStore | None",
+    feature_spec: str,
+    stack: str | None,
+    error_pattern: str | None = None,
+    max_relevant: int = 5,
+    max_hardened: int = 5,
+) -> tuple[str, str, list[str]]:
+    """Single-query KG injection returning both relevant and hardened sections.
+
+    Performs one query with min_status='active' and a larger result set,
+    then partitions results into:
+    - Relevant knowledge (for user prompt) — all matched nodes
+    - Hardened clues (for system prompt) — only hardened-status nodes
+
+    Returns *(relevant_section, hardened_section, node_ids)*.
+    This replaces separate calls to inject_relevant_knowledge +
+    inject_hardened_clues, halving the DB round-trips.
+    """
+    if store is None:
+        return "", "", []
+
+    try:
+        # Fetch enough results to fill both buckets from a single query.
+        # Use feature_spec + error_pattern for relevance ranking.
+        results = store.query(
+            stack=stack,
+            feature_spec=feature_spec,
+            error_pattern=error_pattern,
+            max_results=max_relevant + max_hardened,
+            min_status="active",
+        )
+        if not results:
+            return "", "", []
+
+        # Partition into hardened vs. all
+        hardened = [r for r in results if r.get("status") == "hardened"]
+        relevant = results[:max_relevant]
+
+        # Build relevant section (user prompt)
+        node_ids = [r["id"] for r in relevant]
+        rel_lines: list[str] = ["## Relevant Knowledge\n"]
+        for r in relevant:
+            title = r.get("title") or r["content"].split("\n")[0][:300]
+            content = r.get("content", "")
+            header = f"**{r['id']}** ({r['node_type']}, {r['status']}): {title}"
+            if content and content.strip() != title.strip():
+                body = content[:1000]
+                if len(content) > 1000:
+                    body += "…"
+                rel_lines.append(f"{header}\n{body}")
+            else:
+                rel_lines.append(header)
+        relevant_section = "\n\n".join(rel_lines) + "\n"
+        relevant_section = _truncate(relevant_section, _USER_PROMPT_MAX_TOKENS)
+
+        # Build hardened section (system prompt)
+        hardened_section = ""
+        if hardened:
+            h_lines: list[str] = ["\nHARDENED RULES (validated across multiple builds):"]
+            for r in hardened[:max_hardened]:
+                rule = r.get("title") or r["content"].split("\n")[0][:200]
+                h_lines.append(f"- {rule}")
+            hardened_section = "\n".join(h_lines) + "\n"
+            hardened_section = _truncate(hardened_section, _SYSTEM_PROMPT_MAX_TOKENS)
+
+        return relevant_section, hardened_section, node_ids
+
+    except Exception as exc:
+        logger.warning("KG combined query failed (continuing): %s", exc)
+        return "", "", []
+
+
 def inject_spec_learnings(
     store: "KnowledgeStore | None",
     stack: str | None,
