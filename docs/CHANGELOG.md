@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-03-24 (session 13)
+
+### Knowledge system — audit fixes
+
+Three integration fixes from deep audit of the capture/inject/query pipeline:
+
+- **Merge-failure capture**: `BranchError` handler now calls `_kg_post_gate(gate_failed="MERGE")`. Builds that pass all gates but fail to merge were producing no KG record — now create a mistake node like any other gate failure.
+- **Full-spec query keywords**: `inject_relevant_knowledge()` receives the full spec file content instead of just `feature.name` (a 2-4 word string). FTS keyword extraction now has the full spec to match against.
+- **Full node content in injection**: `inject_relevant_knowledge()` outputs node content (capped at 1000 chars) below the header line, not just `**ID** (type, status): title`. Agents see actual guidance.
+
+Dropped `LEARNING_CANDIDATE` prompt signal. The audit identified it as dead code (never in prompts), but the deeper issue is that failure-based learning (mistake nodes from gate errors) is the working mechanism. Agent self-reported learnings are noisy and unreliable. The `extract_learning_candidates()` infrastructure remains in `build_integration.py` but is not prompted for.
+
+**Tests:** 185 knowledge system tests, ~620 total — all passing.
+
+---
+
 ## 2026-03-23 (session 12)
 
 ### Knowledge system — final review fixes
