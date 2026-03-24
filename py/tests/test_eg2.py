@@ -73,6 +73,34 @@ class TestValidateSignals:
         assert result.valid is False
         assert any(e.code == "MISSING_FEATURE_BUILT" for e in result.errors)
 
+    def test_feature_name_mismatch(self, tmp_path: Path) -> None:
+        spec = tmp_path / ".specs" / "auth.md"
+        spec.parent.mkdir(parents=True)
+        spec.write_text("# Auth\n\nImplement login with email and password validation.\n")
+        signals = ParsedSignals(
+            feature_name="Wrong Feature", spec_file=".specs/auth.md",
+        )
+        result = validate_signals(signals, tmp_path, expected_feature="Auth Login")
+        assert result.valid is False
+        assert any(e.code == "FEATURE_NAME_MISMATCH" for e in result.errors)
+
+    def test_feature_name_match_case_insensitive(self, tmp_path: Path) -> None:
+        spec = tmp_path / ".specs" / "auth.md"
+        spec.parent.mkdir(parents=True)
+        spec.write_text("# Auth\n\nImplement login with email and password validation.\n")
+        signals = ParsedSignals(
+            feature_name="auth login", spec_file=".specs/auth.md",
+        )
+        result = validate_signals(signals, tmp_path, expected_feature="Auth Login")
+        assert result.valid is True
+
+    def test_feature_name_no_expected_skips_check(self, tmp_path: Path) -> None:
+        """When no expected_feature is provided, any name is accepted."""
+        signals = ParsedSignals(feature_name="Anything")
+        result = validate_signals(signals, tmp_path)
+        # Only fails on MISSING_SPEC_FILE, not feature name
+        assert not any(e.code == "FEATURE_NAME_MISMATCH" for e in result.errors)
+
     def test_missing_spec_file(self, tmp_path: Path) -> None:
         signals = ParsedSignals(feature_name="Auth")
         result = validate_signals(signals, tmp_path)

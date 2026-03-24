@@ -21,6 +21,38 @@ from auto_sdd.exec_gates.eg1_tool_calls import BuildAgentExecutor
 logger = logging.getLogger(__name__)
 
 
+# Output files per pre-build phase. Each phase's agent is only allowed
+# to write its own output — all other phases' outputs are protected.
+_PHASE_OUTPUTS: dict[str, list[str]] = {
+    "VISION": [".specs/vision.md"],
+    "SYSTEMS_DESIGN": [".specs/systems-design.md"],
+    "DESIGN_SYSTEM": [".specs/design-system/tokens.md"],
+    "PERSONAS": [".specs/personas.md"],
+    "DESIGN_PATTERNS": [".specs/design-system/patterns.md"],
+    "ROADMAP": [".specs/roadmap.md"],
+    # SPEC_FIRST writes to .specs/features/**/*.md — protected per-file
+    # RED writes test scaffolds — no agent, so no protection needed
+}
+
+
+def _protected_for_phase(phase_name: str, project_dir: Path) -> set[str]:
+    """Compute protected paths for a pre-build phase.
+
+    Returns all other phases' output files (that exist on disk) so the
+    agent can't accidentally overwrite them — especially important when
+    phases run in parallel.
+    """
+    protected: set[str] = set()
+    for other_phase, outputs in _PHASE_OUTPUTS.items():
+        if other_phase == phase_name:
+            continue
+        for rel in outputs:
+            full = project_dir / rel
+            if full.exists():
+                protected.add(rel)
+    return protected
+
+
 def run_phase(
     phase_name: str,
     config: ModelConfig,
@@ -33,7 +65,10 @@ def run_phase(
     """Run a single agent-driven pre-build phase.
 
     Pattern: invoke agent → validate output → retry or pass.
+    Each phase's agent is restricted from overwriting other phases' outputs.
     """
+    protected = _protected_for_phase(phase_name, project_dir)
+
     for attempt in range(max_attempts):
         if attempt > 0:
             logger.info("%s: retry %d/%d", phase_name, attempt, max_attempts - 1)
@@ -42,6 +77,7 @@ def run_phase(
             project_root=project_dir,
             allowed_branch="",
             command_timeout=60,
+            protected_paths=protected,
         )
 
         logger.info("%s: invoking agent (attempt %d)", phase_name, attempt)

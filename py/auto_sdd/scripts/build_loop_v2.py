@@ -238,6 +238,10 @@ _RETRY_GUIDANCE: dict[str, str] = {
         "You forgot to emit the FEATURE_BUILT signal. After committing, "
         "print: FEATURE_BUILT: <feature name>"
     ),
+    "FEATURE_NAME_MISMATCH": (
+        "Your FEATURE_BUILT signal doesn't match the feature you were asked "
+        "to build. Emit: FEATURE_BUILT: <exact feature name from the spec>"
+    ),
     "MISSING_SPEC_FILE": (
         "You forgot to emit the SPEC_FILE signal. After committing, "
         "print: SPEC_FILE: <path to spec>"
@@ -1272,6 +1276,7 @@ class BuildLoopV2:
                 agent_result=agent_result,
                 head_before=head_before,
                 baseline_test_count=baseline_test_count,
+                feature=feature,
             )
 
             if not gate.passed:
@@ -1289,6 +1294,7 @@ class BuildLoopV2:
                             agent_result=agent_result,
                             head_before=head_before,
                             baseline_test_count=baseline_test_count,
+                            feature=feature,
                         )
 
             if not gate.passed:
@@ -1516,6 +1522,9 @@ class BuildLoopV2:
         Models write files and stop without committing or emitting
         FEATURE_BUILT signals. Rather than failing at EG2, detect
         the situation and complete the loop in Python.
+
+        Note: does NOT force agent_result.success — EG2 will still
+        validate the injected signals against disk state.
         """
         output = agent_result.output or ""
         has_signal = "FEATURE_BUILT" in output
@@ -1530,7 +1539,17 @@ class BuildLoopV2:
             len(executor._written_files),
         )
 
-        # Auto-commit if there are uncommitted changes
+        # Derive source files from executor's write log (trusted, not agent-declared)
+        source_files = []
+        for f in executor._written_files:
+            try:
+                rel = str(Path(f).relative_to(self.project_dir))
+                source_files.append(rel)
+            except ValueError:
+                source_files.append(f)
+
+        # Auto-commit only the files the agent actually wrote — never `git add -A`
+        # which could stage untracked temp files, debug logs, or other artifacts.
         try:
             status = subprocess.run(
                 ["git", "status", "--porcelain"],
@@ -1538,18 +1557,19 @@ class BuildLoopV2:
                 cwd=str(self.project_dir),
             )
             if status.stdout.strip():
-                subprocess.run(
-                    ["git", "add", "-A"],
-                    capture_output=True, text=True,
-                    cwd=str(self.project_dir),
-                )
+                for sf in source_files:
+                    subprocess.run(
+                        ["git", "add", "--", sf],
+                        capture_output=True, text=True,
+                        cwd=str(self.project_dir),
+                    )
                 subprocess.run(
                     ["git", "commit", "-m",
                      f"Auto-commit: {feature.name} (agent forgot to commit)"],
                     capture_output=True, text=True,
                     cwd=str(self.project_dir),
                 )
-                logger.info("Auto-complete: committed changes")
+                logger.info("Auto-complete: committed %d file(s)", len(source_files))
         except Exception as exc:
             logger.warning("Auto-complete: git commit failed: %s", exc)
 
@@ -1563,23 +1583,15 @@ class BuildLoopV2:
                     spec_file = str(p.relative_to(self.project_dir))
                     break
 
-        # Derive source files from executor's written files
-        source_files = []
-        for f in executor._written_files:
-            try:
-                rel = str(Path(f).relative_to(self.project_dir))
-                source_files.append(rel)
-            except ValueError:
-                source_files.append(f)
-
-        # Inject signals into agent output
+        # Inject signals into agent output — EG2 will still validate them
         signals = (
             f"\nFEATURE_BUILT: {feature.name}\n"
             f"SPEC_FILE: {spec_file}\n"
             f"SOURCE_FILES: {','.join(source_files)}\n"
         )
         agent_result.output = output + signals
-        agent_result.success = True
+        # Do NOT set agent_result.success = True here. The original
+        # agent status is preserved; EG2 validates the injected signals.
         logger.info("Auto-complete: injected signals for %s", feature.name)
         return agent_result
 
@@ -1588,6 +1600,7 @@ class BuildLoopV2:
         agent_result: AgentResult,
         head_before: str,
         baseline_test_count: int | None,
+        feature: Feature | None = None,
     ) -> GateResult:
         """Run all GATE checks in sequence. Short-circuits on first failure.
 
@@ -1607,6 +1620,7 @@ class BuildLoopV2:
         # ── EG2: Signal parse ────────────────────────────────────
         signals = extract_and_validate(
             agent_result.output, self.project_dir,
+            expected_feature=feature.name if feature else "",
         )
         gate.eg2_signals = signals
 

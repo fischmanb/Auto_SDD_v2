@@ -116,11 +116,12 @@ def parse_signals(agent_output: str) -> ParsedSignals:
 def validate_signals(
     signals: ParsedSignals,
     project_dir: Path,
+    expected_feature: str = "",
 ) -> ParsedSignals:
     """Validate parsed signals against disk state.
 
     Checks:
-        1. FEATURE_BUILT is present and non-empty
+        1. FEATURE_BUILT is present, non-empty, and matches expected_feature
         2. SPEC_FILE is present, exists on disk, within project_dir
         3. SPEC_FILE has substantive content (>25 characters)
         4. SOURCE_FILES all exist on disk within project_dir
@@ -130,9 +131,15 @@ def validate_signals(
     """
     errors: list[GateError] = []
 
-    # 1. FEATURE_BUILT is required
+    # 1. FEATURE_BUILT is required and must match expected feature name
     if not signals.feature_name:
         errors.append(GateError("MISSING_FEATURE_BUILT", "Missing required signal: FEATURE_BUILT"))
+    elif expected_feature and signals.feature_name.lower().strip() != expected_feature.lower().strip():
+        errors.append(GateError(
+            "FEATURE_NAME_MISMATCH",
+            f"FEATURE_BUILT '{signals.feature_name}' does not match "
+            f"expected feature '{expected_feature}'",
+        ))
 
     # 2. SPEC_FILE is required, must exist, must be contained
     if not signals.spec_file:
@@ -216,7 +223,8 @@ def validate_signals(
 def extract_and_validate(
     agent_output: str,
     project_dir: Path,
+    expected_feature: str = "",
 ) -> ParsedSignals:
     """Parse + validate in one call. The typical usage pattern."""
     signals = parse_signals(agent_output)
-    return validate_signals(signals, project_dir)
+    return validate_signals(signals, project_dir, expected_feature=expected_feature)
