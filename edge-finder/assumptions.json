@@ -9,7 +9,7 @@
       "regression_to_mean": 0.0,
       "pace_adjustment": "season_average"
     },
-    "promoted_on": null,
+    "promoted_on": "2026-03-24",
     "rolling_10d_accuracy": null
   },
   "challengers": [
@@ -17,8 +17,8 @@
       "id": "recency-v1",
       "description": "Weight last-10-games stats 2x vs season averages to capture hot/cold streaks",
       "weight": 0.5,
-      "born": null,
-      "grace_until": null,
+      "born": "2026-03-24",
+      "grace_until": "2026-03-29",
       "params": {
         "recency_weight": 2.0,
         "injury_discount": 0.0,
@@ -33,8 +33,8 @@
       "id": "injury-rest-v1",
       "description": "Apply estimated impact for known absences and back-to-back games",
       "weight": 0.5,
-      "born": null,
-      "grace_until": null,
+      "born": "2026-03-24",
+      "grace_until": "2026-03-29",
       "params": {
         "recency_weight": 1.0,
         "injury_discount": 1.0,
@@ -49,8 +49,8 @@
       "id": "home-swing-v1",
       "description": "Adjust home court/field advantage by +1.5 points from baseline",
       "weight": 0.5,
-      "born": null,
-      "grace_until": null,
+      "born": "2026-03-24",
+      "grace_until": "2026-03-29",
       "params": {
         "recency_weight": 1.0,
         "injury_discount": 0.0,
@@ -65,8 +65,8 @@
       "id": "regression-v1",
       "description": "Regress team ratings 20% toward league average to cool off hot/cold teams",
       "weight": 0.5,
-      "born": null,
-      "grace_until": null,
+      "born": "2026-03-24",
+      "grace_until": "2026-03-29",
       "params": {
         "recency_weight": 1.0,
         "injury_discount": 0.0,
@@ -81,8 +81,8 @@
       "id": "pace-adj-v1",
       "description": "Use opponent-adjusted pace instead of season average pace for scoring model",
       "weight": 0.5,
-      "born": null,
-      "grace_until": null,
+      "born": "2026-03-24",
+      "grace_until": "2026-03-29",
       "params": {
         "recency_weight": 1.0,
         "injury_discount": 0.0,
