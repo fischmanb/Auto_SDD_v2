@@ -403,6 +403,75 @@ def test_inject_spec_learnings_handles_store_exception() -> None:
     assert inject_spec_learnings(bad_store, stack=None) == ""
 
 
+# ── kg_post_gate generalization linking ─────────────────────────────────────
+
+
+def test_kg_post_gate_links_mistake_to_universal(store: KnowledgeStore) -> None:
+    """Mistake nodes get linked to matching universals on creation."""
+    store.add_node(
+        "universal",
+        "Always validate environment variables before build",
+        "Check that required environment variables are set before starting builds",
+        node_id="U-00001",
+    )
+    kg_post_gate(
+        store,
+        feature_name="Auth: Login",
+        campaign_id="camp-001",
+        injected_ids=[],
+        attempt=0,
+        outcome="failure",
+        gate_failed="EG3",
+        error_pattern="Build failed because environment variables were not validated before build start",
+    )
+    # Should have created a mistake node and linked it to U-00001
+    stats = store.stats()
+    assert stats["edges"] >= 1
+    # Find the mistake node
+    mistakes = [
+        dict(r) for r in store._conn.execute(
+            "SELECT id FROM nodes WHERE node_type='mistake'"
+        ).fetchall()
+    ]
+    assert len(mistakes) == 1
+    edges = store.get_edges(mistakes[0]["id"], direction="in")
+    gen_edges = [e for e in edges if e["edge_type"] == "generalizes"]
+    assert len(gen_edges) == 1
+    assert gen_edges[0]["source_id"] == "U-00001"
+
+
+def test_kg_post_gate_links_learning_candidate_to_universal(
+    store: KnowledgeStore,
+) -> None:
+    """LEARNING_CANDIDATE instance nodes get linked to matching universals."""
+    store.add_node(
+        "universal",
+        "Validate import paths and module resolution",
+        "Always verify that import paths resolve correctly before committing",
+        node_id="U-00001",
+    )
+    output = "LEARNING_CANDIDATE: Always validate import paths and verify module resolution before running tests\n"
+    kg_post_gate(
+        store,
+        feature_name="Feature X",
+        campaign_id="camp-001",
+        injected_ids=[],
+        attempt=0,
+        outcome="success",
+        agent_output=output,
+    )
+    # Instance node should exist and be linked to U-00001
+    instances = [
+        dict(r) for r in store._conn.execute(
+            "SELECT id FROM nodes WHERE node_type='instance'"
+        ).fetchall()
+    ]
+    assert len(instances) == 1
+    edges = store.get_edges(instances[0]["id"], direction="in")
+    gen_edges = [e for e in edges if e["edge_type"] == "generalizes"]
+    assert len(gen_edges) >= 1
+
+
 def test_kg_post_gate_no_mistake_node_when_gate_failed_is_none(
     store: KnowledgeStore,
 ) -> None:

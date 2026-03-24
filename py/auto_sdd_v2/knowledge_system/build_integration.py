@@ -268,6 +268,9 @@ def kg_post_gate(
             duration=duration,
         )
 
+        # Track newly created node IDs for generalization linking
+        new_node_ids: list[str] = []
+
         # Extract LEARNING_CANDIDATE signals from agent output
         if agent_output:
             for candidate_text in extract_learning_candidates(agent_output):
@@ -283,6 +286,7 @@ def kg_post_gate(
                         "attempt": attempt,
                     },
                 )
+                new_node_ids.append(node_id)
                 logger.info("KG: captured LEARNING_CANDIDATE → node %s", node_id)
 
         # On failure, create a mistake node from the gate error
@@ -299,10 +303,20 @@ def kg_post_gate(
                     "attempt": attempt,
                 },
             )
+            new_node_ids.append(node_id)
             logger.info(
                 "KG: created mistake node %s for %s failure in %s",
                 node_id, gate_failed, feature_name,
             )
+
+        # Link new nodes to existing universals via keyword overlap
+        for nid in new_node_ids:
+            linked = store.link_to_universals(nid)
+            if linked:
+                logger.info(
+                    "KG: linked %s to %d universal(s): %s",
+                    nid, len(linked), linked,
+                )
 
     except Exception as exc:
         logger.warning("KG post-gate capture failed (continuing): %s", exc)

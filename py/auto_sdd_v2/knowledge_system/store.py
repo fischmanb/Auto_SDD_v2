@@ -766,6 +766,141 @@ class KnowledgeStore:
         ).fetchall()
         return {row["node_type"]: row["cnt"] for row in rows}
 
+    # ── Generalization linking ────────────────────────────────────────────────
+
+    def link_to_universals(self, node_id: str, min_keyword_overlap: int = 2) -> list[str]:
+        """Link a node to existing universal/framework/technology nodes via `generalizes` edges.
+
+        Uses FTS keyword overlap between the new node and each universal-tier node.
+        A `generalizes` edge means "universal generalizes instance" (universal → instance).
+
+        Returns the list of universal node IDs that were linked.
+
+        This is NOT LLM-as-judge — it's keyword overlap as a mechanical heuristic.
+        False positives are cheap (weak edges get ignored by scoring), false negatives
+        are caught by `find_generalization_clusters` which surfaces unlinked clusters
+        for human review.
+        """
+        node = self.get_node(node_id)
+        if node is None:
+            return []
+
+        # Extract keywords from the new node
+        node_text = f"{node.get('title', '')} {node.get('content', '')}"
+        node_keywords = set(self._extract_keywords(node_text, None, None))
+        if not node_keywords:
+            return []
+
+        # Get all universal-tier nodes (universal, framework, technology)
+        universal_types = ("universal", "framework", "technology")
+        placeholders = ",".join("?" * len(universal_types))
+        universal_rows = self._conn.execute(
+            f"""
+            SELECT id, title, content FROM nodes
+            WHERE node_type IN ({placeholders})
+              AND status != 'deprecated'
+              AND id != ?
+            """,
+            (*universal_types, node_id),
+        ).fetchall()
+
+        linked: list[str] = []
+        for urow in universal_rows:
+            u_text = f"{urow['title'] or ''} {urow['content'] or ''}"
+            u_keywords = set(self._extract_keywords(u_text, None, None))
+            overlap = node_keywords & u_keywords
+            if len(overlap) >= min_keyword_overlap:
+                # generalizes: universal → instance
+                if not self.edge_exists(urow["id"], node_id, "generalizes"):
+                    self.add_edge(
+                        urow["id"],
+                        node_id,
+                        "generalizes",
+                        weight=len(overlap) / max(len(u_keywords), 1),
+                        context={"overlapping_keywords": sorted(overlap)},
+                    )
+                    linked.append(urow["id"])
+
+        return linked
+
+    def find_generalization_clusters(
+        self,
+        min_cluster_size: int = 3,
+    ) -> list[dict[str, Any]]:
+        """Find clusters of instance/mistake nodes that share keywords but have no universal.
+
+        Returns a list of cluster dicts, each with:
+          - shared_keywords: list of keywords shared by all nodes in the cluster
+          - node_ids: list of node IDs in the cluster
+          - suggested_title: a candidate universal title derived from shared keywords
+
+        These are candidates for NEW universal nodes — surface them to a human
+        or (reluctantly) to an LLM for one-time judgment.
+        """
+        # Get instance/mistake nodes that have NO generalizes edge pointing to them
+        unlinked_rows = self._conn.execute(
+            """
+            SELECT n.id, n.title, n.content FROM nodes n
+            WHERE n.node_type IN ('instance', 'mistake')
+              AND n.status != 'deprecated'
+              AND NOT EXISTS (
+                  SELECT 1 FROM edges e
+                  WHERE e.target_id = n.id AND e.edge_type = 'generalizes'
+              )
+            """
+        ).fetchall()
+
+        if len(unlinked_rows) < min_cluster_size:
+            return []
+
+        # Build keyword → node_ids index
+        keyword_index: dict[str, list[str]] = {}
+        node_keywords_map: dict[str, set[str]] = {}
+        for row in unlinked_rows:
+            text = f"{row['title'] or ''} {row['content'] or ''}"
+            keywords = set(self._extract_keywords(text, None, None))
+            node_keywords_map[row["id"]] = keywords
+            for kw in keywords:
+                keyword_index.setdefault(kw, []).append(row["id"])
+
+        # Find keyword pairs that co-occur in >= min_cluster_size nodes
+        # (single keywords are too noisy; pairs are more meaningful)
+        seen_clusters: set[frozenset[str]] = set()
+        clusters: list[dict[str, Any]] = []
+
+        hot_keywords = [
+            kw for kw, ids in keyword_index.items()
+            if len(ids) >= min_cluster_size
+        ]
+
+        for kw in hot_keywords:
+            member_ids = keyword_index[kw]
+            if len(member_ids) < min_cluster_size:
+                continue
+
+            # Find additional shared keywords among these members
+            member_keyword_sets = [node_keywords_map[nid] for nid in member_ids]
+            shared = set.intersection(*member_keyword_sets) if member_keyword_sets else set()
+
+            if len(shared) < 2:
+                # Single-keyword clusters are too noisy
+                continue
+
+            cluster_key = frozenset(member_ids)
+            if cluster_key in seen_clusters:
+                continue
+            seen_clusters.add(cluster_key)
+
+            clusters.append({
+                "shared_keywords": sorted(shared),
+                "node_ids": member_ids,
+                "suggested_title": " ".join(sorted(shared)[:5]),
+                "size": len(member_ids),
+            })
+
+        clusters.sort(key=lambda c: c["size"], reverse=True)
+        return clusters
+
     # ── Internal helpers ──────────────────────────────────────────────────────
 
     @staticmethod
