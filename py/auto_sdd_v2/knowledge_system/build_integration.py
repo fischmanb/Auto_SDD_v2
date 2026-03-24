@@ -343,6 +343,7 @@ Error:
 Agent output (last 3000 chars):
 {agent_tail}
 
+{gate_context}
 Instructions:
 1. Identify the ROOT CAUSE (not the symptom).
 2. Write a RULE that would prevent this class of failure in future builds.
@@ -353,6 +354,43 @@ Instructions:
 Respond with exactly:
 CAUSE: <one-sentence root cause>
 RULE: <the reusable rule>"""
+
+
+# Gate-specific analysis hints to improve reflection quality.
+# These tell the reflection LLM what to focus on per failure type.
+_GATE_REFLECTION_CONTEXT: dict[str, str] = {
+    "BUILD": (
+        "Analysis context: The agent itself crashed, timed out, or failed to "
+        "complete. Common causes: agent entered an infinite read loop, exceeded "
+        "turn limit, or encountered an unrecoverable tool error. Focus on what "
+        "the agent was doing (from the output tail) and why it got stuck."
+    ),
+    "EG2": (
+        "Analysis context: The agent's output was missing required signals "
+        "(FEATURE_BUILT, SPEC_FILE, SOURCE_FILES) or the referenced files "
+        "don't exist on disk. Common causes: agent forgot to emit signals, "
+        "emitted them inside a code block (gets filtered), or declared files "
+        "it didn't actually create. Focus on signal emission and file creation."
+    ),
+    "EG3": (
+        "Analysis context: The project failed to compile after the agent's "
+        "changes. Common causes: syntax errors, missing imports, wrong module "
+        "paths, type errors, referencing non-existent exports. Focus on the "
+        "compiler error message and which files the agent wrote."
+    ),
+    "EG4": (
+        "Analysis context: Tests failed after the agent's changes. Common "
+        "causes: agent broke existing functionality, didn't match expected "
+        "API contracts, introduced state mutations, or changed shared "
+        "utilities. Focus on which tests failed and what behavior changed."
+    ),
+    "EG5": (
+        "Analysis context: Commit authorization failed. Common causes: agent "
+        "forgot to git commit, left uncommitted changes, modified files outside "
+        "the project scope, or caused test count to drop. Focus on the specific "
+        "check that failed (HEAD_UNCHANGED, TREE_DIRTY, TEST_REGRESSION)."
+    ),
+}
 
 
 def reflect_on_failure(
@@ -382,11 +420,13 @@ def reflect_on_failure(
     dict or None
         ``{cause, rule}`` on success, None on parse failure or exception.
     """
+    gate_context = _GATE_REFLECTION_CONTEXT.get(gate_failed, "")
     prompt = _REFLECTION_PROMPT.format(
         feature_name=feature_name,
         gate_failed=gate_failed,
         error_pattern=(error_pattern or "")[:2000],
         agent_tail=(agent_output or "")[-3000:],
+        gate_context=gate_context,
     )
     try:
         raw = llm_call(prompt)

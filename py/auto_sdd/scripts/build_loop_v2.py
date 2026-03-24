@@ -693,6 +693,25 @@ def _read_arch_summary(project_dir: Path) -> str:
     return f"## Architecture Context\n\n{summary}\n"
 
 
+def _find_spec_content(feature: Feature, project_dir: Path) -> str:
+    """Find and read the spec file for a feature. Returns content or empty string.
+
+    Searches .specs/features/**/*.md for a file whose stem matches the
+    feature name. Called once per feature and cached across retries.
+    """
+    spec_dir = project_dir / ".specs" / "features"
+    if not spec_dir.is_dir():
+        return ""
+    target = feature.name.lower().replace(" ", "-")
+    for p in spec_dir.rglob("*.md"):
+        if target in p.stem.lower():
+            try:
+                return p.read_text()
+            except OSError:
+                return ""
+    return ""
+
+
 def _build_user_prompt(
     feature: Feature,
     project_dir: Path,
@@ -1099,6 +1118,11 @@ class BuildLoopV2:
         )
         baseline_test_count = baseline_test_result.test_count
 
+        # Cache test file discovery and spec content — stable across retries
+        # (agent can't modify test files, and spec files don't change mid-build).
+        protected = _discover_test_files(self.project_dir, self.test_cmd)
+        feature_spec_content = _find_spec_content(feature, self.project_dir)
+
         # Reset injected IDs once per feature (not per attempt) so retries
         # that return no KG results still reference the first-attempt injection.
         self._kg_injected_ids = []
@@ -1118,17 +1142,10 @@ class BuildLoopV2:
             kg_clues = ""
             if _KG_MODULE_AVAILABLE and self._kg is not None:
                 error_for_query = last_gate_error if attempt > 0 else None
-                # Use full spec content for richer KG query keywords
-                _spec_query = feature.name
-                _spec_dir = self.project_dir / ".specs" / "features"
-                if _spec_dir.is_dir():
-                    for _sp in _spec_dir.rglob("*.md"):
-                        if feature.name.lower().replace(" ", "-") in _sp.stem.lower():
-                            try:
-                                _spec_query = f"{feature.name}\n{_sp.read_text()}"
-                            except OSError:
-                                pass
-                            break
+                _spec_query = (
+                    f"{feature.name}\n{feature_spec_content}"
+                    if feature_spec_content else feature.name
+                )
                 kg_section, new_ids = _inject_relevant_knowledge(
                     self._kg,
                     feature_spec=_spec_query,
@@ -1171,7 +1188,6 @@ class BuildLoopV2:
                     user_prompt += _format_reflection_for_prompt(last_reflection)
 
             # Create executor (EG1 gate) scoped to this feature
-            protected = _discover_test_files(self.project_dir, self.test_cmd)
             executor = BuildAgentExecutor(
                 project_root=self.project_dir,
                 allowed_branch=branch_name,
