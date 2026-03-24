@@ -849,6 +849,7 @@ class BuildLoopV2:
         max_retries: int = 2,
         main_branch: str = "main",
         auto_approve: bool = False,
+        eg6_warn_only: bool = True,
     ) -> None:
         self.config = model_config
         self.project_dir = project_dir.resolve()
@@ -858,6 +859,7 @@ class BuildLoopV2:
         self.max_retries = max_retries
         self.main_branch = main_branch
         self.auto_approve = auto_approve
+        self.eg6_warn_only = eg6_warn_only
         self._codebase_summary: str = ""
         self._campaign_blocked: list[str] = []  # cross-feature EG1 rejections
         self._campaign_id: str = ""
@@ -1748,11 +1750,20 @@ class BuildLoopV2:
         gate.eg6_adherence = adherence_result
 
         if not adherence_result.passed:
-            gate.failed_gate = "EG6"
-            gate.error = adherence_result.summary
-            return gate
-
-        _status(f"EG6 ✓ spec adherence ({len(adherence_result.checks_passed)} checks)")
+            if self.eg6_warn_only:
+                # Warn mode: log deviations but don't block the build.
+                # Use this to validate EG6 checks against real campaigns
+                # before enforcing. Switch to enforce with --eg6-enforce.
+                logger.warning(
+                    "EG6 WARN (not blocking): %s", adherence_result.summary,
+                )
+                _status(f"EG6 ⚠ spec adherence warnings: {adherence_result.summary[:200]}")
+            else:
+                gate.failed_gate = "EG6"
+                gate.error = adherence_result.summary
+                return gate
+        else:
+            _status(f"EG6 ✓ spec adherence ({len(adherence_result.checks_passed)} checks)")
 
         # All checks passed
         gate.passed = True
@@ -1974,6 +1985,12 @@ def main() -> None:
         default=os.environ.get("VISION_INPUT", ""),
         help="User input for Phase 1 (VISION). Required if --pre-build and no .specs/vision.md",
     )
+    parser.add_argument(
+        "--eg6-enforce",
+        action="store_true",
+        default=False,
+        help="Enforce EG6 spec adherence (default: warn-only mode, logs but doesn't block)",
+    )
     args = parser.parse_args()
 
     # Validate project dir
@@ -2033,6 +2050,7 @@ def main() -> None:
         max_features=args.max_features,
         max_retries=args.max_retries,
         auto_approve=args.auto_approve,
+        eg6_warn_only=not args.eg6_enforce,
     )
 
     exit_code = loop.run()
