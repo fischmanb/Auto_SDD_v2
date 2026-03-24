@@ -362,7 +362,7 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 
 ### Bugfixes from first Claude API run
 - `AgentResult.success` is a read-only property (derived from `finish_reason == "stop"`). Anthropic path was assigning to it directly. Fixed: set `result.finish_reason = "stop"` instead.
-- `codebase_summary.py` passes `max_turns=1` to `run_local_agent` but the function doesn't accept that kwarg. Fails silently (caught exception, returns empty summary). Known bug, not yet fixed.
+- `codebase_summary.py` passes `max_turns=1` to `run_local_agent` but the function doesn't accept that kwarg. Fails silently (caught exception, returns empty summary). Known bug, not yet fixed. **→ Resolved session 7 part 4** (`10c4752`): changed `tools=[]` to `tools=None`, summary generates successfully.
 
 ### First successful end-to-end tool-calling loop
 - Claude Sonnet completed Data Loader feature in 13 turns, 31.5 seconds on first run.
@@ -531,21 +531,21 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 - Total: 158 tests passing across all modules.
 
 ### Documented gap
-- `local_agent.py` has no unit tests. The module makes HTTP calls to an OpenAI-compatible server; testing requires mocking the `OpenAI` client. Deferred — not blocking tier 1.
+- `local_agent.py` has no unit tests. The module makes HTTP calls to an OpenAI-compatible server; testing requires mocking the `OpenAI` client. Deferred — not blocking tier 1. **→ Resolved session 5**: `test_local_agent.py` (445 lines, 31 tests).
 
 ### Review completed
 - EG1 check 6 (unknown tool rejection): classified A — sound. Hardcoded else clause blocks invented tool names.
 - EG1 check 7 (malformed argument rejection): classified B — minor gap, now fixed. All 82 tests pass.
-- EG5 all 4 checks reviewed: HEAD advanced (A), tree clean (B — fixed with warning log), contamination (A), test regression (A, deferred integrity question).
+- EG5 all 4 checks reviewed: HEAD advanced (A), tree clean (B — fixed with warning log), contamination (A), test regression (A, deferred integrity question). **→ Integrity question resolved session 3**: `protected_paths` in EG1 makes test files write-blocked at tool-call layer.
 
 ### Design resolved
 - Design question 1 (test content integrity): resolved by adding `protected_paths` to EG1. Test files are write-blocked at the tool-call layer. Agent cannot delete, modify, or replace them. EG5 count check is now defense-in-depth, not primary defense.
 
 ### Noted (not fixed)
-- Pre-build phases 1–6 (VISION through RED) have zero code implementation. architectural-inventory.md defines them as automated, but the build loop currently assumes all spec artifacts exist on disk as human-authored inputs.
+- Pre-build phases 1–6 (VISION through RED) have zero code implementation. architectural-inventory.md defines them as automated, but the build loop currently assumes all spec artifacts exist on disk as human-authored inputs. **→ Resolved sessions 7–8**: 8 phase files implemented (phase_vision.py, phase_design.py, phase_personas.py, phase_design_patterns.py, phase_spec.py, phase_red.py, phase_roadmap.py, phase_systems.py) totaling 652 lines, wired into orchestrator.
 
-### Design identified (no code)
-- Structured error types: current `errors: list[str]` across EG2, EG5, GateResult should become `errors: list[GateError]` where `GateError` has a stable `code` field (e.g. `SPEC_TOO_SHORT`, `SOURCE_MISSING`) and a free-form `detail` field. ~25 error-producing call sites, ~15 test assertions. Benefits: tests become wording-independent, build summary gets machine-queryable failure codes, retry logic can branch on error type (e.g. `SOURCE_MISSING` → retry, `SPEC_TOO_SHORT` → don't). Est. 2–3 hours.
+### Design identified (partially implemented)
+- Structured error types: current `errors: list[str]` across EG2, EG5, GateResult should become `errors: list[GateError]` where `GateError` has a stable `code` field (e.g. `SPEC_TOO_SHORT`, `SOURCE_MISSING`) and a free-form `detail` field. ~25 error-producing call sites, ~15 test assertions. Benefits: tests become wording-independent, build summary gets machine-queryable failure codes, retry logic can branch on error type (e.g. `SOURCE_MISSING` → retry, `SPEC_TOO_SHORT` → don't). Est. 2–3 hours. **→ Partially resolved**: `GateError` dataclass defined in `types.py` and adopted in pre-build phases (phase_spec.py). EG2/EG5 migration to `list[GateError]` still pending.
 
 ---
 
@@ -558,7 +558,7 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 - Replaced `_parse_roadmap()` single-pass dependency filter with true topological sort (Kahn's algorithm) + cycle detection. Pending features with dep chains now resolve in a single campaign.
 
 ### Decisions
-- EG numbering expanded to cover all orchestrator-side verification: EG1 tool calls, EG2 signals, EG3 build, EG4 test, EG5 commit auth, EG6 spec adherence (reserved). All follow AgentSpec pattern (Wang et al., arXiv:2503.18666).
+- EG numbering expanded to cover all orchestrator-side verification: EG1 tool calls, EG2 signals, EG3 build, EG4 test, EG5 commit auth, EG6 spec adherence (reserved — deferred session 8, replaced by Phase 5 prompt hardening for spec quality). All follow AgentSpec pattern (Wang et al., arXiv:2503.18666).
 - GATE short-circuits on first failure (Option A over Option B flat-run). More efficient, matches code reality.
 - True topo sort lives in `_parse_roadmap()` (build loop), not in ROADMAP phase or SPEC-FIRST. Orchestrator-owned, deterministic.
 
