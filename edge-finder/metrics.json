@@ -1,0 +1,25 @@
+{
+  "last_updated": null,
+  "rolling_7d": {
+    "accuracy": null,
+    "ev_realized": null,
+    "total_games": 0,
+    "total_correct": 0
+  },
+  "rolling_30d": {
+    "accuracy": null,
+    "ev_realized": null,
+    "total_games": 0,
+    "total_correct": 0
+  },
+  "all_time": {
+    "accuracy": null,
+    "ev_realized": null,
+    "total_games": 0,
+    "total_correct": 0,
+    "total_bets_recommended": 0,
+    "total_bets_won": 0
+  },
+  "variant_performance": {},
+  "champion_history": []
+}
