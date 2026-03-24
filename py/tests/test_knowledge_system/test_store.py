@@ -850,3 +850,97 @@ class TestFindGeneralizationClusters:
             assert "suggested_title" in c
             assert "size" in c
             assert len(c["shared_keywords"]) >= 2
+
+
+class TestMaterializeCluster:
+    def test_creates_universal_with_edges(self, store):
+        for i in range(3):
+            store.add_node(
+                "instance", f"Node {i}", f"Content {i}",
+                node_id=f"L-{i+1:05d}",
+            )
+        uid = store.materialize_cluster(
+            title="Always validate imports",
+            content="Validate import paths before committing code changes.",
+            member_ids=["L-00001", "L-00002", "L-00003"],
+        )
+        assert uid.startswith("U-")
+        node = store.get_node(uid)
+        assert node is not None
+        assert node["node_type"] == "universal"
+        assert node["status"] == "active"  # must earn promotion
+        # Check edges exist for all members
+        for mid in ["L-00001", "L-00002", "L-00003"]:
+            assert store.edge_exists(uid, mid, "generalizes")
+
+    def test_metadata_tracks_source(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001")
+        cluster = {"shared_keywords": ["import", "validate"], "size": 1}
+        uid = store.materialize_cluster(
+            title="Rule",
+            content="Content",
+            member_ids=["L-00001"],
+            source_cluster=cluster,
+        )
+        import json
+        node = store.get_node(uid)
+        assert node is not None
+        meta = json.loads(node["metadata"])
+        assert meta["source"] == "cluster_materialization"
+        assert meta["member_ids"] == ["L-00001"]
+        assert meta["cluster"] == cluster
+
+    def test_skips_nonexistent_members(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001")
+        uid = store.materialize_cluster(
+            title="Rule",
+            content="Content",
+            member_ids=["L-00001", "L-99999"],  # L-99999 doesn't exist
+        )
+        # Should create edge only for existing member
+        assert store.edge_exists(uid, "L-00001", "generalizes")
+        assert not store.edge_exists(uid, "L-99999", "generalizes")
+
+    def test_materialized_node_participates_in_promotion(self, store):
+        """Materialized universals go through normal promotion pipeline."""
+        store.add_node("instance", "A", "A", node_id="L-00001")
+        uid = store.materialize_cluster(
+            title="Validate everything",
+            content="Always validate before proceeding.",
+            member_ids=["L-00001"],
+            stack="python",
+        )
+        # Starts active
+        assert store.get_node(uid)["status"] == "active"
+        # Simulate successful injection
+        store.record_outcome(
+            "feat", 1, "success",
+            node_ids_injected=[uid],
+            campaign_id="c1",
+        )
+        events = store.promote()
+        assert any(e["node_id"] == uid and e["to"] == "promoted" for e in events)
+
+    def test_materialized_node_excluded_from_clusters(self, store):
+        """After materialization, members should no longer appear in clusters."""
+        for i in range(3):
+            store.add_node(
+                "instance",
+                f"Import validation error case {i}",
+                f"The import validation check failed module resolution wrong #{i}",
+                node_id=f"L-{i+1:05d}",
+            )
+        # Before materialization — should have clusters
+        clusters_before = store.find_generalization_clusters(min_cluster_size=3)
+        assert len(clusters_before) >= 1
+
+        # Materialize
+        store.materialize_cluster(
+            title="Validate imports",
+            content="Always validate import paths",
+            member_ids=["L-00001", "L-00002", "L-00003"],
+        )
+
+        # After — members are now linked, should not cluster
+        clusters_after = store.find_generalization_clusters(min_cluster_size=3)
+        assert clusters_after == []

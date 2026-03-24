@@ -21,6 +21,7 @@ from auto_sdd_v2.knowledge_system.build_integration import (
     _SPEC_PROMPT_MAX_TOKENS,
     _SYSTEM_PROMPT_MAX_TOKENS,
     _USER_PROMPT_MAX_TOKENS,
+    _parse_synthesis_response,
     detect_project_stack,
     extract_learning_candidates,
     inject_hardened_clues,
@@ -28,6 +29,7 @@ from auto_sdd_v2.knowledge_system.build_integration import (
     inject_spec_learnings,
     init_store_optional,
     kg_post_gate,
+    synthesize_universals,
 )
 from auto_sdd_v2.knowledge_system.store import KnowledgeStore
 
@@ -527,3 +529,167 @@ def test_truncate_applied_to_very_long_content(tmp_db: str) -> None:
     max_chars = _USER_PROMPT_MAX_TOKENS * _CHARS_PER_TOKEN
     assert len(section) <= max_chars + len("\n[truncated to fit token budget]")
     store.close()
+
+
+# ── synthesize_universals ────────────────────────────────────────────────────
+
+
+def _make_cluster_store(store: KnowledgeStore) -> KnowledgeStore:
+    """Populate store with 3 instance nodes that will cluster."""
+    for i in range(3):
+        store.add_node(
+            "instance",
+            f"Import validation error case {i}",
+            f"The import validation check failed because module resolution was wrong #{i}",
+            node_id=f"L-{i+1:05d}",
+        )
+    return store
+
+
+def _fake_llm(prompt: str) -> str:
+    return (
+        "TITLE: Always validate import paths before committing\n"
+        "CONTENT: Verify that all import paths resolve correctly to prevent "
+        "build failures from broken module resolution."
+    )
+
+
+def test_synthesize_universals_creates_nodes(store: KnowledgeStore) -> None:
+    _make_cluster_store(store)
+    results = synthesize_universals(store, _fake_llm, min_cluster_size=3)
+    assert len(results) >= 1
+    r = results[0]
+    assert r["node_id"] is not None
+    assert r["node_id"].startswith("U-")
+    # Verify the node exists and is active
+    node = store.get_node(r["node_id"])
+    assert node is not None
+    assert node["status"] == "active"
+    assert node["node_type"] == "universal"
+    # Verify edges to members
+    for mid in r["member_ids"]:
+        assert store.edge_exists(r["node_id"], mid, "generalizes")
+
+
+def test_synthesize_universals_dry_run(store: KnowledgeStore) -> None:
+    _make_cluster_store(store)
+    results = synthesize_universals(store, _fake_llm, min_cluster_size=3, dry_run=True)
+    assert len(results) >= 1
+    assert results[0]["node_id"] is None
+    assert "prompt" in results[0]
+    # No nodes created
+    stats = store.stats()
+    assert stats["by_type"].get("universal", 0) == 0
+
+
+def test_synthesize_universals_noop_for_none_store() -> None:
+    assert synthesize_universals(None, _fake_llm) == []
+
+
+def test_synthesize_universals_handles_bad_llm_response(
+    store: KnowledgeStore,
+) -> None:
+    _make_cluster_store(store)
+
+    def bad_llm(prompt: str) -> str:
+        return "I don't know what you want me to do."
+
+    results = synthesize_universals(store, bad_llm, min_cluster_size=3)
+    assert results == []  # unparseable → skipped
+    assert store.stats()["by_type"].get("universal", 0) == 0
+
+
+def test_synthesize_universals_handles_llm_exception(
+    store: KnowledgeStore,
+) -> None:
+    _make_cluster_store(store)
+
+    def exploding_llm(prompt: str) -> str:
+        raise RuntimeError("API timeout")
+
+    results = synthesize_universals(store, exploding_llm, min_cluster_size=3)
+    assert results == []
+
+
+def test_synthesize_universals_respects_max_cap(store: KnowledgeStore) -> None:
+    # Create enough nodes for multiple clusters (different keyword groups)
+    for i in range(3):
+        store.add_node(
+            "instance",
+            f"Import validation error {i}",
+            f"Import validation check failed module resolution wrong #{i}",
+            node_id=f"L-{i+1:05d}",
+        )
+    results = synthesize_universals(store, _fake_llm, min_cluster_size=3, max_synthesize=1)
+    assert len(results) <= 1
+
+
+def test_synthesize_universals_created_node_trackable_via_lift(
+    store: KnowledgeStore,
+) -> None:
+    """The synthesized universal participates in the lift pipeline."""
+    _make_cluster_store(store)
+    results = synthesize_universals(store, _fake_llm, min_cluster_size=3)
+    uid = results[0]["node_id"]
+
+    # Simulate 3 successful injections
+    for i in range(3):
+        store.record_outcome(
+            f"feat{i}", 1, "success",
+            node_ids_injected=[uid],
+            campaign_id="c1",
+        )
+    # Baseline: some failures without this node
+    for i in range(3):
+        store.record_outcome(f"other{i}", 1, "failure")
+
+    lift = store.calculate_lift(uid)
+    assert lift > 0  # with_rate=1.0, baseline_rate=0.0 → lift=1.0
+
+    # Should promote active → promoted → hardened
+    events = store.promote()
+    promoted = [e for e in events if e["node_id"] == uid]
+    assert len(promoted) >= 1
+
+
+def test_synthesize_universals_bad_node_decays(store: KnowledgeStore) -> None:
+    """A bad synthesized universal gets negative lift and never promotes."""
+    _make_cluster_store(store)
+    results = synthesize_universals(store, _fake_llm, min_cluster_size=3)
+    uid = results[0]["node_id"]
+
+    # Simulate: injected builds all fail, baseline succeeds
+    for i in range(3):
+        store.record_outcome(
+            f"feat{i}", 1, "failure",
+            node_ids_injected=[uid],
+        )
+    for i in range(3):
+        store.record_outcome(f"other{i}", 1, "success")
+
+    lift = store.calculate_lift(uid)
+    assert lift < 0  # negative lift
+
+    events = store.promote()
+    # Should NOT promote — still active with negative lift
+    assert not any(e["node_id"] == uid and e["to"] == "promoted" for e in events)
+    assert store.get_node(uid)["status"] == "active"
+
+
+def test_parse_synthesis_response_valid() -> None:
+    resp = "TITLE: Always validate imports\nCONTENT: Check all import paths resolve."
+    result = _parse_synthesis_response(resp)
+    assert result is not None
+    assert result == ("Always validate imports", "Check all import paths resolve.")
+
+
+def test_parse_synthesis_response_invalid() -> None:
+    assert _parse_synthesis_response("just some text") is None
+    assert _parse_synthesis_response("TITLE: only title") is None
+    assert _parse_synthesis_response("CONTENT: only content") is None
+
+
+def test_parse_synthesis_response_strips_whitespace() -> None:
+    resp = "  TITLE:   Padded title  \n  CONTENT:  Padded content  "
+    result = _parse_synthesis_response(resp)
+    assert result == ("Padded title", "Padded content")

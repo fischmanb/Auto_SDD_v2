@@ -1,8 +1,11 @@
 """Knowledge system integration helpers for the build loop and pre-build phases.
 
 All public functions are optional-safe: if *store* is None they return empty
-strings or are no-ops.  No LLM judgment here — all SQL-backed deterministic
-queries and plain-text extraction.
+strings or are no-ops.  Deterministic SQL-backed queries and plain-text
+extraction throughout, with one explicit exception: ``synthesize_universals``
+uses a one-shot LLM call to generate universal node titles/content from
+keyword clusters.  Created universals start at ``active`` and must earn
+promotion through the normal lift-gated pipeline.
 
 Token budgets
 -------------
@@ -320,3 +323,156 @@ def kg_post_gate(
 
     except Exception as exc:
         logger.warning("KG post-gate capture failed (continuing): %s", exc)
+
+
+# ── Cluster → Universal synthesis ────────────────────────────────────────────
+
+# The ONE place LLM judgment is used.  Everything else is deterministic SQL.
+# Created universals start at active and must earn promotion via lift > 0.
+
+_SYNTHESIS_PROMPT = """\
+You are distilling a reusable engineering rule from related build learnings.
+
+Below are {count} related nodes from a knowledge graph.  They share these keywords: {keywords}.
+
+{node_summaries}
+
+Write a single universal engineering rule that captures the common pattern.
+The rule must be:
+- Actionable (starts with a verb: "Always...", "Never...", "Validate...")
+- Domain-invariant (applies across projects, not specific to one feature)
+- Concise (1-2 sentences max)
+
+Respond with exactly two lines:
+TITLE: <short rule title, max 120 chars>
+CONTENT: <full rule text, max 500 chars>"""
+
+
+def _build_synthesis_prompt(
+    cluster: dict,
+    store: "KnowledgeStore",
+) -> str:
+    """Build the one-shot prompt for a single cluster."""
+    summaries: list[str] = []
+    for nid in cluster["node_ids"]:
+        node = store.get_node(nid)
+        if node:
+            title = node.get("title", "")
+            content = (node.get("content") or "")[:300]
+            summaries.append(f"- **{nid}** ({node['node_type']}): {title}\n  {content}")
+    return _SYNTHESIS_PROMPT.format(
+        count=cluster["size"],
+        keywords=", ".join(cluster["shared_keywords"]),
+        node_summaries="\n".join(summaries),
+    )
+
+
+def _parse_synthesis_response(response: str) -> tuple[str, str] | None:
+    """Extract TITLE/CONTENT from LLM response.  Returns None on parse failure."""
+    title = ""
+    content = ""
+    for line in response.splitlines():
+        stripped = line.strip()
+        if stripped.upper().startswith("TITLE:"):
+            title = stripped[len("TITLE:"):].strip()
+        elif stripped.upper().startswith("CONTENT:"):
+            content = stripped[len("CONTENT:"):].strip()
+    if title and content:
+        return title[:200], content[:2000]
+    return None
+
+
+def synthesize_universals(
+    store: "KnowledgeStore | None",
+    llm_call: "callable",
+    *,
+    min_cluster_size: int = 3,
+    max_synthesize: int = 5,
+    campaign_id: str | None = None,
+    dry_run: bool = False,
+) -> list[dict]:
+    """Find unlinked clusters and synthesize universal nodes via one-shot LLM.
+
+    Parameters
+    ----------
+    store : KnowledgeStore or None
+        The knowledge store.  No-op if None.
+    llm_call : callable
+        ``llm_call(prompt: str) -> str`` — single-turn LLM invocation.
+        The caller owns model selection and API keys.  This function only
+        provides the prompt and parses the response.
+    min_cluster_size : int
+        Minimum cluster members to trigger synthesis (default 3).
+    max_synthesize : int
+        Cap on universals created per sweep (default 5).
+    campaign_id : str or None
+        Campaign to tag new nodes with.
+    dry_run : bool
+        If True, return planned actions without creating nodes.
+
+    Returns
+    -------
+    list[dict]
+        Each entry: ``{node_id, title, member_ids, cluster}`` for created
+        universals.  On dry_run, ``node_id`` is None.
+
+    The created universals start at ``active`` — they must survive the
+    injection → outcome → lift pipeline to promote.  Bad LLM output
+    produces nodes that never promote (lift ≤ 0) and decay via recency.
+    """
+    if store is None:
+        return []
+
+    results: list[dict] = []
+    try:
+        clusters = store.find_generalization_clusters(min_cluster_size=min_cluster_size)
+        for cluster in clusters[:max_synthesize]:
+            prompt = _build_synthesis_prompt(cluster, store)
+
+            if dry_run:
+                results.append({
+                    "node_id": None,
+                    "title": cluster["suggested_title"],
+                    "member_ids": cluster["node_ids"],
+                    "cluster": cluster,
+                    "prompt": prompt,
+                })
+                continue
+
+            try:
+                raw = llm_call(prompt)
+                parsed = _parse_synthesis_response(raw)
+                if parsed is None:
+                    logger.warning(
+                        "KG: synthesis LLM response unparseable for cluster %s, skipping",
+                        cluster["shared_keywords"],
+                    )
+                    continue
+
+                title, content = parsed
+                node_id = store.materialize_cluster(
+                    title=title,
+                    content=content,
+                    member_ids=cluster["node_ids"],
+                    campaign_id=campaign_id,
+                    source_cluster=cluster,
+                )
+                results.append({
+                    "node_id": node_id,
+                    "title": title,
+                    "member_ids": cluster["node_ids"],
+                    "cluster": cluster,
+                })
+                logger.info(
+                    "KG: synthesized universal %s from %d members: %s",
+                    node_id, cluster["size"], title,
+                )
+            except Exception as exc:
+                logger.warning(
+                    "KG: synthesis failed for cluster %s: %s",
+                    cluster["shared_keywords"], exc,
+                )
+    except Exception as exc:
+        logger.warning("KG: synthesize_universals sweep failed: %s", exc)
+
+    return results

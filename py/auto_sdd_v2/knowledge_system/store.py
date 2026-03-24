@@ -905,6 +905,50 @@ class KnowledgeStore:
         clusters.sort(key=lambda c: c["size"], reverse=True)
         return clusters
 
+    def materialize_cluster(
+        self,
+        title: str,
+        content: str,
+        member_ids: list[str],
+        *,
+        stack: str | None = None,
+        campaign_id: str | None = None,
+        source_cluster: dict[str, Any] | None = None,
+    ) -> str:
+        """Create a universal node from a cluster and link it to all members.
+
+        The new node starts at ``active`` status — it must earn promotion via
+        the normal injection → outcome → lift pipeline.  If the LLM-generated
+        content is wrong, lift stays ≤ 0 and the node never promotes.
+
+        Returns the new universal node ID.
+        """
+        node_id = self.add_node(
+            node_type="universal",
+            title=title[:200],
+            content=content[:2000],
+            stack=stack,
+            campaign_id=campaign_id,
+            status="active",
+            metadata={
+                "source": "cluster_materialization",
+                "member_ids": member_ids,
+                "cluster": source_cluster,
+            },
+        )
+
+        # Link universal → each member via generalizes
+        for mid in member_ids:
+            if self.get_node(mid) is not None:
+                self.add_edge(
+                    node_id,
+                    mid,
+                    "generalizes",
+                    context={"source": "cluster_materialization"},
+                )
+
+        return node_id
+
     # ── Internal helpers ──────────────────────────────────────────────────────
 
     @staticmethod
