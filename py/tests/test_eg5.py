@@ -27,6 +27,7 @@ def git_project(tmp_path: Path) -> Path:
     _git(["init"], tmp_path)
     _git(["config", "user.email", "test@test.com"], tmp_path)
     _git(["config", "user.name", "Test"], tmp_path)
+    _git(["config", "commit.gpgsign", "false"], tmp_path)
     (tmp_path / "initial.txt").write_text("initial\n")
     _git(["add", "."], tmp_path)
     _git(["commit", "-m", "initial"], tmp_path)

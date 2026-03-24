@@ -74,6 +74,7 @@ def git_project(tmp_path: Path) -> Path:
     _git(tmp_path, "init")
     _git(tmp_path, "config", "user.email", "test@test.com")
     _git(tmp_path, "config", "user.name", "Test")
+    _git(tmp_path, "config", "commit.gpgsign", "false")
 
     # package.json with build + test scripts
     (tmp_path / "package.json").write_text(json.dumps({
