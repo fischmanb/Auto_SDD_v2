@@ -52,6 +52,7 @@ from auto_sdd.exec_gates.eg2_signal_parse import extract_and_validate, ParsedSig
 from auto_sdd.exec_gates.eg3_build_check import check_build, detect_build_cmd, BuildCheckResult
 from auto_sdd.exec_gates.eg4_test_check import check_tests, detect_test_cmd, TestCheckResult
 from auto_sdd.exec_gates.eg5_commit_auth import authorize_commit, CommitAuthResult
+from auto_sdd.exec_gates.eg6_spec_adherence import check_spec_adherence, SpecAdherenceResult
 from auto_sdd.lib.constants import BUILD_AGENT_TOOLS
 
 logger = logging.getLogger(__name__)
@@ -125,7 +126,7 @@ class GateResult:
     eg3_build: BuildCheckResult | None = None
     eg4_tests: TestCheckResult | None = None
     eg5_commit: CommitAuthResult | None = None
-    # eg6_spec_adherence: reserved
+    eg6_adherence: "SpecAdherenceResult | None" = None
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -226,6 +227,8 @@ def _extract_error_codes(gate: "GateResult") -> list[str]:
         codes = [e.code for e in gate.eg2_signals.errors]
     elif gate.failed_gate == "EG5" and gate.eg5_commit:
         codes = [e.code for e in gate.eg5_commit.checks_failed]
+    elif gate.failed_gate == "EG6" and gate.eg6_adherence:
+        codes = [e.code for e in gate.eg6_adherence.checks_failed]
     # EG3/EG4 don't have structured codes yet — gate name is enough
     return codes
 
@@ -258,6 +261,23 @@ _RETRY_GUIDANCE: dict[str, str] = {
     "SPEC_TOO_SHORT": (
         "The spec file has too little content (<25 chars). This is a "
         "pre-build issue — write a substantive spec before building."
+    ),
+    # EG6 spec adherence errors
+    "SOURCE_NOT_IN_DIFF": (
+        "Your SOURCE_FILES signal lists files that weren't actually "
+        "changed. Update the signal to match only the files you modified."
+    ),
+    "FILE_MISPLACED": (
+        "You created files in unexpected directories. Check the project's "
+        "systems-design.md for the expected directory structure."
+    ),
+    "TOKEN_UNKNOWN": (
+        "You referenced design tokens that don't exist in tokens.md. "
+        "Use only tokens defined in .specs/design-system/tokens.md."
+    ),
+    "NAMING_VIOLATION": (
+        "File names don't follow conventions: React components should be "
+        "PascalCase (.tsx), Python modules should be snake_case (.py)."
     ),
     # EG5 commit errors
     "HEAD_UNCHANGED": (
@@ -298,6 +318,12 @@ _GATE_GUIDANCE: dict[str, str] = {
     "EG5": (
         "Commit authorization failed. Make sure you commit all changes "
         "and don't modify files outside the project scope."
+    ),
+    "EG6": (
+        "Spec adherence check failed. Your code doesn't match the "
+        "structural requirements: check file placement, naming conventions, "
+        "design token references, and that SOURCE_FILES matches what you "
+        "actually changed."
     ),
 }
 
@@ -1674,9 +1700,20 @@ class BuildLoopV2:
 
         _status("EG5 ✓ commit authorized")
 
-        # ── EG6: Spec adherence (reserved) ───────────────────────
-        # Not yet implemented. Will be deterministic diff-based
-        # static analysis when added.
+        # ── EG6: Spec adherence ─────────────────────────────────
+        adherence_result = check_spec_adherence(
+            project_dir=self.project_dir,
+            source_files=signals.source_files,
+            base_commit=head_before,
+        )
+        gate.eg6_adherence = adherence_result
+
+        if not adherence_result.passed:
+            gate.failed_gate = "EG6"
+            gate.error = adherence_result.summary
+            return gate
+
+        _status(f"EG6 ✓ spec adherence ({len(adherence_result.checks_passed)} checks)")
 
         # All checks passed
         gate.passed = True

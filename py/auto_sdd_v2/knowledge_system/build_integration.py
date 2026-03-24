@@ -463,6 +463,14 @@ _GATE_REFLECTION_CONTEXT: dict[str, str] = {
         "the project scope, or caused test count to drop. Focus on the specific "
         "check that failed (HEAD_UNCHANGED, TREE_DIRTY, TEST_REGRESSION)."
     ),
+    "EG6": (
+        "Analysis context: Spec adherence failed. The code compiles and tests "
+        "pass, but the agent's output doesn't match structural requirements. "
+        "Common causes: files placed in wrong directories, SOURCE_FILES signal "
+        "doesn't match actual changes, design tokens referenced that don't "
+        "exist in tokens.md, or file naming convention violations. Focus on "
+        "which adherence check failed and whether it's a signal/placement issue."
+    ),
 }
 
 
