@@ -218,6 +218,114 @@ def _get_diff(project_dir: Path, base_commit: str) -> str:
         return ""
 
 
+def _extract_error_codes(gate: "GateResult") -> list[str]:
+    """Extract structured error codes from a failed GateResult."""
+    codes: list[str] = []
+    if gate.failed_gate == "EG2" and gate.eg2_signals:
+        codes = [e.code for e in gate.eg2_signals.errors]
+    elif gate.failed_gate == "EG5" and gate.eg5_commit:
+        codes = [e.code for e in gate.eg5_commit.checks_failed]
+    # EG3/EG4 don't have structured codes yet — gate name is enough
+    return codes
+
+
+# ── Retry guidance by failure type ────────────────────────────────────────
+
+_RETRY_GUIDANCE: dict[str, str] = {
+    # EG2 signal errors
+    "MISSING_FEATURE_BUILT": (
+        "You forgot to emit the FEATURE_BUILT signal. After committing, "
+        "print: FEATURE_BUILT: <feature name>"
+    ),
+    "MISSING_SPEC_FILE": (
+        "You forgot to emit the SPEC_FILE signal. After committing, "
+        "print: SPEC_FILE: <path to spec>"
+    ),
+    "SOURCE_MISSING": (
+        "One or more SOURCE_FILES you declared don't exist on disk. "
+        "Either create the missing files or fix the SOURCE_FILES signal "
+        "to list only files you actually created."
+    ),
+    "SPEC_NOT_FOUND": (
+        "The SPEC_FILE you referenced doesn't exist. Check the path and "
+        "make sure you're pointing to the actual spec file in .specs/."
+    ),
+    "SPEC_TOO_SHORT": (
+        "The spec file has too little content (<25 chars). This is a "
+        "pre-build issue — write a substantive spec before building."
+    ),
+    # EG5 commit errors
+    "HEAD_UNCHANGED": (
+        "You didn't commit your changes. Use git add and git commit "
+        "before emitting signals."
+    ),
+    "TREE_DIRTY": (
+        "You left uncommitted changes. Run git add for all modified files "
+        "and commit them before emitting signals."
+    ),
+    "TEST_REGRESSION": (
+        "Your changes caused existing tests to fail. Review the test "
+        "output, identify which tests broke, and fix your implementation "
+        "to preserve existing behavior."
+    ),
+}
+
+# Gate-level fallback guidance when no specific error codes match
+_GATE_GUIDANCE: dict[str, str] = {
+    "BUILD": (
+        "The agent crashed or timed out. Simplify your approach — "
+        "implement the minimum viable version first."
+    ),
+    "EG2": (
+        "Signal validation failed. After implementing and committing, "
+        "emit FEATURE_BUILT, SPEC_FILE, and SOURCE_FILES signals."
+    ),
+    "EG3": (
+        "The project failed to compile. Check for syntax errors, missing "
+        "imports, and type errors in the files you wrote. Do NOT introduce "
+        "new dependencies unless the spec requires them."
+    ),
+    "EG4": (
+        "Tests failed. Read the test output carefully. Fix your "
+        "implementation to make tests pass — do NOT modify existing tests "
+        "unless the feature spec requires it."
+    ),
+    "EG5": (
+        "Commit authorization failed. Make sure you commit all changes "
+        "and don't modify files outside the project scope."
+    ),
+}
+
+
+def _retry_guidance(failed_gate: str, error_codes: list[str]) -> str:
+    """Build targeted retry instructions based on failure type."""
+    parts: list[str] = []
+
+    # Specific guidance per error code
+    for code in error_codes:
+        if code in _RETRY_GUIDANCE:
+            parts.append(f"- {_RETRY_GUIDANCE[code]}")
+
+    # Gate-level fallback if no specific codes matched
+    if not parts and failed_gate in _GATE_GUIDANCE:
+        parts.append(_GATE_GUIDANCE[failed_gate])
+
+    if parts:
+        guidance = "## RETRY STRATEGY\n" + "\n".join(parts) + "\n\n"
+    else:
+        guidance = ""
+
+    # Always include the general instruction
+    guidance += (
+        "Fix ONLY the errors above. The import signatures for all "
+        "existing modules are already provided in this prompt. Do "
+        "NOT re-read files whose exports are listed above. Read "
+        "ONLY your own files if you need to see what you wrote, "
+        "then write corrected versions immediately.\n"
+    )
+    return guidance
+
+
 def _format_duration(seconds: int) -> str:
     """Format seconds as human-readable duration."""
     h, remainder = divmod(seconds, 3600)
@@ -906,6 +1014,8 @@ class BuildLoopV2:
 
         last_gate_error: str = ""
         last_diff: str = ""
+        last_failed_gate: str = ""
+        last_error_codes: list[str] = []
         last_reflection: dict | None = None
         base_max_turns = self.config.max_turns
         scaled_turns = _turns_for_complexity(feature.complexity, base_max_turns)
@@ -988,13 +1098,8 @@ class BuildLoopV2:
                         f"## YOUR PREVIOUS CHANGES (git diff)\n"
                         f"```diff\n{last_diff}\n```\n\n"
                     )
-                user_prompt += (
-                    f"Fix ONLY the errors above. The import signatures for all "
-                    f"existing modules are already provided in this prompt. Do "
-                    f"NOT re-read files whose exports are listed above. Read "
-                    f"ONLY your own files if you need to see what you wrote, "
-                    f"then write corrected versions immediately.\n"
-                )
+                # Targeted retry guidance based on failure type
+                user_prompt += _retry_guidance(last_failed_gate, last_error_codes)
                 # Append structured reflection if available
                 if last_reflection is not None and _KG_MODULE_AVAILABLE:
                     user_prompt += _format_reflection_for_prompt(last_reflection)
@@ -1044,6 +1149,8 @@ class BuildLoopV2:
                 )
                 # Capture diff before git reset wipes the agent's changes
                 last_diff = _get_diff(self.project_dir, head_before)
+                last_failed_gate = "BUILD"
+                last_error_codes = []
                 last_gate_error = f"BUILD: {agent_result.error}"
                 last_reflection = self._reflect_and_capture(
                     feature, "BUILD", agent_result.error or "",
@@ -1109,6 +1216,8 @@ class BuildLoopV2:
                 )
                 # Capture diff before git reset wipes the agent's changes
                 last_diff = _get_diff(self.project_dir, head_before)
+                last_failed_gate = gate.failed_gate
+                last_error_codes = _extract_error_codes(gate)
                 last_gate_error = f"{gate.failed_gate}: {gate.error}"
                 last_reflection = self._reflect_and_capture(
                     feature, gate.failed_gate, gate.error,
