@@ -48,64 +48,65 @@ class TestCheckHeadAdvanced:
         (git_project / "new.txt").write_text("new\n")
         _git(["add", "."], git_project)
         _git(["commit", "-m", "new"], git_project)
-        ok, label = _check_head_advanced(git_project, start)
+        ok, err = _check_head_advanced(git_project, start)
         assert ok is True
-        assert "head_advanced" in label
+        assert err.code == "HEAD_ADVANCED"
 
     def test_head_not_advanced(self, git_project: Path) -> None:
         start = _get_head(git_project)
-        ok, label = _check_head_advanced(git_project, start)
+        ok, err = _check_head_advanced(git_project, start)
         assert ok is False
-        assert "unchanged" in label
+        assert err.code == "HEAD_UNCHANGED"
 
     def test_no_baseline_skips(self, git_project: Path) -> None:
-        ok, label = _check_head_advanced(git_project, "")
+        ok, err = _check_head_advanced(git_project, "")
         assert ok is True
-        assert "skipped" in label
+        assert "skipped" in err.detail
 
 
 class TestCheckTreeClean:
     def test_clean_tree(self, git_project: Path) -> None:
-        ok, label = _check_tree_clean(git_project)
+        ok, err = _check_tree_clean(git_project)
         assert ok is True
 
     def test_dirty_tree(self, git_project: Path) -> None:
         (git_project / "initial.txt").write_text("modified\n")
-        ok, label = _check_tree_clean(git_project)
+        ok, err = _check_tree_clean(git_project)
         assert ok is False
-        assert "uncommitted" in label
+        assert err.code == "TREE_DIRTY"
 
     def test_untracked_files_ignored(self, git_project: Path) -> None:
         """Untracked files are not considered dirty (warning only)."""
         (git_project / "untracked.txt").write_text("new\n")
-        ok, label = _check_tree_clean(git_project)
+        ok, err = _check_tree_clean(git_project)
         assert ok is True
 
 
 class TestCheckTestRegression:
     def test_no_regression(self) -> None:
-        ok, label = _check_test_regression(current_test_count=15, baseline_test_count=10)
+        ok, err = _check_test_regression(current_test_count=15, baseline_test_count=10)
         assert ok is True
-        assert "15 >= 10" in label
+        assert "15 >= 10" in err.detail
 
     def test_regression_detected(self) -> None:
-        ok, label = _check_test_regression(current_test_count=8, baseline_test_count=10)
+        ok, err = _check_test_regression(current_test_count=8, baseline_test_count=10)
         assert ok is False
-        assert "dropped" in label
+        assert err.code == "TEST_REGRESSION"
+        assert "dropped" in err.detail
 
     def test_equal_passes(self) -> None:
-        ok, label = _check_test_regression(current_test_count=10, baseline_test_count=10)
+        ok, err = _check_test_regression(current_test_count=10, baseline_test_count=10)
         assert ok is True
 
     def test_no_baseline_skips(self) -> None:
-        ok, label = _check_test_regression(current_test_count=10, baseline_test_count=None)
+        ok, err = _check_test_regression(current_test_count=10, baseline_test_count=None)
         assert ok is True
-        assert "skipped" in label
+        assert "skipped" in err.detail
 
     def test_no_current_skips(self) -> None:
-        ok, label = _check_test_regression(current_test_count=None, baseline_test_count=10)
+        ok, err = _check_test_regression(current_test_count=None, baseline_test_count=10)
         assert ok is True
-        assert "skipped" in label
+        assert "skipped" in err.detail
 
 
 class TestAuthorizeCommit:
@@ -131,7 +132,7 @@ class TestAuthorizeCommit:
             branch_start_commit=start,
         )
         assert result.authorized is False
-        assert any("head_advanced" in f for f in result.checks_failed)
+        assert any(e.code == "HEAD_UNCHANGED" for e in result.checks_failed)
 
     def test_dirty_tree_blocks(self, git_project: Path) -> None:
         start = _get_head(git_project)
@@ -145,7 +146,7 @@ class TestAuthorizeCommit:
             branch_start_commit=start,
         )
         assert result.authorized is False
-        assert any("tree_clean" in f for f in result.checks_failed)
+        assert any(e.code == "TREE_DIRTY" for e in result.checks_failed)
 
     def test_regression_blocks(self, git_project: Path) -> None:
         start = _get_head(git_project)
@@ -159,24 +160,26 @@ class TestAuthorizeCommit:
             baseline_test_count=10,
         )
         assert result.authorized is False
-        assert any("test_regression" in f for f in result.checks_failed)
+        assert any(e.code == "TEST_REGRESSION" for e in result.checks_failed)
 
     def test_summary_property(self) -> None:
+        from auto_sdd.lib.types import GateError
         r = CommitAuthResult(
             authorized=True,
-            checks_passed=["a", "b", "c"],
+            checks_passed=[GateError("A"), GateError("B"), GateError("C")],
             checks_failed=[],
         )
         assert "Authorized" in r.summary
         assert "3" in r.summary
 
     def test_to_dict(self) -> None:
+        from auto_sdd.lib.types import GateError
         r = CommitAuthResult(
             authorized=False,
-            checks_passed=["a"],
-            checks_failed=["b"],
+            checks_passed=[GateError("A", "ok")],
+            checks_failed=[GateError("B", "failed")],
         )
         d = r.to_dict()
         assert d["authorized"] is False
-        assert "b" in d["checks_failed"]
+        assert d["checks_failed"][0]["code"] == "B"
         assert "summary" in d

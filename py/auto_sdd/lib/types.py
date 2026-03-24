@@ -1,7 +1,6 @@
 """Shared types for Auto-SDD V2.
 
-GateError is the structured error type used by all new code.
-Existing EG modules still use list[str] — migration is separate work.
+GateError is the structured error type used across all gate modules.
 """
 from __future__ import annotations
 

@@ -1040,7 +1040,9 @@ class BuildLoopV2:
                 # Auto-clean: if EG5 failed on tree_clean only (framework
                 # artifacts like next-env.d.ts, tsconfig.tsbuildinfo), add
                 # them to the commit and re-check without burning a retry.
-                if gate.failed_gate == "EG5" and "tree_clean" in gate.error:
+                if gate.failed_gate == "EG5" and gate.eg5_commit and any(
+                    e.code == "TREE_DIRTY" for e in gate.eg5_commit.checks_failed
+                ):
                     cleaned = self._auto_clean_artifacts()
                     if cleaned:
                         _status(f"EG5 auto-clean: committed {cleaned} artifact(s), re-checking")
@@ -1368,7 +1370,7 @@ class BuildLoopV2:
 
         if not signals.valid:
             gate.failed_gate = "EG2"
-            gate.error = "; ".join(signals.errors)
+            gate.error = "; ".join(e.detail for e in signals.errors)
             return gate
 
         logger.info(

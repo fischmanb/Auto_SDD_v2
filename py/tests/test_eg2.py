@@ -71,13 +71,13 @@ class TestValidateSignals:
         signals = ParsedSignals(spec_file=".specs/auth.md")
         result = validate_signals(signals, tmp_path)
         assert result.valid is False
-        assert any("FEATURE_BUILT" in e for e in result.errors)
+        assert any(e.code == "MISSING_FEATURE_BUILT" for e in result.errors)
 
     def test_missing_spec_file(self, tmp_path: Path) -> None:
         signals = ParsedSignals(feature_name="Auth")
         result = validate_signals(signals, tmp_path)
         assert result.valid is False
-        assert any("SPEC_FILE" in e for e in result.errors)
+        assert any(e.code == "MISSING_SPEC_FILE" for e in result.errors)
 
     def test_spec_file_not_on_disk(self, tmp_path: Path) -> None:
         signals = ParsedSignals(
@@ -85,7 +85,7 @@ class TestValidateSignals:
         )
         result = validate_signals(signals, tmp_path)
         assert result.valid is False
-        assert any("does not exist" in e for e in result.errors)
+        assert any(e.code == "SPEC_NOT_FOUND" for e in result.errors)
 
     def test_spec_file_outside_project(self, tmp_path: Path) -> None:
         # Create a spec file outside project
@@ -97,7 +97,7 @@ class TestValidateSignals:
         )
         result = validate_signals(signals, tmp_path)
         assert result.valid is False
-        assert any("outside project" in e for e in result.errors)
+        assert any(e.code == "SPEC_OUTSIDE_PROJECT" for e in result.errors)
 
     def test_relative_path_resolved_against_project_dir(self, tmp_path: Path) -> None:
         """L-00217: SPEC_FILE must resolve against project_dir, not cwd."""
@@ -198,7 +198,7 @@ class TestSpecContentValidation:
         )
         result = validate_signals(signals, tmp_path)
         assert result.valid is False
-        assert any("insufficient content" in e for e in result.errors)
+        assert any(e.code == "SPEC_TOO_SHORT" for e in result.errors)
 
     def test_spec_exactly_25_chars_fails(self, tmp_path: Path) -> None:
         spec = tmp_path / ".specs" / "edge.md"
@@ -209,7 +209,7 @@ class TestSpecContentValidation:
         )
         result = validate_signals(signals, tmp_path)
         assert result.valid is False
-        assert any("insufficient content" in e for e in result.errors)
+        assert any(e.code == "SPEC_TOO_SHORT" for e in result.errors)
 
     def test_spec_26_chars_passes(self, tmp_path: Path) -> None:
         spec = tmp_path / ".specs" / "ok.md"
@@ -233,7 +233,7 @@ class TestSourceFilesValidation:
         )
         result = validate_signals(signals, tmp_path)
         assert result.valid is False
-        assert any("does not exist" in e for e in result.errors)
+        assert any(e.code == "SOURCE_MISSING" for e in result.errors)
 
     def test_source_file_outside_project_fails(self, tmp_path: Path) -> None:
         spec = tmp_path / ".specs" / "feat.md"
@@ -247,7 +247,7 @@ class TestSourceFilesValidation:
         )
         result = validate_signals(signals, tmp_path)
         assert result.valid is False
-        assert any("outside project" in e for e in result.errors)
+        assert any(e.code == "SOURCE_OUTSIDE_PROJECT" for e in result.errors)
 
     def test_valid_source_files_pass(self, tmp_path: Path) -> None:
         spec = tmp_path / ".specs" / "feat.md"

@@ -703,7 +703,7 @@ class TestEG2DiskIntegration:
         )
         signals = extract_and_validate(output, git_project)
         assert signals.valid is False
-        assert any("ghost.ts" in e for e in signals.errors)
+        assert any(e.code == "SOURCE_MISSING" for e in signals.errors)
 
     def test_spec_outside_project_fails(self, git_project: Path) -> None:
         """SPEC_FILE resolving outside project_dir fails."""
@@ -785,7 +785,7 @@ class TestEG5GitIntegration:
             baseline_test_count=1,
         )
         assert result.authorized is False
-        assert any("head" in c.lower() for c in result.checks_failed)
+        assert any(e.code == "HEAD_UNCHANGED" for e in result.checks_failed)
 
     def test_test_regression_unauthorized(self, git_project: Path) -> None:
         """Test count drops below baseline → unauthorized."""
@@ -803,7 +803,7 @@ class TestEG5GitIntegration:
             baseline_test_count=5,
         )
         assert result.authorized is False
-        assert any("regression" in c.lower() for c in result.checks_failed)
+        assert any(e.code == "TEST_REGRESSION" for e in result.checks_failed)
 
 
 # ── BuildLoopV2 config/limit tests ──────────────────────────────────────────
