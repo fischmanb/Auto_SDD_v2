@@ -21,14 +21,18 @@ from auto_sdd_v2.knowledge_system.build_integration import (
     _SPEC_PROMPT_MAX_TOKENS,
     _SYSTEM_PROMPT_MAX_TOKENS,
     _USER_PROMPT_MAX_TOKENS,
+    _parse_reflection_response,
     _parse_synthesis_response,
+    capture_reflection,
     detect_project_stack,
     extract_learning_candidates,
+    format_reflection_for_prompt,
     inject_hardened_clues,
     inject_relevant_knowledge,
     inject_spec_learnings,
     init_store_optional,
     kg_post_gate,
+    reflect_on_failure,
     synthesize_universals,
 )
 from auto_sdd_v2.knowledge_system.store import KnowledgeStore
@@ -693,3 +697,153 @@ def test_parse_synthesis_response_strips_whitespace() -> None:
     resp = "  TITLE:   Padded title  \n  CONTENT:  Padded content  "
     result = _parse_synthesis_response(resp)
     assert result == ("Padded title", "Padded content")
+
+
+# ── Structured reflection ────────────────────────────────────────────────────
+
+
+def _fake_reflection_llm(prompt: str) -> str:
+    return (
+        "CAUSE: The test file imported a module that doesn't exist yet.\n"
+        "RULE: Always create module files before writing tests that import them."
+    )
+
+
+def test_reflect_on_failure_parses_response() -> None:
+    result = reflect_on_failure(
+        _fake_reflection_llm,
+        feature_name="Auth: Login",
+        gate_failed="EG4",
+        error_pattern="ModuleNotFoundError: No module named 'auth'",
+    )
+    assert result is not None
+    assert "cause" in result
+    assert "rule" in result
+    assert "module" in result["cause"].lower()
+
+
+def test_reflect_on_failure_handles_bad_response() -> None:
+    def bad_llm(prompt: str) -> str:
+        return "I'm not sure what happened."
+
+    result = reflect_on_failure(
+        bad_llm,
+        feature_name="Auth",
+        gate_failed="EG4",
+        error_pattern="error",
+    )
+    assert result is None
+
+
+def test_reflect_on_failure_handles_exception() -> None:
+    def exploding_llm(prompt: str) -> str:
+        raise RuntimeError("API down")
+
+    result = reflect_on_failure(
+        exploding_llm,
+        feature_name="Auth",
+        gate_failed="EG4",
+        error_pattern="error",
+    )
+    assert result is None
+
+
+def test_parse_reflection_response_valid() -> None:
+    resp = "CAUSE: Missing import\nRULE: Always check imports"
+    result = _parse_reflection_response(resp)
+    assert result == {"cause": "Missing import", "rule": "Always check imports"}
+
+
+def test_parse_reflection_response_invalid() -> None:
+    assert _parse_reflection_response("just text") is None
+    assert _parse_reflection_response("CAUSE: only cause") is None
+    assert _parse_reflection_response("RULE: only rule") is None
+
+
+def test_capture_reflection_creates_node(store: KnowledgeStore) -> None:
+    reflection = {"cause": "Missing import", "rule": "Always verify imports exist"}
+    node_id = capture_reflection(
+        store,
+        reflection,
+        feature_name="Auth: Login",
+        gate_failed="EG4",
+        campaign_id="camp-001",
+    )
+    assert node_id is not None
+    node = store.get_node(node_id)
+    assert node is not None
+    assert node["node_type"] == "instance"
+    assert node["status"] == "active"
+    assert "Reflection:" in node["title"]
+    assert "Always verify imports exist" in node["content"]
+
+
+def test_capture_reflection_noop_for_none_store() -> None:
+    result = capture_reflection(None, {"cause": "x", "rule": "y"}, "feat", "EG4")
+    assert result is None
+
+
+def test_capture_reflection_noop_for_none_reflection(
+    store: KnowledgeStore,
+) -> None:
+    result = capture_reflection(store, None, "feat", "EG4")
+    assert result is None
+
+
+def test_capture_reflection_participates_in_promotion(
+    store: KnowledgeStore,
+) -> None:
+    """Reflection nodes go through the normal promotion pipeline."""
+    reflection = {"cause": "Missing init", "rule": "Always create __init__.py"}
+    node_id = capture_reflection(
+        store, reflection, feature_name="Auth", gate_failed="EG4",
+    )
+    assert store.get_node(node_id)["status"] == "active"
+
+    # Simulate successful injection
+    store.record_outcome("feat1", 1, "success", node_ids_injected=[node_id])
+    events = store.promote()
+    assert any(e["node_id"] == node_id and e["to"] == "promoted" for e in events)
+
+
+def test_format_reflection_for_prompt() -> None:
+    reflection = {"cause": "Missing module", "rule": "Always create files first"}
+    text = format_reflection_for_prompt(reflection)
+    assert "REFLECTION ON FAILURE" in text
+    assert "Missing module" in text
+    assert "Always create files first" in text
+
+
+def test_full_reflection_to_injection_flow(store: KnowledgeStore) -> None:
+    """End-to-end: reflect → capture → inject → outcome → promote."""
+    # Step 1: Reflect
+    reflection = reflect_on_failure(
+        _fake_reflection_llm,
+        feature_name="Dashboard",
+        gate_failed="EG3",
+        error_pattern="TypeError: undefined is not a function",
+    )
+    assert reflection is not None
+
+    # Step 2: Capture
+    node_id = capture_reflection(
+        store, reflection, feature_name="Dashboard", gate_failed="EG3",
+    )
+    assert node_id is not None
+
+    # Step 3: Format for injection
+    prompt_section = format_reflection_for_prompt(reflection)
+    assert len(prompt_section) > 0
+
+    # Step 4: Simulate successful builds with this node injected
+    for i in range(3):
+        store.record_outcome(
+            f"feat{i}", 1, "success",
+            node_ids_injected=[node_id],
+        )
+    for i in range(3):
+        store.record_outcome(f"other{i}", 1, "failure")
+
+    # Step 5: Promote — should go all the way through
+    events = store.promote()
+    assert any(e["node_id"] == node_id for e in events)

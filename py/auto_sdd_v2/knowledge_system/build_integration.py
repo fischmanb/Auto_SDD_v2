@@ -325,9 +325,153 @@ def kg_post_gate(
         logger.warning("KG post-gate capture failed (continuing): %s", exc)
 
 
+# ── Structured reflection ────────────────────────────────────────────────────
+
+# Post-failure LLM reflection: extract a reusable lesson from a failure.
+# Runs between gate failure and retry — the extracted rule is:
+#   1. Injected into the retry prompt (immediate value)
+#   2. Stored as an instance node in the KG (long-term value via promotion)
+
+_REFLECTION_PROMPT = """\
+A build attempt just failed.  Analyze the failure and extract a reusable rule.
+
+Feature: {feature_name}
+Gate that failed: {gate_failed}
+Error:
+{error_pattern}
+
+Agent output (last 3000 chars):
+{agent_tail}
+
+Instructions:
+1. Identify the ROOT CAUSE (not the symptom).
+2. Write a RULE that would prevent this class of failure in future builds.
+   - Start with a verb: "Always...", "Never...", "Ensure..."
+   - Be specific enough to act on, general enough to reuse
+   - Max 2 sentences
+
+Respond with exactly:
+CAUSE: <one-sentence root cause>
+RULE: <the reusable rule>"""
+
+
+def reflect_on_failure(
+    llm_call: "callable",
+    feature_name: str,
+    gate_failed: str,
+    error_pattern: str,
+    agent_output: str = "",
+) -> dict | None:
+    """Run a one-shot LLM reflection on a build failure.
+
+    Parameters
+    ----------
+    llm_call : callable
+        ``llm_call(prompt: str) -> str`` — single-turn LLM invocation.
+    feature_name : str
+        Name of the feature that failed.
+    gate_failed : str
+        Which gate failed (BUILD, EG2, EG3, EG4, EG5, MERGE).
+    error_pattern : str
+        The error text from the failed gate.
+    agent_output : str
+        The agent's output (used for context; truncated to last 3000 chars).
+
+    Returns
+    -------
+    dict or None
+        ``{cause, rule}`` on success, None on parse failure or exception.
+    """
+    prompt = _REFLECTION_PROMPT.format(
+        feature_name=feature_name,
+        gate_failed=gate_failed,
+        error_pattern=(error_pattern or "")[:2000],
+        agent_tail=(agent_output or "")[-3000:],
+    )
+    try:
+        raw = llm_call(prompt)
+        return _parse_reflection_response(raw)
+    except Exception as exc:
+        logger.warning("KG: reflection LLM call failed: %s", exc)
+        return None
+
+
+def _parse_reflection_response(response: str) -> dict | None:
+    """Extract CAUSE/RULE from reflection LLM response."""
+    cause = ""
+    rule = ""
+    for line in response.splitlines():
+        stripped = line.strip()
+        if stripped.upper().startswith("CAUSE:"):
+            cause = stripped[len("CAUSE:"):].strip()
+        elif stripped.upper().startswith("RULE:"):
+            rule = stripped[len("RULE:"):].strip()
+    if cause and rule:
+        return {"cause": cause[:500], "rule": rule[:500]}
+    return None
+
+
+def capture_reflection(
+    store: "KnowledgeStore | None",
+    reflection: dict,
+    feature_name: str,
+    gate_failed: str,
+    campaign_id: str | None = None,
+) -> str | None:
+    """Store a reflection result as an instance node in the KG.
+
+    Returns the new node ID, or None if store is unavailable.
+    The node starts at ``active`` — it must earn promotion via lift.
+    """
+    if store is None or reflection is None:
+        return None
+    try:
+        node_id = store.add_node(
+            node_type="instance",
+            title=f"Reflection: {reflection['rule'][:150]}",
+            content=(
+                f"Root cause: {reflection['cause']}\n"
+                f"Rule: {reflection['rule']}\n"
+                f"Source: {gate_failed} failure on {feature_name}"
+            ),
+            campaign_id=campaign_id,
+            status="active",
+            metadata={
+                "source": "structured_reflection",
+                "gate_failed": gate_failed,
+                "feature_name": feature_name,
+                "cause": reflection["cause"],
+                "rule": reflection["rule"],
+            },
+        )
+        # Link to any matching universals
+        store.link_to_universals(node_id)
+        logger.info(
+            "KG: captured reflection node %s from %s failure: %s",
+            node_id, gate_failed, reflection["rule"][:80],
+        )
+        return node_id
+    except Exception as exc:
+        logger.warning("KG: capture_reflection failed: %s", exc)
+        return None
+
+
+def format_reflection_for_prompt(reflection: dict) -> str:
+    """Format a reflection result for injection into a retry prompt.
+
+    Returns a short markdown block suitable for appending to the user prompt.
+    """
+    return (
+        f"\n\n## REFLECTION ON FAILURE\n"
+        f"**Root cause:** {reflection['cause']}\n"
+        f"**Rule:** {reflection['rule']}\n"
+        f"Apply this rule in your next attempt.\n"
+    )
+
+
 # ── Cluster → Universal synthesis ────────────────────────────────────────────
 
-# The ONE place LLM judgment is used.  Everything else is deterministic SQL.
+# The other place LLM judgment is used.  Everything else is deterministic SQL.
 # Created universals start at active and must earn promotion via lift > 0.
 
 _SYNTHESIS_PROMPT = """\

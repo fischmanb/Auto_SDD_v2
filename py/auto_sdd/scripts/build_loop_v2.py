@@ -59,11 +59,15 @@ logger = logging.getLogger(__name__)
 # ── Optional KG integration (graceful degradation if unavailable) ─────────────
 try:
     from auto_sdd_v2.knowledge_system.build_integration import (
+        capture_reflection as _capture_reflection,
         detect_project_stack as _detect_project_stack,
+        format_reflection_for_prompt as _format_reflection_for_prompt,
         inject_hardened_clues as _inject_hardened_clues,
         inject_relevant_knowledge as _inject_relevant_knowledge,
         init_store_optional as _init_store_optional,
         kg_post_gate as _kg_post_gate_fn,
+        reflect_on_failure as _reflect_on_failure,
+        synthesize_universals as _synthesize_universals,
     )
     _KG_MODULE_AVAILABLE = True
 except Exception:
@@ -866,6 +870,7 @@ class BuildLoopV2:
         branch_name = branch_result.branch_name
 
         last_gate_error: str = ""
+        last_reflection: dict | None = None
         base_max_turns = self.config.max_turns
         scaled_turns = _turns_for_complexity(feature.complexity, base_max_turns)
         self.config.max_turns = scaled_turns
@@ -943,6 +948,9 @@ class BuildLoopV2:
                     f"ONLY your own files if you need to see what you wrote, "
                     f"then write corrected versions immediately.\n"
                 )
+                # Append structured reflection if available
+                if last_reflection is not None and _KG_MODULE_AVAILABLE:
+                    user_prompt += _format_reflection_for_prompt(last_reflection)
 
             # Create executor (EG1 gate) scoped to this feature
             protected = _discover_test_files(self.project_dir, self.test_cmd)
@@ -988,6 +996,10 @@ class BuildLoopV2:
                     agent_result.finish_reason,
                 )
                 last_gate_error = f"BUILD: {agent_result.error}"
+                last_reflection = self._reflect_and_capture(
+                    feature, "BUILD", agent_result.error or "",
+                    agent_result.output or "",
+                )
                 self._record(feature, "failed", attempt,
                              error=agent_result.error)
                 self._kg_post_gate(
@@ -1045,6 +1057,10 @@ class BuildLoopV2:
                     "GATE FAILED at %s: %s", gate.failed_gate, gate.error,
                 )
                 last_gate_error = f"{gate.failed_gate}: {gate.error}"
+                last_reflection = self._reflect_and_capture(
+                    feature, gate.failed_gate, gate.error,
+                    agent_result.output or "",
+                )
                 self._record(feature, "failed", attempt,
                              error=last_gate_error)
                 self._kg_post_gate(
@@ -1139,10 +1155,69 @@ class BuildLoopV2:
             stack=self._kg_stack,
         )
 
-    # ── Post-campaign promotion ────────────────────────────────────
+    # ── Structured reflection ────────────────────────────────────
+
+    def _make_llm_call(self, prompt: str) -> str:
+        """Single-turn LLM completion (no tools) for reflection/synthesis.
+
+        Reuses the same model server as the build agent but with no tools
+        and max_tokens capped to keep it cheap and fast.
+        """
+        from openai import OpenAI
+        client = OpenAI(
+            base_url=self.config.base_url,
+            api_key=self.config.api_key,
+        )
+        role = self.config.system_role
+        resp = client.chat.completions.create(
+            model=self.config.model,
+            messages=[
+                {"role": role, "content": "You are a concise engineering analyst."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=512,
+            temperature=0.3,
+        )
+        return resp.choices[0].message.content or ""
+
+    def _reflect_and_capture(
+        self,
+        feature: Feature,
+        gate_failed: str,
+        error_pattern: str,
+        agent_output: str,
+    ) -> dict | None:
+        """Run structured reflection on a failure, capture to KG.
+
+        Returns the reflection dict (for prompt injection) or None.
+        """
+        if not _KG_MODULE_AVAILABLE:
+            return None
+        try:
+            reflection = _reflect_on_failure(
+                llm_call=self._make_llm_call,
+                feature_name=feature.name,
+                gate_failed=gate_failed,
+                error_pattern=error_pattern,
+                agent_output=agent_output,
+            )
+            if reflection:
+                _capture_reflection(
+                    self._kg,
+                    reflection,
+                    feature_name=feature.name,
+                    gate_failed=gate_failed,
+                    campaign_id=getattr(self, "_campaign_id", None),
+                )
+            return reflection
+        except Exception as exc:
+            logger.warning("KG: reflection failed (continuing): %s", exc)
+            return None
+
+    # ── Post-campaign promotion + synthesis ───────────────────────
 
     def _run_promotion(self) -> None:
-        """Run the KG promotion job after a campaign. No-op if KG unavailable."""
+        """Run KG promotion and cluster synthesis after a campaign."""
         if not _KG_MODULE_AVAILABLE or self._kg is None:
             return
         try:
@@ -1165,6 +1240,23 @@ class BuildLoopV2:
                 logger.info("KG promotion: no changes")
         except Exception as exc:
             logger.warning("KG promotion failed (continuing): %s", exc)
+
+        # Synthesize universals from unlinked clusters
+        try:
+            results = _synthesize_universals(
+                self._kg,
+                llm_call=self._make_llm_call,
+                max_synthesize=5,
+                campaign_id=getattr(self, "_campaign_id", None),
+            )
+            if results:
+                logger.info(
+                    "KG synthesis: created %d universal(s): %s",
+                    len(results),
+                    [r["title"][:60] for r in results],
+                )
+        except Exception as exc:
+            logger.warning("KG synthesis failed (continuing): %s", exc)
 
     # ── GATE: deterministic ExecGate checks (EG2–EG5) ─────────────
 
