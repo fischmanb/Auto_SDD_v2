@@ -2,7 +2,7 @@
 
 > The single mandatory read for every new session.
 > Overwritten each session to reflect current truth.
-> Last updated: 2026-03-24 (session 13)
+> Last updated: 2026-03-24 (session 13, continued)
 
 ## Read order
 
@@ -31,10 +31,13 @@ Run command: `bash /Users/BrianFischman/Auto_SDD_v2.2/run_build.sh`
 - Roadmap parser uses shared `_parse_roadmap_table()` from `validators.py`, then does its own topo sort
 - Unified `_run_gate()` with `GateResult` dataclass, short-circuits on first failure
 - Retry logic: attempt 0 = fix-in-place, attempt 1+ = git reset
+- **Retry prompt includes**: gate error (smart-truncated to 5000 chars), git diff of previous changes, error-code-specific guidance, structured reflection
+- **Stalled agent detection**: 2 nudges at 12-turn intervals → hard-stop if no writes
 - Campaign locking (fcntl.flock + PID stale detection) and resume state
 - Feature branches: setup from main, merge on success, delete on failure, post-campaign cleanup
 - Worktree support: `setup_feature_worktree`, `link_deps_to_worktree`, `remove_worktree` in `branch_manager.py`
-- Codebase summary generated once per campaign, injected into all feature prompts
+- **Codebase summary refreshed after each merge** — subsequent features see up-to-date project context
+- **Per-feature metrics**: duration, turn_count, tool_call_count tracked in FeatureRecord and summary JSON
 - Preflight summary printed to terminal, `--auto-approve` flag
 - CLI: `--pre-build`, `--pre-build-only`, `--vision-input`, `--auto-approve` / `AUTO_APPROVE`
 
@@ -43,7 +46,7 @@ Run command: `bash /Users/BrianFischman/Auto_SDD_v2.2/run_build.sh`
 |---|---|---|---|
 | `validators.py` | all | ~535 | Deterministic validators for phases 1-6. Shared `_parse_roadmap_table()` also used by build loop. |
 | `prompts.py` | 1-5 | ~344 | System/user prompt templates per phase. Hardened phase 5 with token assertion requirement, interaction_states, personas/patterns inputs. |
-| `runner.py` | 1-5 | 152 | Shared agent invocation + validate + retry pattern |
+| `runner.py` | 1-5 | ~180 | Shared agent invocation + validate + retry pattern. **Protected paths**: each phase's agent blocked from overwriting other phases' outputs. |
 | `phase_vision.py` | 1 | 29 | Generates `.specs/vision.md` from user input |
 | `phase_systems.py` | 2 | 31 | Generates `.specs/systems-design.md` from vision |
 | `phase_design.py` | 3 | 31 | Generates `.specs/design-system/tokens.md` from vision |
@@ -52,7 +55,7 @@ Run command: `bash /Users/BrianFischman/Auto_SDD_v2.2/run_build.sh`
 | `phase_roadmap.py` | 4 | 28 | Generates `.specs/roadmap.md` from vision |
 | `phase_spec.py` | 5 | 119 | Generates `.feature.md` per pending roadmap feature |
 | `phase_red.py` | 6 | 272 | Deterministic Gherkin→test scaffold generator (no agent) |
-| `orchestrator.py` | all | ~144 | Runs phases 1→3→3b→3c→4→5→6 sequentially, skips valid outputs (resume) |
+| `orchestrator.py` | all | ~170 | Runs phases 1→2→{3∥3b}→3c→4→5→6. **Phases 3+3b run in parallel** (ThreadPoolExecutor). Skips valid outputs (resume). |
 
 ### Operational infrastructure (`py/auto_sdd/lib/`)
 | Module | Lines | What it does |
@@ -60,28 +63,28 @@ Run command: `bash /Users/BrianFischman/Auto_SDD_v2.2/run_build.sh`
 | `reliability.py` | 202 | Campaign locking (fcntl.flock + PID stale detection), ResumeState persistence (atomic write via tempfile+rename) |
 | `branch_manager.py` | ~250 | Feature branch setup, merge (--no-ff + --abort on conflict), force-delete, cleanup. **v2.2**: worktree support (`setup_feature_worktree`, `link_deps_to_worktree`, `remove_worktree`). |
 | `codebase_summary.py` | 265 | File tree generation (excluded dirs), git tree hash cache, agent-generated structural summary |
-| `local_agent.py` | — | OpenAI + Anthropic agent loops. `keep_recent=8` for context trimming (bumped from 2 in session 9). |
+| `local_agent.py` | — | OpenAI + Anthropic agent loops. `keep_recent=8` for context trimming. **Stalled agent detection**: 2 nudges → hard-stop. |
 
 ### Shared types (`py/auto_sdd/lib/types.py`)
-- `GateError(code, detail)` — structured error type. Tests assert on `code` (stable contract), `detail` is free-form.
+- `GateError(code, detail)` — structured error type used across all gate modules. Tests assert on `code` (stable contract), `detail` is free-form.
 - `PhaseResult(phase, passed, errors, artifacts)` — result type for pre-build phases.
 - `WorktreeResult(branch_name, worktree_path)` — v2.2 worktree setup result.
 
-### ExecGates (AgentSpec lineage — deterministic, agent-opaque, binary)
+### ExecGates (SAGE gates — deterministic, agent-opaque, binary)
 | EG | Module | Trigger | Status |
 |---|---|---|---|
 | EG1 | `eg1_tool_calls.py` | `before_action` per tool call | All 7 checks reviewed+hardened. `protected_paths` (test files). **v2.2**: `readonly_paths` (existing source files in parallel builds). |
-| EG2 | `eg2_signal_parse.py` | `agent_finish` | Reviewed — code block skip, spec content check, SOURCE_FILES disk validation. |
-| EG3 | `eg3_build_check.py` | `agent_finish` artifact | v1 detection ported. **v2.2**: skippable via `skip_build_test`, runs post-merge instead. |
-| EG4 | `eg4_test_check.py` | `agent_finish` artifact | v1 detection ported, 6 framework parsers. **v2.2**: same skip/defer as EG3. |
-| EG5 | `eg5_commit_auth.py` | `agent_finish` state | Reviewed. **v2.2**: `_check_no_contamination` uses literal `..` check instead of `Path.resolve()` (symlink false positive fix). |
-| EG6 | reserved | `agent_finish` artifact+compliance | Deferred. |
+| EG2 | `eg2_signal_parse.py` | `agent_finish` | `list[GateError]` errors. Code block skip, spec content check, SOURCE_FILES disk validation. **`expected_feature` validation** — FEATURE_BUILT must match feature being built. |
+| EG3 | `eg3_build_check.py` | `agent_finish` artifact | v1 detection ported. Error capture raised to 2000 chars. **v2.2**: skippable via `skip_build_test`, runs post-merge instead. |
+| EG4 | `eg4_test_check.py` | `agent_finish` artifact | v1 detection ported, 6 framework parsers. Error capture raised to 2000 chars. **v2.2**: same skip/defer as EG3. |
+| EG5 | `eg5_commit_auth.py` | `agent_finish` state | `list[GateError]` checks. **v2.2**: literal `..` check instead of `Path.resolve()`. |
+| EG6 | `eg6_spec_adherence.py` | `agent_finish` artifact+compliance | **Implemented.** 4 checks: SOURCE_MATCH, FILE_PLACEMENT, TOKEN_EXISTENCE, NAMING_CONVENTION. All deterministic. |
 
 ### Knowledge system (`py/auto_sdd_v2/knowledge_system/`)
 | Module | Lines | What it does |
 |---|---|---|
-| `store.py` | ~600 | KnowledgeStore: SQLite-backed graph with FTS5. Nodes, edges, outcomes, promotion. DP-2 clean (no LLM in query/promote). |
-| `build_integration.py` | ~310 | Injection helpers (3 points: system prompt, user prompt, spec prompt) + post-gate capture. All None-safe. |
+| `store.py` | ~650 | KnowledgeStore: SQLite-backed graph with FTS5. **Synonym expansion** (16 groups) in keyword extraction. Nodes, edges, outcomes, promotion. DP-2 clean (no LLM in query/promote). |
+| `build_integration.py` | ~400 | Injection helpers: `inject_knowledge_combined()` (single query, partitioned client-side), `inject_relevant_knowledge()`, `inject_hardened_clues()`, `inject_spec_learnings()`. Post-gate capture. **Gate-specific reflection templates** for 6 gate types. All None-safe. |
 | `promotion.py` | ~50 | Standalone CLI runner for promotion job. |
 | `migration.py` | ~320 | Markdown → KnowledgeStore import. Idempotent. |
 
@@ -89,29 +92,32 @@ Run command: `bash /Users/BrianFischman/Auto_SDD_v2.2/run_build.sh`
 - **Failure capture**: Gate failures → mistake nodes with error pattern + gate name. Queryable by FTS on retries.
 - **Promotion pipeline**: active → promoted (≥1 successful injection) → hardened (≥3 successes + positive lift) → demoted if lift drops. All deterministic SQL.
 - **Three injection points**: hardened clues → system prompt, relevant knowledge → user prompt, promoted learnings → spec prompt.
+- **Combined query**: `inject_knowledge_combined()` does one DB round-trip instead of two.
+- **Synonym expansion**: FTS keyword extraction expands terms using 16 synonym groups (import↔module↔resolve, build↔compile↔tsc, etc.).
 
-### Unit test coverage (~620 tests, all passing)
+### Unit test coverage (~740 tests, 354 verified passing in this session)
 | Test file | Module | Tests |
 |---|---|---|
 | test_eg1.py | eg1_tool_calls.py | 112 |
-| test_eg2.py | eg2_signal_parse.py | 24 |
+| test_eg2.py | eg2_signal_parse.py | 27 (+3 feature name validation) |
 | test_eg3.py | eg3_build_check.py | 24 |
 | test_eg4.py | eg4_test_check.py | 31 |
-| test_eg5.py | eg5_commit_auth.py | 19 |
+| test_eg5.py | eg5_commit_auth.py | 19 (all passing, git signing fixed) |
+| test_eg6.py | eg6_spec_adherence.py | 22 (new) |
 | test_model_config.py | model_config.py | 9 |
 | test_validators.py | pre_build/validators.py | ~62 |
 | test_phase_red.py | pre_build/phase_red.py | 30 |
 | test_local_agent.py | local_agent.py | 31 |
-| test_integration.py | cross-module integration | 41 |
+| test_integration.py | cross-module integration | 41 (git signing fixed) |
 | test_reliability.py | reliability.py | 20 |
 | test_branch_manager.py | branch_manager.py | 16 |
 | test_codebase_summary.py | codebase_summary.py | 23 |
-| test_knowledge_system/ | knowledge_system/ | 185 |
+| test_knowledge_system/ | knowledge_system/ | 231 |
 
 ## Open items
 
 ### Code changes needed
-- Structured error types: replace `errors: list[str]` with `errors: list[GateError]` across EG2, EG5, GateResult. ~25 call sites, ~15 test assertions.
+- **Spec-first parallelism**: `phase_spec.py` generates specs one at a time. Independent features could run in parallel (ThreadPoolExecutor). ~3-4 hours.
 - Auto-QA post-render validation (Playwright screenshots): v1 port item. Visual bugs that deterministic code analysis cannot catch.
 - `runner.py` duplicates `BUILD_AGENT_TOOLS` from `build_loop_v2.py`. Should be single constant.
 - `phase_spec.py` re-scans roadmap for domain. Parser should add domain to return dict.
@@ -144,6 +150,13 @@ All session 7 decisions remain. Additions from sessions 9–13:
 - **EG5 literal `..` check**: Replaced `Path.resolve()` with `..` traversal detection. EG1 blocks symlink creation; `resolve()` was causing false positives on orchestrator-created symlinks.
 - **`keep_recent=8`**: Context trimming in `local_agent.py` bumped from 2 to 8. Agents read 5+ files before writing; aggressive trimming caused re-read loops.
 - **Knowledge system: failure-based learning**. Mistake nodes from gate failures are the learning mechanism. Agent self-reported learnings (`LEARNING_CANDIDATE`) dropped — noisy and unreliable. Query, promotion, and injection are all deterministic SQL (DP-2 clean).
+- **Stalled agent hard-stop after 2 nudges**: Prevents agents from burning max_turns in read-only loops. Force-stops with `finish_reason="error"` after 24+ consecutive read-only turns.
+- **EG6 enforced**: Post-build structural adherence checks (source match, file placement, token existence, naming conventions). All deterministic.
+- **EG2 feature name validation**: FEATURE_BUILT signal must match expected feature name (case-insensitive).
+- **Auto-complete uses targeted git add**: Only stages files from `executor._written_files`, never `git add -A`.
+- **Pre-build phases protect each other's outputs**: Each phase's agent can't overwrite other phases' files.
+- **Codebase summary refreshed per feature**: No more stale summary after first merge.
+- **Error-code-aware retry**: Retry guidance tailored to specific GateError codes, not generic "fix the error".
 
 Prior session decisions still in effect (non-exhaustive, see CHANGELOG for full lineage):
 - GATE short-circuits on first failure. ExecGates follow AgentSpec pattern (Wang et al., arXiv:2503.18666).
@@ -154,7 +167,7 @@ Prior session decisions still in effect (non-exhaustive, see CHANGELOG for full 
 - Cross-feature learning: blocked patterns injected into next feature's system prompt.
 - Dep export scanner: injects import signatures into prompt. Cut Dashboard Shell from 60+ to 16 turns.
 - Resume state is sacred. Don't nuke between runs.
-- Pre-build pipeline: 1 → 2 → 3 → 3b → 3c → 4 → 5(hardened) → 6. Phase 5 enforces token assertions + interaction states.
+- Pre-build pipeline: 1 → 2 → {3∥3b} → 3c → 4 → 5(hardened) → 6. Phase 5 enforces token assertions + interaction states.
 
 ## References
 - `docs/architectural-inventory.md` — 12-phase pipeline (expanded: 3b personas, 3c design patterns)

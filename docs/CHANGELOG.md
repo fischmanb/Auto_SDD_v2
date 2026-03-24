@@ -5,6 +5,65 @@
 
 ---
 
+## 2026-03-24 (session 13, continued)
+
+### Build loop speed + quality optimizations
+
+Systematic analysis of wall-clock bottlenecks and quality gaps, then 10 targeted fixes:
+
+**Speed improvements:**
+- **Cache baseline per feature**: `head_before` and `check_tests()` moved before the retry loop. Saves one full test suite run per retry (~5-120s).
+- **Cache test discovery + spec lookup**: `_discover_test_files()` and spec rglob moved before retry loop. New `_find_spec_content()` helper replaces per-attempt rglob.
+- **Parallel pre-build phases 3+3b**: Design System (tokens.md) and Personas (personas.md) run concurrently via `ThreadPoolExecutor`. Phase 3c (Design Patterns) still waits for both. Saves ~15-30s per pre-build.
+- **Merge KG queries**: New `inject_knowledge_combined()` does one `store.query()` instead of two separate calls. Partitions results into relevant (user prompt) and hardened (system prompt) client-side.
+- **Stalled agent hard-stop**: After 2 nudges (24+ read-only turns) without any write, agent is force-stopped. Saves 30-120s of wasted inference on stuck agents. Applied to both OpenAI and Anthropic paths.
+
+**Quality improvements:**
+- **Git diff in retry prompt**: `_get_diff(base..HEAD)` captured before `_git_reset`, injected as "YOUR PREVIOUS CHANGES" section. Agent no longer wastes turns re-reading its own files.
+- **Error-code-aware retry strategy**: `_retry_guidance()` maps GateError codes to specific instructions (e.g., `SOURCE_MISSING` → "create the missing files"). 19 error-specific + 6 gate-level fallback guidance strings.
+- **Skip design patterns for non-UI features**: `_is_ui_feature()` heuristic checks for token refs, component keywords, .tsx/.jsx. Backend features get a cleaner prompt.
+- **Inject architecture context**: `_read_arch_summary()` pulls vision.md + systems-design.md (capped 1500 chars) into build prompts. Agent sees stack and conventions upfront.
+- **Gate-specific reflection templates**: `_GATE_REFLECTION_CONTEXT` dict gives the reflection LLM gate-specific analysis hints (compiler errors for EG3, test breakage for EG4, signal emission for EG2, etc.).
+- **Smart error truncation**: Retry prompt cap raised from 2000→5000 chars with `_smart_truncate()` (keeps first 60% + last 40%). EG3/EG4 error capture raised from 200→2000 chars.
+- **Synonym expansion for FTS**: `_extract_keywords()` now expands terms using 16 synonym groups. "import path wrong" also searches "module", "resolve", "route".
+
+**Observability:**
+- **Per-feature metrics**: `FeatureRecord` now tracks `duration`, `turn_count`, `tool_call_count`. All `_record()` call sites updated. Summary JSON includes per-feature timing and agent efficiency data.
+- **Codebase summary refresh**: Summary regenerated after each successful merge so subsequent features see up-to-date project context instead of stale campaign-start snapshot.
+
+### SAGE gate hardening
+
+Audit of all ExecGate enforcement paths. Four gaps closed:
+
+- **Auto-complete targeted git add**: Replaced `git add -A` with targeted `git add -- <file>` for only `executor._written_files`. Prevents staging temp files or debug logs.
+- **Auto-complete preserves agent state**: Removed `agent_result.success = True` override. EG2 validates injected signals independently.
+- **EG2 validates FEATURE_BUILT matches expected name**: New `expected_feature` parameter and `FEATURE_NAME_MISMATCH` error code. Prevents cross-feature signal spoofing.
+- **Pre-build phases protect each other's outputs**: `runner.py` computes `protected_paths` per phase. Each phase's agent is blocked from overwriting other phases' output files. Critical for parallel phase execution.
+
+### EG6: Spec Adherence gate — implemented
+
+New SAGE gate, previously reserved. Runs after EG5, before marking build as passed. All checks deterministic Python, no LLM.
+
+Four checks:
+1. **SOURCE_MATCH**: Verifies SOURCE_FILES signal matches files actually changed in git diff.
+2. **FILE_PLACEMENT**: Reads systems-design.md "Directory Structure" section, validates new files are in expected directories.
+3. **TOKEN_EXISTENCE**: Scans source files for design token references (Tailwind classes), verifies they exist in tokens.md.
+4. **NAMING_CONVENTION**: Validates PascalCase for React components (.tsx), snake_case for Python modules (.py).
+
+New file: `py/auto_sdd/exec_gates/eg6_spec_adherence.py` (~270 lines). `SpecAdherenceResult` dataclass with `checks_passed`/`checks_failed` using `GateError`. Integrated into `_run_gate()`, `_extract_error_codes()`, retry guidance, and gate-specific reflection.
+
+### Structured error types — completed
+
+Migrated all `list[str]` error paths to `list[GateError]` across EG2, EG5, and build loop. 21 error-producing call sites, 31 test assertions updated. See previous entry for error code inventory.
+
+### Test fixes
+
+- Fixed 11 pre-existing test failures: `git_project` fixtures in test_eg5.py and test_integration.py now set `commit.gpgsign=false` to work around environment git signing config.
+
+**Tests:** 354 passing (was 329 at session start, +25 new: 3 feature name validation, 22 EG6).
+
+---
+
 ## 2026-03-24 (session 13)
 
 ### Knowledge system — audit fixes
