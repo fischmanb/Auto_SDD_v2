@@ -183,6 +183,41 @@ def _get_head(project_dir: Path) -> str:
         return ""
 
 
+def _get_diff(project_dir: Path, base_commit: str) -> str:
+    """Get git diff between base_commit and HEAD (agent's changes).
+
+    Returns the diff text (capped at 8000 chars to fit in prompt context),
+    or empty string on error.
+    """
+    if not base_commit:
+        return ""
+    try:
+        result = subprocess.run(
+            ["git", "diff", base_commit, "HEAD", "--stat"],
+            capture_output=True, text=True,
+            cwd=str(project_dir), timeout=15,
+        )
+        stat = result.stdout.strip() if result.returncode == 0 else ""
+
+        result = subprocess.run(
+            ["git", "diff", base_commit, "HEAD"],
+            capture_output=True, text=True,
+            cwd=str(project_dir), timeout=30,
+        )
+        full = result.stdout.strip() if result.returncode == 0 else ""
+
+        if not stat and not full:
+            return ""
+
+        # Stat summary always fits; cap the full diff to leave room in prompt
+        diff = f"### File summary\n{stat}\n\n### Full diff\n{full}"
+        if len(diff) > 8000:
+            diff = diff[:8000] + "\n... (diff truncated)"
+        return diff
+    except (subprocess.TimeoutExpired, OSError):
+        return ""
+
+
 def _format_duration(seconds: int) -> str:
     """Format seconds as human-readable duration."""
     h, remainder = divmod(seconds, 3600)
@@ -870,6 +905,7 @@ class BuildLoopV2:
         branch_name = branch_result.branch_name
 
         last_gate_error: str = ""
+        last_diff: str = ""
         last_reflection: dict | None = None
         base_max_turns = self.config.max_turns
         scaled_turns = _turns_for_complexity(feature.complexity, base_max_turns)
@@ -878,6 +914,15 @@ class BuildLoopV2:
             "Turn budget: %d (base=%d, complexity=%s)",
             scaled_turns, base_max_turns, feature.complexity,
         )
+
+        # Capture baseline once per feature — retries reset to this state,
+        # so head_before and baseline_test_count are stable across attempts.
+        head_before = _get_head(self.project_dir)
+        baseline_test_result = check_tests(
+            self.test_cmd, self.project_dir,
+        )
+        baseline_test_count = baseline_test_result.test_count
+
         # Reset injected IDs once per feature (not per attempt) so retries
         # that return no KG results still reference the first-attempt injection.
         self._kg_injected_ids = []
@@ -891,12 +936,6 @@ class BuildLoopV2:
                 )
 
             # ── SELECT ───────────────────────────────────────────────
-            # Capture baseline state before agent runs
-            head_before = _get_head(self.project_dir)
-            baseline_test_result = check_tests(
-                self.test_cmd, self.project_dir,
-            )
-            baseline_test_count = baseline_test_result.test_count
 
             # KG: query for relevant knowledge (optional — silently skipped if unavailable)
             kg_section = ""
@@ -942,6 +981,14 @@ class BuildLoopV2:
                     f"\n\n## PREVIOUS ATTEMPT FAILED\n"
                     f"Your previous implementation failed verification:\n"
                     f"{last_gate_error[:2000]}\n\n"
+                )
+                # Show agent what it wrote so it doesn't waste turns re-reading
+                if last_diff:
+                    user_prompt += (
+                        f"## YOUR PREVIOUS CHANGES (git diff)\n"
+                        f"```diff\n{last_diff}\n```\n\n"
+                    )
+                user_prompt += (
                     f"Fix ONLY the errors above. The import signatures for all "
                     f"existing modules are already provided in this prompt. Do "
                     f"NOT re-read files whose exports are listed above. Read "
@@ -995,6 +1042,8 @@ class BuildLoopV2:
                     agent_result.turn_count,
                     agent_result.finish_reason,
                 )
+                # Capture diff before git reset wipes the agent's changes
+                last_diff = _get_diff(self.project_dir, head_before)
                 last_gate_error = f"BUILD: {agent_result.error}"
                 last_reflection = self._reflect_and_capture(
                     feature, "BUILD", agent_result.error or "",
@@ -1058,6 +1107,8 @@ class BuildLoopV2:
                 logger.warning(
                     "GATE FAILED at %s: %s", gate.failed_gate, gate.error,
                 )
+                # Capture diff before git reset wipes the agent's changes
+                last_diff = _get_diff(self.project_dir, head_before)
                 last_gate_error = f"{gate.failed_gate}: {gate.error}"
                 last_reflection = self._reflect_and_capture(
                     feature, gate.failed_gate, gate.error,
