@@ -638,6 +638,61 @@ def _build_system_prompt(
     return prompt
 
 
+def _is_ui_feature(spec_content: str) -> bool:
+    """Heuristic: does this feature spec describe UI work?
+
+    Returns True if the spec references design tokens, UI components,
+    or visual elements — meaning design patterns are relevant context.
+    """
+    import re
+    lower = spec_content.lower()
+
+    # Backtick-wrapped token references like `emerald-500`, `p-4`
+    if re.search(r"`[a-z]+-[a-z0-9]+(?:-[a-z0-9]+)*`", spec_content):
+        return True
+
+    # Explicit UI signals in the spec text.
+    # Avoid ambiguous words like "table" (could be DB table) or "input"
+    # (could be CLI input) — use compound phrases for those.
+    ui_keywords = (
+        "design token", "component", "layout", "render", "button",
+        "modal", "form field", "card", "sidebar", "navbar", "dashboard",
+        "chart", "data table", "dialog", "tooltip", "dropdown",
+        "checkbox", "toggle", "tabs", "panel", "grid layout", "flexbox",
+        ".tsx", ".jsx", "classname", "tailwind", "css",
+        "ui ", " ui", "user interface",
+    )
+    return any(kw in lower for kw in ui_keywords)
+
+
+def _read_arch_summary(project_dir: Path) -> str:
+    """Read vision.md and systems-design.md into a brief architecture context.
+
+    Caps total at 1500 chars to avoid bloating the prompt.
+    """
+    parts: list[str] = []
+    vision_path = project_dir / ".specs" / "vision.md"
+    systems_path = project_dir / ".specs" / "systems-design.md"
+
+    if vision_path.is_file():
+        content = vision_path.read_text().strip()
+        if content:
+            parts.append(f"### Project Vision\n{content[:600]}")
+
+    if systems_path.is_file():
+        content = systems_path.read_text().strip()
+        if content:
+            parts.append(f"### Systems Design\n{content[:800]}")
+
+    if not parts:
+        return ""
+
+    summary = "\n\n".join(parts)
+    if len(summary) > 1500:
+        summary = summary[:1500] + "\n..."
+    return f"## Architecture Context\n\n{summary}\n"
+
+
 def _build_user_prompt(
     feature: Feature,
     project_dir: Path,
@@ -669,15 +724,26 @@ def _build_user_prompt(
         f"Specification:\n{spec_content}\n",
     ]
 
-    # Inject design patterns (layout rules, component anatomy, spacing)
-    patterns_path = project_dir / ".specs" / "design-system" / "patterns.md"
-    if patterns_path.is_file():
-        patterns_content = patterns_path.read_text()
-        if patterns_content.strip():
-            parts.append(
-                f"\n## Design Patterns (apply to all components)\n\n"
-                f"{patterns_content}\n"
-            )
+    # Inject architecture context (vision + systems design)
+    arch_summary = _read_arch_summary(project_dir)
+    if arch_summary:
+        parts.append(f"\n{arch_summary}")
+
+    # Inject design patterns only for UI features (skip for backend/data)
+    if _is_ui_feature(spec_content):
+        patterns_path = project_dir / ".specs" / "design-system" / "patterns.md"
+        if patterns_path.is_file():
+            patterns_content = patterns_path.read_text()
+            if patterns_content.strip():
+                parts.append(
+                    f"\n## Design Patterns (apply to all components)\n\n"
+                    f"{patterns_content}\n"
+                )
+    else:
+        logger.debug(
+            "Skipping design patterns for non-UI feature: %s",
+            feature.name,
+        )
 
     if codebase_summary:
         parts.append(f"\n## Codebase Context\n\n{codebase_summary}\n")
