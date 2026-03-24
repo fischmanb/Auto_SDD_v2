@@ -2,7 +2,7 @@
 
 > The single mandatory read for every new session.
 > Overwritten each session to reflect current truth.
-> Last updated: 2026-03-19 (session 9)
+> Last updated: 2026-03-24 (session 13)
 
 ## Read order
 
@@ -77,7 +77,20 @@ Run command: `bash /Users/BrianFischman/Auto_SDD_v2.2/run_build.sh`
 | EG5 | `eg5_commit_auth.py` | `agent_finish` state | Reviewed. **v2.2**: `_check_no_contamination` uses literal `..` check instead of `Path.resolve()` (symlink false positive fix). |
 | EG6 | reserved | `agent_finish` artifact+compliance | Deferred. |
 
-### Unit test coverage (435 tests, all passing)
+### Knowledge system (`py/auto_sdd_v2/knowledge_system/`)
+| Module | Lines | What it does |
+|---|---|---|
+| `store.py` | ~600 | KnowledgeStore: SQLite-backed graph with FTS5. Nodes, edges, outcomes, promotion. DP-2 clean (no LLM in query/promote). |
+| `build_integration.py` | ~310 | Injection helpers (3 points: system prompt, user prompt, spec prompt) + post-gate capture. All None-safe. |
+| `promotion.py` | ~50 | Standalone CLI runner for promotion job. |
+| `migration.py` | ~320 | Markdown → KnowledgeStore import. Idempotent. |
+
+- **170 nodes, 127 edges** (migrated from learnings files). All active — promoted/hardened tiers populate as campaigns run.
+- **Failure capture**: Gate failures → mistake nodes with error pattern + gate name. Queryable by FTS on retries.
+- **Promotion pipeline**: active → promoted (≥1 successful injection) → hardened (≥3 successes + positive lift) → demoted if lift drops. All deterministic SQL.
+- **Three injection points**: hardened clues → system prompt, relevant knowledge → user prompt, promoted learnings → spec prompt.
+
+### Unit test coverage (~620 tests, all passing)
 | Test file | Module | Tests |
 |---|---|---|
 | test_eg1.py | eg1_tool_calls.py | 112 |
@@ -93,6 +106,7 @@ Run command: `bash /Users/BrianFischman/Auto_SDD_v2.2/run_build.sh`
 | test_reliability.py | reliability.py | 20 |
 | test_branch_manager.py | branch_manager.py | 16 |
 | test_codebase_summary.py | codebase_summary.py | 23 |
+| test_knowledge_system/ | knowledge_system/ | 185 |
 
 ## Open items
 
@@ -104,9 +118,6 @@ Run command: `bash /Users/BrianFischman/Auto_SDD_v2.2/run_build.sh`
 - No tests for `runner.py`, `orchestrator.py`, or phase 1-5 wrappers.
 - V2.2 changes uncommitted — need to merge back or formalize v2.2 as the active repo.
 - `test_count` is null across all campaign runs — either `test_cmd` empty/skip or parser mismatch. Not yet investigated.
-
-### Persistent learning
-The user expressed a desire to revive the knowledge graph work in /superloop to enable compounding knowledge from project learnings.
 
 ## Campaign history
 
@@ -124,7 +135,7 @@ Multiple failed runs. Root causes: EG3/EG4 ran per-worktree (no full project), E
 
 ## Key decisions in effect
 
-All session 7 decisions remain. Additions from session 9:
+All session 7 decisions remain. Additions from sessions 9–13:
 
 - **Parallel builds: deferred EG3/EG4**. Agents don't need the full project to write code. They need it to validate. Parallelize the expensive part (agent), validate sequentially after merge.
 - **EG1 `readonly_paths`**: Parallel agents can only create new files. Existing source files are read-only. Prevents scope collisions (e.g. multiple agents writing `page.tsx`).
@@ -132,6 +143,7 @@ All session 7 decisions remain. Additions from session 9:
 - **`git merge --abort` on conflict**: Prevents stale merge state from poisoning subsequent merges.
 - **EG5 literal `..` check**: Replaced `Path.resolve()` with `..` traversal detection. EG1 blocks symlink creation; `resolve()` was causing false positives on orchestrator-created symlinks.
 - **`keep_recent=8`**: Context trimming in `local_agent.py` bumped from 2 to 8. Agents read 5+ files before writing; aggressive trimming caused re-read loops.
+- **Knowledge system: failure-based learning**. Mistake nodes from gate failures are the learning mechanism. Agent self-reported learnings (`LEARNING_CANDIDATE`) dropped — noisy and unreliable. Query, promotion, and injection are all deterministic SQL (DP-2 clean).
 
 Prior session decisions still in effect (non-exhaustive, see CHANGELOG for full lineage):
 - GATE short-circuits on first failure. ExecGates follow AgentSpec pattern (Wang et al., arXiv:2503.18666).

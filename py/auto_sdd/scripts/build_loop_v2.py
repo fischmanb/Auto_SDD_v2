@@ -898,9 +898,20 @@ class BuildLoopV2:
             kg_clues = ""
             if _KG_MODULE_AVAILABLE and self._kg is not None:
                 error_for_query = last_gate_error if attempt > 0 else None
+                # Use full spec content for richer KG query keywords
+                _spec_query = feature.name
+                _spec_dir = self.project_dir / ".specs" / "features"
+                if _spec_dir.is_dir():
+                    for _sp in _spec_dir.rglob("*.md"):
+                        if feature.name.lower().replace(" ", "-") in _sp.stem.lower():
+                            try:
+                                _spec_query = f"{feature.name}\n{_sp.read_text()}"
+                            except OSError:
+                                pass
+                            break
                 kg_section, new_ids = _inject_relevant_knowledge(
                     self._kg,
-                    feature_spec=feature.name,
+                    feature_spec=_spec_query,
                     stack=self._kg_stack,
                     error_pattern=error_for_query,
                 )
@@ -1066,6 +1077,14 @@ class BuildLoopV2:
             except BranchError as exc:
                 logger.error("Merge failed for %s: %s", feature.name, exc)
                 self._record(feature, "failed", attempt, error=str(exc))
+                self._kg_post_gate(
+                    feature=feature,
+                    attempt=attempt,
+                    outcome="failure",
+                    gate_failed="MERGE",
+                    error_pattern=str(exc),
+                    duration=time.time() - attempt_start,
+                )
                 delete_feature_branch(
                     self.project_dir, branch_name, self.main_branch,
                 )
