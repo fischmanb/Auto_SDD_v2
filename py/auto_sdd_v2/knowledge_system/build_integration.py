@@ -121,9 +121,17 @@ def inject_relevant_knowledge(
         lines: list[str] = ["## Relevant Knowledge\n"]
         for r in results:
             title = r.get("title") or r["content"].split("\n")[0][:300]
-            lines.append(
-                f"**{r['id']}** ({r['node_type']}, {r['status']}): {title}"
-            )
+            content = r.get("content", "")
+            header = f"**{r['id']}** ({r['node_type']}, {r['status']}): {title}"
+            # Include full content when it adds information beyond the title
+            if content and content.strip() != title.strip():
+                # Cap individual node content to keep total size reasonable
+                body = content[:1000]
+                if len(content) > 1000:
+                    body += "…"
+                lines.append(f"{header}\n{body}")
+            else:
+                lines.append(header)
         section = "\n\n".join(lines) + "\n"
         section = _truncate(section, _USER_PROMPT_MAX_TOKENS)
         return section, node_ids
