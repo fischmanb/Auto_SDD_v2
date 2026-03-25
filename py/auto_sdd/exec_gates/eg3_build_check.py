@@ -131,13 +131,22 @@ def detect_build_cmd(
                 pass
 
     if is_nextjs:
-        pkg = project_dir / "package.json"
-        if pkg.exists():
-            try:
-                if '"build"' in pkg.read_text():
-                    return "npm run build"
-            except OSError:
-                pass
+        # Next.js build requires app/ or pages/ to exist. Before the
+        # app entry point is created, fall through to tsc --noEmit.
+        has_app_dir = (
+            (project_dir / "app").is_dir()
+            or (project_dir / "pages").is_dir()
+            or (project_dir / "src" / "app").is_dir()
+            or (project_dir / "src" / "pages").is_dir()
+        )
+        if has_app_dir:
+            pkg = project_dir / "package.json"
+            if pkg.exists():
+                try:
+                    if '"build"' in pkg.read_text():
+                        return "npm run build"
+                except OSError:
+                    pass
 
     # ── TypeScript ────────────────────────────────────────────────
     if (project_dir / "tsconfig.build.json").exists():

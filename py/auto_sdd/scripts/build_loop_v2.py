@@ -853,6 +853,8 @@ class BuildLoopV2:
     ) -> None:
         self.config = model_config
         self.project_dir = project_dir.resolve()
+        self._build_cmd_explicit = build_cmd  # empty = auto-detect
+        self._test_cmd_explicit = test_cmd
         self.build_cmd = build_cmd or detect_build_cmd(self.project_dir)
         self.test_cmd = test_cmd or detect_test_cmd(self.project_dir)
         self.max_features = max_features
@@ -1704,6 +1706,10 @@ class BuildLoopV2:
         _status(f"EG2 ✓ signals valid (sources={len(signals.source_files)})")
 
         # ── EG3: Build check ─────────────────────────────────────
+        # Re-detect build command: agent may have created app/ or pages/
+        # this turn, upgrading the check from tsc to next build.
+        if not self._build_cmd_explicit:
+            self.build_cmd = detect_build_cmd(self.project_dir)
         build_result = check_build(self.build_cmd, self.project_dir)
         gate.eg3_build = build_result
 
