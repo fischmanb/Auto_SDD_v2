@@ -564,6 +564,19 @@ class TestStatsEnhanced:
         assert s["hardened_with_lift"] == []
         assert s["promotion_candidates"] == []
         assert s["promotion_pipeline"] == {}
+        assert s["generalization_clusters"] == []
+
+    def test_stats_includes_generalization_clusters(self, store):
+        for i in range(3):
+            store.add_node(
+                "instance",
+                f"Import validation error case {i}",
+                f"The import validation check failed because module resolution wrong #{i}",
+                node_id=f"L-{i+1:05d}",
+            )
+        s = store.stats()
+        assert "generalization_clusters" in s
+        assert isinstance(s["generalization_clusters"], list)
 
 
 # ── N-4: Boundary tests ───────────────────────────────────────────────────────
@@ -630,3 +643,304 @@ class TestPromoteBoundary:
         events2 = store.promote()
         assert any(e.get("to") == "hardened" for e in events2)
         assert store.get_node("L-00001")["status"] == "hardened"  # type: ignore[index]
+
+
+# ── Generalization linking ───────────────────────────────────────────────────
+
+
+class TestLinkToUniversals:
+    def test_links_instance_to_matching_universal(self, store):
+        store.add_node(
+            "universal", "Respect client server boundaries",
+            "Never import server-only modules from client components",
+            node_id="U-00001",
+        )
+        instance_id = store.add_node(
+            "instance", "Client component server import error",
+            "Do not import server-only database modules from client components in Next.js",
+        )
+        linked = store.link_to_universals(instance_id)
+        assert "U-00001" in linked
+        # Edge direction: universal → instance
+        edges = store.get_edges(instance_id, direction="in")
+        gen_edges = [e for e in edges if e["edge_type"] == "generalizes"]
+        assert len(gen_edges) == 1
+        assert gen_edges[0]["source_id"] == "U-00001"
+
+    def test_no_link_when_no_keyword_overlap(self, store):
+        store.add_node(
+            "universal", "Database indexing strategy",
+            "Always add indexes for foreign key columns",
+            node_id="U-00001",
+        )
+        instance_id = store.add_node(
+            "instance", "CSS grid layout issue",
+            "The flex container was overflowing on mobile viewport",
+        )
+        linked = store.link_to_universals(instance_id)
+        assert linked == []
+
+    def test_skips_deprecated_universals(self, store):
+        store.add_node(
+            "universal", "Import validation rules checking modules",
+            "Always validate import paths and check module resolution",
+            node_id="U-00001",
+            status="deprecated",
+        )
+        instance_id = store.add_node(
+            "instance", "Import validation failed for modules",
+            "Module import validation check revealed broken paths",
+        )
+        linked = store.link_to_universals(instance_id)
+        assert linked == []
+
+    def test_does_not_self_link(self, store):
+        uid = store.add_node(
+            "universal", "Always validate inputs",
+            "Input validation prevents injection attacks",
+            node_id="U-00001",
+        )
+        linked = store.link_to_universals(uid)
+        assert linked == []
+
+    def test_idempotent_no_duplicate_edges(self, store):
+        store.add_node(
+            "universal", "Respect client server boundaries",
+            "Never import server-only modules from client components",
+            node_id="U-00001",
+        )
+        instance_id = store.add_node(
+            "instance", "Client component server import error",
+            "Do not import server-only database modules from client components",
+        )
+        linked1 = store.link_to_universals(instance_id)
+        linked2 = store.link_to_universals(instance_id)
+        assert len(linked1) >= 1
+        assert linked2 == []  # Already linked
+
+    def test_links_to_framework_and_technology_nodes(self, store):
+        store.add_node(
+            "framework", "Next.js server components pattern",
+            "Server components should handle data fetching directly",
+            node_id="U-00001",
+        )
+        store.add_node(
+            "technology", "TypeScript strict mode checking",
+            "Enable strict mode for better type checking safety",
+            node_id="U-00002",
+        )
+        instance_id = store.add_node(
+            "instance", "Server components data fetching issue",
+            "Server components failed when data fetching was delegated to client",
+        )
+        linked = store.link_to_universals(instance_id)
+        assert "U-00001" in linked
+
+    def test_edge_weight_reflects_overlap_ratio(self, store):
+        store.add_node(
+            "universal", "Always validate input data",
+            "Input validation prevents injection attacks and data corruption",
+            node_id="U-00001",
+        )
+        instance_id = store.add_node(
+            "instance", "Input validation missing on form",
+            "The form submission lacked input validation causing data corruption",
+        )
+        store.link_to_universals(instance_id)
+        edges = store.get_edges(instance_id, direction="in")
+        gen_edges = [e for e in edges if e["edge_type"] == "generalizes"]
+        assert len(gen_edges) == 1
+        assert gen_edges[0]["weight"] > 0
+        assert gen_edges[0]["weight"] <= 1.0
+
+    def test_returns_empty_for_nonexistent_node(self, store):
+        assert store.link_to_universals("L-99999") == []
+
+    def test_case_insensitive_keyword_matching(self, store):
+        """Keywords like 'VALIDATE' and 'validate' should match."""
+        store.add_node(
+            "universal", "VALIDATE Import Paths Always",
+            "Always VALIDATE that IMPORT paths resolve correctly",
+            node_id="U-00001",
+        )
+        instance_id = store.add_node(
+            "instance", "validate import paths for modules",
+            "Need to validate import paths before running the test suite",
+        )
+        linked = store.link_to_universals(instance_id)
+        assert "U-00001" in linked
+
+
+class TestFindGeneralizationClusters:
+    def test_finds_cluster_of_similar_unlinked_nodes(self, store):
+        # Three instance nodes about import validation — should cluster
+        for i in range(3):
+            store.add_node(
+                "instance",
+                f"Import validation error case {i}",
+                f"The import validation check failed because module resolution was wrong #{i}",
+                node_id=f"L-{i+1:05d}",
+            )
+        clusters = store.find_generalization_clusters(min_cluster_size=3)
+        assert len(clusters) >= 1
+        # All three nodes should be in at least one cluster
+        all_clustered = set()
+        for c in clusters:
+            all_clustered.update(c["node_ids"])
+        assert {"L-00001", "L-00002", "L-00003"} <= all_clustered
+
+    def test_no_clusters_below_threshold(self, store):
+        for i in range(2):
+            store.add_node(
+                "instance",
+                f"Import validation error {i}",
+                f"Import validation failed #{i}",
+                node_id=f"L-{i+1:05d}",
+            )
+        clusters = store.find_generalization_clusters(min_cluster_size=3)
+        assert clusters == []
+
+    def test_excludes_already_linked_nodes(self, store):
+        store.add_node(
+            "universal", "Import validation rules",
+            "Always validate import paths",
+            node_id="U-00001",
+        )
+        for i in range(3):
+            nid = store.add_node(
+                "instance",
+                f"Import validation error {i}",
+                f"Import validation failed because module resolution was wrong #{i}",
+                node_id=f"L-{i+1:05d}",
+            )
+            # Link all of them to the universal
+            store.add_edge("U-00001", nid, "generalizes")
+        clusters = store.find_generalization_clusters(min_cluster_size=3)
+        # No clusters — all nodes are already linked
+        assert clusters == []
+
+    def test_excludes_deprecated_nodes(self, store):
+        for i in range(3):
+            store.add_node(
+                "instance",
+                f"Import validation error {i}",
+                f"Import validation failed #{i}",
+                node_id=f"L-{i+1:05d}",
+                status="deprecated",
+            )
+        clusters = store.find_generalization_clusters(min_cluster_size=3)
+        assert clusters == []
+
+    def test_empty_store_returns_empty(self, store):
+        assert store.find_generalization_clusters() == []
+
+    def test_cluster_has_expected_fields(self, store):
+        for i in range(3):
+            store.add_node(
+                "instance",
+                f"Import validation error case {i}",
+                f"Import validation check failed module resolution wrong #{i}",
+                node_id=f"L-{i+1:05d}",
+            )
+        clusters = store.find_generalization_clusters(min_cluster_size=3)
+        if clusters:
+            c = clusters[0]
+            assert "shared_keywords" in c
+            assert "node_ids" in c
+            assert "suggested_title" in c
+            assert "size" in c
+            assert len(c["shared_keywords"]) >= 2
+
+
+class TestMaterializeCluster:
+    def test_creates_universal_with_edges(self, store):
+        for i in range(3):
+            store.add_node(
+                "instance", f"Node {i}", f"Content {i}",
+                node_id=f"L-{i+1:05d}",
+            )
+        uid = store.materialize_cluster(
+            title="Always validate imports",
+            content="Validate import paths before committing code changes.",
+            member_ids=["L-00001", "L-00002", "L-00003"],
+        )
+        assert uid.startswith("U-")
+        node = store.get_node(uid)
+        assert node is not None
+        assert node["node_type"] == "universal"
+        assert node["status"] == "active"  # must earn promotion
+        # Check edges exist for all members
+        for mid in ["L-00001", "L-00002", "L-00003"]:
+            assert store.edge_exists(uid, mid, "generalizes")
+
+    def test_metadata_tracks_source(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001")
+        cluster = {"shared_keywords": ["import", "validate"], "size": 1}
+        uid = store.materialize_cluster(
+            title="Rule",
+            content="Content",
+            member_ids=["L-00001"],
+            source_cluster=cluster,
+        )
+        import json
+        node = store.get_node(uid)
+        assert node is not None
+        meta = json.loads(node["metadata"])
+        assert meta["source"] == "cluster_materialization"
+        assert meta["member_ids"] == ["L-00001"]
+        assert meta["cluster"] == cluster
+
+    def test_skips_nonexistent_members(self, store):
+        store.add_node("instance", "A", "A", node_id="L-00001")
+        uid = store.materialize_cluster(
+            title="Rule",
+            content="Content",
+            member_ids=["L-00001", "L-99999"],  # L-99999 doesn't exist
+        )
+        # Should create edge only for existing member
+        assert store.edge_exists(uid, "L-00001", "generalizes")
+        assert not store.edge_exists(uid, "L-99999", "generalizes")
+
+    def test_materialized_node_participates_in_promotion(self, store):
+        """Materialized universals go through normal promotion pipeline."""
+        store.add_node("instance", "A", "A", node_id="L-00001")
+        uid = store.materialize_cluster(
+            title="Validate everything",
+            content="Always validate before proceeding.",
+            member_ids=["L-00001"],
+            stack="python",
+        )
+        # Starts active
+        assert store.get_node(uid)["status"] == "active"
+        # Simulate successful injection
+        store.record_outcome(
+            "feat", 1, "success",
+            node_ids_injected=[uid],
+            campaign_id="c1",
+        )
+        events = store.promote()
+        assert any(e["node_id"] == uid and e["to"] == "promoted" for e in events)
+
+    def test_materialized_node_excluded_from_clusters(self, store):
+        """After materialization, members should no longer appear in clusters."""
+        for i in range(3):
+            store.add_node(
+                "instance",
+                f"Import validation error case {i}",
+                f"The import validation check failed module resolution wrong #{i}",
+                node_id=f"L-{i+1:05d}",
+            )
+        # Before materialization — should have clusters
+        clusters_before = store.find_generalization_clusters(min_cluster_size=3)
+        assert len(clusters_before) >= 1
+
+        # Materialize
+        store.materialize_cluster(
+            title="Validate imports",
+            content="Always validate import paths",
+            member_ids=["L-00001", "L-00002", "L-00003"],
+        )
+
+        # After — members are now linked, should not cluster
+        clusters_after = store.find_generalization_clusters(min_cluster_size=3)
+        assert clusters_after == []

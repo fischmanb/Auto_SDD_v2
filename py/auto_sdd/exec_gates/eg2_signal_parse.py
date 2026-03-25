@@ -15,6 +15,8 @@ import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from auto_sdd.lib.types import GateError
+
 logger = logging.getLogger(__name__)
 
 
@@ -35,7 +37,7 @@ class ParsedSignals:
 
     # Validation results (populated by validate())
     valid: bool = False
-    errors: list[str] = field(default_factory=list)
+    errors: list[GateError] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {
@@ -43,7 +45,7 @@ class ParsedSignals:
             "spec_file": self.spec_file,
             "source_files": self.source_files,
             "valid": self.valid,
-            "errors": self.errors,
+            "errors": [{"code": e.code, "detail": e.detail} for e in self.errors],
         }
 
 
@@ -114,11 +116,12 @@ def parse_signals(agent_output: str) -> ParsedSignals:
 def validate_signals(
     signals: ParsedSignals,
     project_dir: Path,
+    expected_feature: str = "",
 ) -> ParsedSignals:
     """Validate parsed signals against disk state.
 
     Checks:
-        1. FEATURE_BUILT is present and non-empty
+        1. FEATURE_BUILT is present, non-empty, and matches expected_feature
         2. SPEC_FILE is present, exists on disk, within project_dir
         3. SPEC_FILE has substantive content (>25 characters)
         4. SOURCE_FILES all exist on disk within project_dir
@@ -126,15 +129,21 @@ def validate_signals(
     Mutates signals.valid and signals.errors, then returns signals
     for chaining.
     """
-    errors: list[str] = []
+    errors: list[GateError] = []
 
-    # 1. FEATURE_BUILT is required
+    # 1. FEATURE_BUILT is required and must match expected feature name
     if not signals.feature_name:
-        errors.append("Missing required signal: FEATURE_BUILT")
+        errors.append(GateError("MISSING_FEATURE_BUILT", "Missing required signal: FEATURE_BUILT"))
+    elif expected_feature and signals.feature_name.lower().strip() != expected_feature.lower().strip():
+        errors.append(GateError(
+            "FEATURE_NAME_MISMATCH",
+            f"FEATURE_BUILT '{signals.feature_name}' does not match "
+            f"expected feature '{expected_feature}'",
+        ))
 
     # 2. SPEC_FILE is required, must exist, must be contained
     if not signals.spec_file:
-        errors.append("Missing required signal: SPEC_FILE")
+        errors.append(GateError("MISSING_SPEC_FILE", "Missing required signal: SPEC_FILE"))
     else:
         # Resolve relative paths against project_dir (L-00217: not loop cwd)
         spec_path = Path(signals.spec_file)
@@ -142,30 +151,33 @@ def validate_signals(
             spec_path = project_dir / spec_path
 
         if not spec_path.exists():
-            errors.append(
+            errors.append(GateError(
+                "SPEC_NOT_FOUND",
                 f"SPEC_FILE does not exist on disk: {signals.spec_file} "
-                f"(resolved: {spec_path})"
-            )
+                f"(resolved: {spec_path})",
+            ))
         else:
             # Check containment
             try:
                 spec_path.resolve().relative_to(project_dir.resolve())
             except ValueError:
-                errors.append(
-                    f"SPEC_FILE resolves outside project: {spec_path}"
-                )
+                errors.append(GateError(
+                    "SPEC_OUTSIDE_PROJECT",
+                    f"SPEC_FILE resolves outside project: {spec_path}",
+                ))
 
             # 3. Check spec has substantive content
             try:
                 content = spec_path.read_text()
                 if len(content.strip()) <= 25:
-                    errors.append(
+                    errors.append(GateError(
+                        "SPEC_TOO_SHORT",
                         f"SPEC_FILE has insufficient content "
                         f"({len(content.strip())} chars, minimum 25): "
-                        f"{signals.spec_file}"
-                    )
+                        f"{signals.spec_file}",
+                    ))
             except OSError as exc:
-                errors.append(f"SPEC_FILE unreadable: {exc}")
+                errors.append(GateError("SPEC_UNREADABLE", f"SPEC_FILE unreadable: {exc}"))
 
     # 4. SOURCE_FILES must all exist on disk within project_dir
     if signals.source_files:
@@ -175,23 +187,25 @@ def validate_signals(
             if not src_path.is_absolute():
                 src_path = project_dir / src_path
             if not src_path.exists():
-                errors.append(
-                    f"SOURCE_FILES: '{src}' does not exist on disk"
-                )
+                errors.append(GateError(
+                    "SOURCE_MISSING",
+                    f"SOURCE_FILES: '{src}' does not exist on disk",
+                ))
             else:
                 try:
                     src_path.resolve().relative_to(resolved_root)
                 except ValueError:
-                    errors.append(
-                        f"SOURCE_FILES: '{src}' resolves outside project"
-                    )
+                    errors.append(GateError(
+                        "SOURCE_OUTSIDE_PROJECT",
+                        f"SOURCE_FILES: '{src}' resolves outside project",
+                    ))
 
     signals.errors = errors
     signals.valid = len(errors) == 0
 
     if errors:
         for err in errors:
-            logger.warning("EG2 signal validation: %s", err)
+            logger.warning("EG2 signal validation: %s", err.detail)
     else:
         logger.debug(
             "EG2 signals valid: feature=%s, spec=%s, sources=%d",
@@ -209,7 +223,8 @@ def validate_signals(
 def extract_and_validate(
     agent_output: str,
     project_dir: Path,
+    expected_feature: str = "",
 ) -> ParsedSignals:
     """Parse + validate in one call. The typical usage pattern."""
     signals = parse_signals(agent_output)
-    return validate_signals(signals, project_dir)
+    return validate_signals(signals, project_dir, expected_feature=expected_feature)

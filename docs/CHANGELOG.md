@@ -5,6 +5,82 @@
 
 ---
 
+<<<<<<< HEAD
+## 2026-03-24 (session 13, continued)
+
+### Build loop speed + quality optimizations
+
+Systematic analysis of wall-clock bottlenecks and quality gaps, then 10 targeted fixes:
+
+**Speed improvements:**
+- **Cache baseline per feature**: `head_before` and `check_tests()` moved before the retry loop. Saves one full test suite run per retry (~5-120s).
+- **Cache test discovery + spec lookup**: `_discover_test_files()` and spec rglob moved before retry loop. New `_find_spec_content()` helper replaces per-attempt rglob.
+- **Parallel pre-build phases 3+3b**: Design System (tokens.md) and Personas (personas.md) run concurrently via `ThreadPoolExecutor`. Phase 3c (Design Patterns) still waits for both. Saves ~15-30s per pre-build.
+- **Merge KG queries**: New `inject_knowledge_combined()` does one `store.query()` instead of two separate calls. Partitions results into relevant (user prompt) and hardened (system prompt) client-side.
+- **Stalled agent hard-stop**: After 2 nudges (24+ read-only turns) without any write, agent is force-stopped. Saves 30-120s of wasted inference on stuck agents. Applied to both OpenAI and Anthropic paths.
+
+**Quality improvements:**
+- **Git diff in retry prompt**: `_get_diff(base..HEAD)` captured before `_git_reset`, injected as "YOUR PREVIOUS CHANGES" section. Agent no longer wastes turns re-reading its own files.
+- **Error-code-aware retry strategy**: `_retry_guidance()` maps GateError codes to specific instructions (e.g., `SOURCE_MISSING` → "create the missing files"). 19 error-specific + 6 gate-level fallback guidance strings.
+- **Skip design patterns for non-UI features**: `_is_ui_feature()` heuristic checks for token refs, component keywords, .tsx/.jsx. Backend features get a cleaner prompt.
+- **Inject architecture context**: `_read_arch_summary()` pulls vision.md + systems-design.md (capped 1500 chars) into build prompts. Agent sees stack and conventions upfront.
+- **Gate-specific reflection templates**: `_GATE_REFLECTION_CONTEXT` dict gives the reflection LLM gate-specific analysis hints (compiler errors for EG3, test breakage for EG4, signal emission for EG2, etc.).
+- **Smart error truncation**: Retry prompt cap raised from 2000→5000 chars with `_smart_truncate()` (keeps first 60% + last 40%). EG3/EG4 error capture raised from 200→2000 chars.
+- **Synonym expansion for FTS**: `_extract_keywords()` now expands terms using 16 synonym groups. "import path wrong" also searches "module", "resolve", "route".
+
+**Observability:**
+- **Per-feature metrics**: `FeatureRecord` now tracks `duration`, `turn_count`, `tool_call_count`. All `_record()` call sites updated. Summary JSON includes per-feature timing and agent efficiency data.
+- **Codebase summary refresh**: Summary regenerated after each successful merge so subsequent features see up-to-date project context instead of stale campaign-start snapshot.
+
+### SAGE gate hardening
+
+Audit of all ExecGate enforcement paths. Four gaps closed:
+
+- **Auto-complete targeted git add**: Replaced `git add -A` with targeted `git add -- <file>` for only `executor._written_files`. Prevents staging temp files or debug logs.
+- **Auto-complete preserves agent state**: Removed `agent_result.success = True` override. EG2 validates injected signals independently.
+- **EG2 validates FEATURE_BUILT matches expected name**: New `expected_feature` parameter and `FEATURE_NAME_MISMATCH` error code. Prevents cross-feature signal spoofing.
+- **Pre-build phases protect each other's outputs**: `runner.py` computes `protected_paths` per phase. Each phase's agent is blocked from overwriting other phases' output files. Critical for parallel phase execution.
+
+### EG6: Spec Adherence gate — implemented
+
+New SAGE gate, previously reserved. Runs after EG5, before marking build as passed. All checks deterministic Python, no LLM.
+
+Four checks:
+1. **SOURCE_MATCH**: Verifies SOURCE_FILES signal matches files actually changed in git diff.
+2. **FILE_PLACEMENT**: Reads systems-design.md "Directory Structure" section, validates new files are in expected directories.
+3. **TOKEN_EXISTENCE**: Scans source files for design token references (Tailwind classes), verifies they exist in tokens.md.
+4. **NAMING_CONVENTION**: Validates PascalCase for React components (.tsx), snake_case for Python modules (.py).
+
+New file: `py/auto_sdd/exec_gates/eg6_spec_adherence.py` (~270 lines). `SpecAdherenceResult` dataclass with `checks_passed`/`checks_failed` using `GateError`. Integrated into `_run_gate()`, `_extract_error_codes()`, retry guidance, and gate-specific reflection.
+
+### Structured error types — completed
+
+Migrated all `list[str]` error paths to `list[GateError]` across EG2, EG5, and build loop. 21 error-producing call sites, 31 test assertions updated. See previous entry for error code inventory.
+
+### Test fixes
+
+- Fixed 11 pre-existing test failures: `git_project` fixtures in test_eg5.py and test_integration.py now set `commit.gpgsign=false` to work around environment git signing config.
+
+**Tests:** 354 passing (was 329 at session start, +25 new: 3 feature name validation, 22 EG6).
+
+---
+
+## 2026-03-24 (session 13)
+
+### Knowledge system — audit fixes
+
+Three integration fixes from deep audit of the capture/inject/query pipeline:
+
+- **Merge-failure capture**: `BranchError` handler now calls `_kg_post_gate(gate_failed="MERGE")`. Builds that pass all gates but fail to merge were producing no KG record — now create a mistake node like any other gate failure.
+- **Full-spec query keywords**: `inject_relevant_knowledge()` receives the full spec file content instead of just `feature.name` (a 2-4 word string). FTS keyword extraction now has the full spec to match against.
+- **Full node content in injection**: `inject_relevant_knowledge()` outputs node content (capped at 1000 chars) below the header line, not just `**ID** (type, status): title`. Agents see actual guidance.
+
+Dropped `LEARNING_CANDIDATE` prompt signal. The audit identified it as dead code (never in prompts), but the deeper issue is that failure-based learning (mistake nodes from gate errors) is the working mechanism. Agent self-reported learnings are noisy and unreliable. The `extract_learning_candidates()` infrastructure remains in `build_integration.py` but is not prompted for.
+
+**Tests:** 185 knowledge system tests, ~620 total — all passing.
+
+---
+
 ## 2026-03-23 (session 12)
 
 ### Knowledge system — final review fixes
@@ -145,6 +221,137 @@ The user expressed a desire to revive the knowledge graph work in /superloop to 
 
 ### Test status
 435 tests passing (unchanged count — no new tests this session, all changes in wiring/enforcement).
+=======
+## 2026-03-17 (session 9)
+
+### EG3 Next.js app dir gate (`c2365e3`)
+
+**Bug**: `detect_build_cmd` returned `npm run build` for Next.js projects even before `app/` or `pages/` existed. Every feature before Dashboard Shell failed EG3 with "Couldn't find any pages or app directory", burned all retries, and failed.
+
+**Root cause**: Session 7 commit `3e3de59` switched Next.js projects from `npx tsc --noEmit` to `npm run build` to catch server/client boundary violations. But `npm run build` requires the app entry point to exist.
+
+**Fix (2 parts)**:
+- `detect_build_cmd`: checks for `app/`, `pages/`, `src/app/`, `src/pages/` before returning `npm run build`. Without app dir, falls through to `npx tsc --noEmit`.
+- `_run_gate`: re-detects build command before each EG3 check (only when not explicitly overridden via CLI). Dashboard Shell creating `app/` upgrades the check mid-campaign.
+
+1 new test (`test_nextjs_without_app_dir_falls_to_tsc`). Existing tests updated with `app/` dir. 436 tests total.
+
+### v2.1-test A/B experiment — failed
+
+Three structural speed changes tested against baseline:
+1. Prompt caching (Anthropic `cache_control` on system + first user message)
+2. Strip git ceremony from pre-build (write files only, single commit at end)
+3. Parallel pre-build phases (systems design, design system, roadmap concurrent)
+
+**Result**: v2 baseline finished first (01:16:03 vs 01:18:32). Parallel API calls likely hit rate limits. Git stripping may have confused the agent (tried to commit, wasted turns on errors). Prompt caching marginal. All three changes are net negative or neutral.
+
+Code lives in `/Users/sorel/Auto_SDD_v2.1-test/`. Dead — do not use.
+
+### v2.2 parallel feature builds — written, untested
+
+Parallel feature builds via git worktrees. Code in `/Users/sorel/Auto_SDD_v2.2/`.
+
+**Changes from v2**:
+- `_group_by_dep_level()`: groups topo-sorted features into dependency levels. Level 0 = no deps, Level N = all deps in levels < N. Features within a level build in parallel.
+- `branch_manager.py`: `setup_feature_worktree()`, `remove_worktree()`, `link_deps_to_worktree()`. Worktrees provide isolated filesystems sharing one `.git` database. Symlinks `node_modules` to avoid per-worktree installs.
+- `_run_locked()`: level-based loop. Single-feature levels use existing sequential path (no overhead). Multi-feature levels spawn `ThreadPoolExecutor` + worktrees. Merges happen sequentially after all parallel builds in a level complete.
+- `_build_feature()`: supports `_preset_branch` and `_skip_merge` flags for worktree mode. All `delete_feature_branch` calls guarded.
+- Includes EG3 app dir fix (`c2365e3`).
+
+**Expected for cre-pulse 10-feature roadmap**:
+```
+L0: Tailwind Config + TypeScript Types        → parallel (2)
+L1: Data Loader + Shared UI + Global Layout   → parallel (3)
+L2: Property Overview + Tenant Roster +       → parallel (4)
+    Lease Velocity + Comp Set
+L3: App Shell                                 → sequential (1)
+```
+Sequential estimate: ~25 min. Parallel estimate: ~12 min. Untested.
+
+436 tests pass. Not yet run against a live campaign.
+
+### Spatial design gap analysis
+
+The 160px dead space below the lease velocity chart in the cre-pulse dashboard is a P7 gap. Analysis:
+
+- **SageGate spatial design** (`docs/sage-spatial-design-draft.md`): forces design agent to declare spatial relationships with measurements. Improves prompt quality. Cannot enforce — the build agent can still produce incorrect CSS.
+- **Generic Playwright heuristics** (e.g., "sibling flex children must have heights within 10%"): only deterministic + autonomous option. Calibrating thresholds to avoid false positives on intentional spacing is the open problem.
+- **LLM-as-judge on screenshots**: violates DP-2. Eliminated.
+- **Screenshot diff against baseline**: requires human sign-off (violates DP-1 in critical path).
+- **Conclusion**: no enforcement path exists today. SageGate improves odds at the prompt level. Auto-QA remains blocked.
+
+### Per-phase model routing — evaluated, deferred
+
+Haiku 4.5 (training data July 2025, reliable cutoff Feb 2025) sufficient for vision and roadmap phases. Sonnet 4.6 (training data Jan 2026, reliable cutoff Aug 2025) required for all design-adjacent phases due to larger training set covering more design systems, UX patterns, and architectural approaches. The quality difference is in substance, not format compliance.
+
+Would require campaign config with per-phase model overrides. 2 phases on Haiku. Marginal savings, not worth config complexity now.
+
+### Commits
+- `c2365e3` Fix EG3: Next.js build requires app/ or pages/ to exist
+
+---
+
+## 2026-03-16 (session 8, continued)
+
+### SageGate spatial design — under consideration
+
+**S.A.G.E. = Simple. Actionable. Generalizable. Enforceable.**
+
+Draft saved to `docs/sage-spatial-design-draft.md`. Adds a `## Spatial Design`
+section to the design patterns prompt with four subsections:
+- **Positive Space** — how content-bearing areas relate locally
+- **Negative Space** — where whitespace is deliberate vs must not appear
+- **Spatial Hierarchy** — how proportion reinforces importance
+- **Visual Harmony & Cohesion** — comparative measurements for component pairs,
+  mismatch handling rules (enforcement gate)
+
+Validator would check: four headers present, >=3 measurements in Visual Harmony,
+cross-reference Layout Grid pairs, mismatch handling keywords. All DP-2 compliant.
+
+**Open:** Definition of "component pairs that share a visual context" — relationships
+are horizontal, vertical, containment, and cross-axis, not just DOM siblings.
+The design agent identifies which pairs matter; the validator checks coverage
+against what was declared in Layout Grid. Also: token cost of pair enumeration
+bounded by grid structure, not total component count.
+
+**Motivation:** V2 cre-pulse build had 160px dead space below lease velocity chart
+when comp set benchmarks card was taller. Prompt-level "avoid empty regions" was
+too vague. SageGate requires the design agent to declare every spatial relationship
+with measurements, then the validator holds it to those declarations.
+
+### Decision-relevant metrics in persona → spec pipeline
+
+- Personas prompt: new `Decision-relevant metrics` field per archetype.
+  What computed insights does this persona need alongside raw data to make
+  their actual decisions (buy/sell, renew/vacate, invest/divest)?
+- Spec prompt: new `COMPUTED INSIGHTS` section. Visualization features must
+  include Gherkin scenarios for supplementary metrics from persona decision-metrics.
+- Pipeline flow: personas define what matters → specs require it → build agent
+  implements it.
+
+### Prompt tightening across all pre-build phases
+
+- Systems design: tables over prose, contract signatures not full implementations,
+  150-250 line target.
+- Design patterns: tables for mappings, no ASCII art, no rationale paragraphs,
+  200-300 line target. Animation specs included for what improves feel (hover fades,
+  focus rings, loading skeletons); gratuitous animation excluded.
+- Feature specs: no prescriptive line budgets. Format constraint: no rationale
+  paragraphs or prose. Component mapping and data flow allowed as bare tables.
+- Layout grid: visual balance principle (avoid large empty regions adjacent to
+  content) — states the problem, does not prescribe a CSS fix.
+
+### CLI: --pre-build-only flag
+
+`--pre-build-only` runs phases 1-6 then exits. Prevents accidental build loop
+after pre-build. `--pre-build` retains existing behavior (phases then loop).
+
+### Renaming: ExecGate → SageGate
+
+Enforcement layer renamed to SageGate (S.A.G.E.). Previous name ExecGate was
+not confirmed. SageGate emphasizes the design philosophy: enforcement must be
+Simple, Actionable, Generalizable, Enforceable.
+>>>>>>> origin/main
 
 ---
 
@@ -346,7 +553,7 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 
 ### Bugfixes from first Claude API run
 - `AgentResult.success` is a read-only property (derived from `finish_reason == "stop"`). Anthropic path was assigning to it directly. Fixed: set `result.finish_reason = "stop"` instead.
-- `codebase_summary.py` passes `max_turns=1` to `run_local_agent` but the function doesn't accept that kwarg. Fails silently (caught exception, returns empty summary). Known bug, not yet fixed.
+- `codebase_summary.py` passes `max_turns=1` to `run_local_agent` but the function doesn't accept that kwarg. Fails silently (caught exception, returns empty summary). Known bug, not yet fixed. **→ Resolved session 7 part 4** (`10c4752`): changed `tools=[]` to `tools=None`, summary generates successfully.
 
 ### First successful end-to-end tool-calling loop
 - Claude Sonnet completed Data Loader feature in 13 turns, 31.5 seconds on first run.
@@ -515,21 +722,21 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 - Total: 158 tests passing across all modules.
 
 ### Documented gap
-- `local_agent.py` has no unit tests. The module makes HTTP calls to an OpenAI-compatible server; testing requires mocking the `OpenAI` client. Deferred — not blocking tier 1.
+- `local_agent.py` has no unit tests. The module makes HTTP calls to an OpenAI-compatible server; testing requires mocking the `OpenAI` client. Deferred — not blocking tier 1. **→ Resolved session 5**: `test_local_agent.py` (445 lines, 31 tests).
 
 ### Review completed
 - EG1 check 6 (unknown tool rejection): classified A — sound. Hardcoded else clause blocks invented tool names.
 - EG1 check 7 (malformed argument rejection): classified B — minor gap, now fixed. All 82 tests pass.
-- EG5 all 4 checks reviewed: HEAD advanced (A), tree clean (B — fixed with warning log), contamination (A), test regression (A, deferred integrity question).
+- EG5 all 4 checks reviewed: HEAD advanced (A), tree clean (B — fixed with warning log), contamination (A), test regression (A, deferred integrity question). **→ Integrity question resolved session 3**: `protected_paths` in EG1 makes test files write-blocked at tool-call layer.
 
 ### Design resolved
 - Design question 1 (test content integrity): resolved by adding `protected_paths` to EG1. Test files are write-blocked at the tool-call layer. Agent cannot delete, modify, or replace them. EG5 count check is now defense-in-depth, not primary defense.
 
 ### Noted (not fixed)
-- Pre-build phases 1–6 (VISION through RED) have zero code implementation. architectural-inventory.md defines them as automated, but the build loop currently assumes all spec artifacts exist on disk as human-authored inputs.
+- Pre-build phases 1–6 (VISION through RED) have zero code implementation. architectural-inventory.md defines them as automated, but the build loop currently assumes all spec artifacts exist on disk as human-authored inputs. **→ Resolved sessions 7–8**: 8 phase files implemented (phase_vision.py, phase_design.py, phase_personas.py, phase_design_patterns.py, phase_spec.py, phase_red.py, phase_roadmap.py, phase_systems.py) totaling 652 lines, wired into orchestrator.
 
-### Design identified (no code)
-- Structured error types: current `errors: list[str]` across EG2, EG5, GateResult should become `errors: list[GateError]` where `GateError` has a stable `code` field (e.g. `SPEC_TOO_SHORT`, `SOURCE_MISSING`) and a free-form `detail` field. ~25 error-producing call sites, ~15 test assertions. Benefits: tests become wording-independent, build summary gets machine-queryable failure codes, retry logic can branch on error type (e.g. `SOURCE_MISSING` → retry, `SPEC_TOO_SHORT` → don't). Est. 2–3 hours.
+### Design identified (resolved)
+- Structured error types: current `errors: list[str]` across EG2, EG5, GateResult should become `errors: list[GateError]` where `GateError` has a stable `code` field (e.g. `SPEC_TOO_SHORT`, `SOURCE_MISSING`) and a free-form `detail` field. ~25 error-producing call sites, ~15 test assertions. Benefits: tests become wording-independent, build summary gets machine-queryable failure codes, retry logic can branch on error type (e.g. `SOURCE_MISSING` → retry, `SPEC_TOO_SHORT` → don't). Est. 2–3 hours. **→ Resolved session 13**: `GateError` adopted across all gate modules. EG2 (8 error sites), EG5 (9 check returns), build loop `_run_gate` (tree_clean check), and 31 test assertions migrated. Error codes: `MISSING_FEATURE_BUILT`, `MISSING_SPEC_FILE`, `SPEC_NOT_FOUND`, `SPEC_OUTSIDE_PROJECT`, `SPEC_TOO_SHORT`, `SPEC_UNREADABLE`, `SOURCE_MISSING`, `SOURCE_OUTSIDE_PROJECT`, `HEAD_ADVANCED`, `HEAD_UNCHANGED`, `TREE_CLEAN`, `TREE_DIRTY`, `NO_CONTAMINATION`, `CONTAMINATION`, `TEST_REGRESSION`.
 
 ---
 
@@ -542,7 +749,7 @@ Three models failed at tool-use compliance — not because they lacked intent bu
 - Replaced `_parse_roadmap()` single-pass dependency filter with true topological sort (Kahn's algorithm) + cycle detection. Pending features with dep chains now resolve in a single campaign.
 
 ### Decisions
-- EG numbering expanded to cover all orchestrator-side verification: EG1 tool calls, EG2 signals, EG3 build, EG4 test, EG5 commit auth, EG6 spec adherence (reserved). All follow AgentSpec pattern (Wang et al., arXiv:2503.18666).
+- EG numbering expanded to cover all orchestrator-side verification: EG1 tool calls, EG2 signals, EG3 build, EG4 test, EG5 commit auth, EG6 spec adherence (reserved — deferred session 8, replaced by Phase 5 prompt hardening for spec quality). All follow AgentSpec pattern (Wang et al., arXiv:2503.18666).
 - GATE short-circuits on first failure (Option A over Option B flat-run). More efficient, matches code reality.
 - True topo sort lives in `_parse_roadmap()` (build loop), not in ROADMAP phase or SPEC-FIRST. Orchestrator-owned, deterministic.
 

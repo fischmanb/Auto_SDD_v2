@@ -714,6 +714,9 @@ class KnowledgeStore:
             })
         hardened_with_lift.sort(key=lambda x: x["lift"], reverse=True)
 
+        # Generalization clusters: unlinked nodes that could form new universals
+        generalization_clusters = self.find_generalization_clusters()
+
         return {
             "nodes": node_count,
             "edges": edge_count,
@@ -724,6 +727,7 @@ class KnowledgeStore:
             "promotion_pipeline": dict(by_status),
             "promotion_candidates": promotion_candidates,
             "hardened_with_lift": hardened_with_lift,
+            "generalization_clusters": generalization_clusters,
         }
 
     # ── Public migration helpers ──────────────────────────────────────────────
@@ -766,7 +770,216 @@ class KnowledgeStore:
         ).fetchall()
         return {row["node_type"]: row["cnt"] for row in rows}
 
+    # ── Generalization linking ────────────────────────────────────────────────
+
+    def link_to_universals(self, node_id: str, min_keyword_overlap: int = 2) -> list[str]:
+        """Link a node to existing universal/framework/technology nodes via `generalizes` edges.
+
+        Uses FTS keyword overlap between the new node and each universal-tier node.
+        A `generalizes` edge means "universal generalizes instance" (universal → instance).
+
+        Returns the list of universal node IDs that were linked.
+
+        This is NOT LLM-as-judge — it's keyword overlap as a mechanical heuristic.
+        False positives are cheap (weak edges get ignored by scoring), false negatives
+        are caught by `find_generalization_clusters` which surfaces unlinked clusters
+        for human review.
+        """
+        node = self.get_node(node_id)
+        if node is None:
+            return []
+
+        # Extract keywords from the new node (lowercased for case-insensitive overlap)
+        node_text = f"{node.get('title', '')} {node.get('content', '')}"
+        node_keywords = {kw.lower() for kw in self._extract_keywords(node_text, None, None)}
+        if not node_keywords:
+            return []
+
+        # Get all universal-tier nodes (universal, framework, technology)
+        universal_types = ("universal", "framework", "technology")
+        placeholders = ",".join("?" * len(universal_types))
+        universal_rows = self._conn.execute(
+            f"""
+            SELECT id, title, content FROM nodes
+            WHERE node_type IN ({placeholders})
+              AND status != 'deprecated'
+              AND id != ?
+            """,
+            (*universal_types, node_id),
+        ).fetchall()
+
+        linked: list[str] = []
+        for urow in universal_rows:
+            u_text = f"{urow['title'] or ''} {urow['content'] or ''}"
+            u_keywords = {kw.lower() for kw in self._extract_keywords(u_text, None, None)}
+            overlap = node_keywords & u_keywords
+            if len(overlap) >= min_keyword_overlap:
+                # generalizes: universal → instance
+                if not self.edge_exists(urow["id"], node_id, "generalizes"):
+                    self.add_edge(
+                        urow["id"],
+                        node_id,
+                        "generalizes",
+                        weight=len(overlap) / max(len(u_keywords), 1),
+                        context={"overlapping_keywords": sorted(overlap)},
+                    )
+                    linked.append(urow["id"])
+
+        return linked
+
+    def find_generalization_clusters(
+        self,
+        min_cluster_size: int = 3,
+    ) -> list[dict[str, Any]]:
+        """Find clusters of instance/mistake nodes that share keywords but have no universal.
+
+        Returns a list of cluster dicts, each with:
+          - shared_keywords: list of keywords shared by all nodes in the cluster
+          - node_ids: list of node IDs in the cluster
+          - suggested_title: a candidate universal title derived from shared keywords
+
+        These are candidates for NEW universal nodes — surface them to a human
+        or (reluctantly) to an LLM for one-time judgment.
+        """
+        # Get instance/mistake nodes that have NO generalizes edge pointing to them
+        unlinked_rows = self._conn.execute(
+            """
+            SELECT n.id, n.title, n.content FROM nodes n
+            WHERE n.node_type IN ('instance', 'mistake')
+              AND n.status != 'deprecated'
+              AND NOT EXISTS (
+                  SELECT 1 FROM edges e
+                  WHERE e.target_id = n.id AND e.edge_type = 'generalizes'
+              )
+            """
+        ).fetchall()
+
+        if len(unlinked_rows) < min_cluster_size:
+            return []
+
+        # Build keyword → node_ids index
+        keyword_index: dict[str, list[str]] = {}
+        node_keywords_map: dict[str, set[str]] = {}
+        for row in unlinked_rows:
+            text = f"{row['title'] or ''} {row['content'] or ''}"
+            keywords = {kw.lower() for kw in self._extract_keywords(text, None, None)}
+            node_keywords_map[row["id"]] = keywords
+            for kw in keywords:
+                keyword_index.setdefault(kw, []).append(row["id"])
+
+        # Find keyword pairs that co-occur in >= min_cluster_size nodes
+        # (single keywords are too noisy; pairs are more meaningful)
+        seen_clusters: set[frozenset[str]] = set()
+        clusters: list[dict[str, Any]] = []
+
+        hot_keywords = [
+            kw for kw, ids in keyword_index.items()
+            if len(ids) >= min_cluster_size
+        ]
+
+        for kw in hot_keywords:
+            member_ids = keyword_index[kw]
+            if len(member_ids) < min_cluster_size:
+                continue
+
+            # Find additional shared keywords among these members
+            member_keyword_sets = [node_keywords_map[nid] for nid in member_ids]
+            shared = set.intersection(*member_keyword_sets) if member_keyword_sets else set()
+
+            if len(shared) < 2:
+                # Single-keyword clusters are too noisy
+                continue
+
+            cluster_key = frozenset(member_ids)
+            if cluster_key in seen_clusters:
+                continue
+            seen_clusters.add(cluster_key)
+
+            clusters.append({
+                "shared_keywords": sorted(shared),
+                "node_ids": member_ids,
+                "suggested_title": " ".join(sorted(shared)[:5]),
+                "size": len(member_ids),
+            })
+
+        clusters.sort(key=lambda c: c["size"], reverse=True)
+        return clusters
+
+    def materialize_cluster(
+        self,
+        title: str,
+        content: str,
+        member_ids: list[str],
+        *,
+        stack: str | None = None,
+        campaign_id: str | None = None,
+        source_cluster: dict[str, Any] | None = None,
+    ) -> str:
+        """Create a universal node from a cluster and link it to all members.
+
+        The new node starts at ``active`` status — it must earn promotion via
+        the normal injection → outcome → lift pipeline.  If the LLM-generated
+        content is wrong, lift stays ≤ 0 and the node never promotes.
+
+        Returns the new universal node ID.
+        """
+        node_id = self.add_node(
+            node_type="universal",
+            title=title[:200],
+            content=content[:2000],
+            stack=stack,
+            campaign_id=campaign_id,
+            status="active",
+            metadata={
+                "source": "cluster_materialization",
+                "member_ids": member_ids,
+                "cluster": source_cluster,
+            },
+        )
+
+        # Link universal → each member via generalizes
+        for mid in member_ids:
+            if self.get_node(mid) is not None:
+                self.add_edge(
+                    node_id,
+                    mid,
+                    "generalizes",
+                    context={"source": "cluster_materialization"},
+                )
+
+        return node_id
+
     # ── Internal helpers ──────────────────────────────────────────────────────
+
+    # Synonym groups for FTS keyword expansion. Each group is a set of
+    # terms that describe the same concept — if any term from a group
+    # appears in the input, all terms from that group are added to the
+    # FTS query. This bridges the vocabulary gap between how errors are
+    # described vs. how knowledge nodes are titled.
+    _SYNONYM_GROUPS: list[set[str]] = [
+        {"import", "module", "resolution", "require", "resolve"},
+        {"type", "typescript", "types", "typing", "typecheck"},
+        {"build", "compile", "compilation", "compiler", "tsc"},
+        {"test", "tests", "testing", "spec", "jest", "vitest", "pytest"},
+        {"path", "route", "routing", "navigation", "paths"},
+        {"export", "exports", "exported", "exporting"},
+        {"missing", "undefined", "notfound", "absent"},
+        {"error", "failure", "failed", "exception", "crash"},
+        {"component", "widget", "element", "render"},
+        {"auth", "authentication", "login", "session", "token"},
+        {"fetch", "request", "response", "endpoint", "http"},
+        {"state", "store", "context", "redux", "zustand"},
+        {"style", "styles", "styling", "tailwind", "className"},
+        {"config", "configuration", "settings", "setup"},
+        {"commit", "staging", "uncommitted", "dirty"},
+        {"signal", "signals", "emit", "emitted"},
+    ]
+
+    # Build reverse lookup: word → set of synonyms (built once per class)
+    _SYNONYM_MAP: dict[str, set[str]] = {}
+    for _group in _SYNONYM_GROUPS:
+        for _word in _group:
+            _SYNONYM_MAP[_word] = _group
 
     @staticmethod
     def _extract_keywords(
@@ -774,7 +987,7 @@ class KnowledgeStore:
         error_pattern: str | None,
         file_patterns: list[str] | None,
     ) -> list[str]:
-        """Extract FTS-safe keywords from query context."""
+        """Extract FTS-safe keywords from query context, with synonym expansion."""
         tokens: list[str] = []
 
         for text in [feature_spec, error_pattern]:
@@ -790,10 +1003,17 @@ class KnowledgeStore:
                 stem = re.sub(r"[^a-zA-Z0-9]", " ", pat)
                 tokens.extend(w for w in stem.split() if len(w) >= 4)
 
+        # Synonym expansion: for each token, add related terms
+        expanded: list[str] = list(tokens)
+        for t in tokens:
+            synonyms = KnowledgeStore._SYNONYM_MAP.get(t.lower())
+            if synonyms:
+                expanded.extend(synonyms)
+
         # Deduplicate while preserving order
         seen: set[str] = set()
         result: list[str] = []
-        for t in tokens:
+        for t in expanded:
             if t.lower() not in seen:
                 seen.add(t.lower())
                 result.append(t)

@@ -1,0 +1,63 @@
+{
+  "last_updated": "2026-03-24",
+  "rolling_7d": {
+    "accuracy": null,
+    "ev_realized": null,
+    "total_games": 0,
+    "total_correct": 0
+  },
+  "rolling_30d": {
+    "accuracy": null,
+    "ev_realized": null,
+    "total_games": 0,
+    "total_correct": 0
+  },
+  "all_time": {
+    "accuracy": null,
+    "ev_realized": null,
+    "total_games": 0,
+    "total_correct": 0,
+    "total_bets_recommended": 19,
+    "total_bets_won": 0
+  },
+  "variant_performance": {
+    "season-avg-v1": {
+      "lifetime_games": 0,
+      "lifetime_correct": 0,
+      "weight": 1.0,
+      "role": "champion"
+    },
+    "recency-v1": {
+      "lifetime_games": 0,
+      "lifetime_correct": 0,
+      "weight": 0.5
+    },
+    "injury-rest-v1": {
+      "lifetime_games": 0,
+      "lifetime_correct": 0,
+      "weight": 0.5
+    },
+    "home-swing-v1": {
+      "lifetime_games": 0,
+      "lifetime_correct": 0,
+      "weight": 0.5
+    },
+    "regression-v1": {
+      "lifetime_games": 0,
+      "lifetime_correct": 0,
+      "weight": 0.5
+    },
+    "pace-adj-v1": {
+      "lifetime_games": 0,
+      "lifetime_correct": 0,
+      "weight": 0.5
+    }
+  },
+  "champion_history": [
+    {
+      "id": "season-avg-v1",
+      "promoted_on": "2026-03-24",
+      "reason": "initial champion"
+    }
+  ]
+}

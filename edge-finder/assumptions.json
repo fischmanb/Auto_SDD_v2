@@ -1,0 +1,98 @@
+{
+  "champion": {
+    "id": "season-avg-v1",
+    "description": "Baseline: season-average offensive/defensive ratings, standard home advantage, league-average pace",
+    "params": {
+      "recency_weight": 1.0,
+      "injury_discount": 0.0,
+      "home_advantage_adjustment": 0.0,
+      "regression_to_mean": 0.0,
+      "pace_adjustment": "season_average"
+    },
+    "promoted_on": "2026-03-24",
+    "rolling_10d_accuracy": null
+  },
+  "challengers": [
+    {
+      "id": "recency-v1",
+      "description": "Weight last-10-games stats 2x vs season averages to capture hot/cold streaks",
+      "weight": 0.5,
+      "born": "2026-03-24",
+      "grace_until": "2026-03-29",
+      "params": {
+        "recency_weight": 2.0,
+        "injury_discount": 0.0,
+        "home_advantage_adjustment": 0.0,
+        "regression_to_mean": 0.0,
+        "pace_adjustment": "season_average"
+      },
+      "lifetime_games": 0,
+      "lifetime_correct": 0
+    },
+    {
+      "id": "injury-rest-v1",
+      "description": "Apply estimated impact for known absences and back-to-back games",
+      "weight": 0.5,
+      "born": "2026-03-24",
+      "grace_until": "2026-03-29",
+      "params": {
+        "recency_weight": 1.0,
+        "injury_discount": 1.0,
+        "home_advantage_adjustment": 0.0,
+        "regression_to_mean": 0.0,
+        "pace_adjustment": "season_average"
+      },
+      "lifetime_games": 0,
+      "lifetime_correct": 0
+    },
+    {
+      "id": "home-swing-v1",
+      "description": "Adjust home court/field advantage by +1.5 points from baseline",
+      "weight": 0.5,
+      "born": "2026-03-24",
+      "grace_until": "2026-03-29",
+      "params": {
+        "recency_weight": 1.0,
+        "injury_discount": 0.0,
+        "home_advantage_adjustment": 1.5,
+        "regression_to_mean": 0.0,
+        "pace_adjustment": "season_average"
+      },
+      "lifetime_games": 0,
+      "lifetime_correct": 0
+    },
+    {
+      "id": "regression-v1",
+      "description": "Regress team ratings 20% toward league average to cool off hot/cold teams",
+      "weight": 0.5,
+      "born": "2026-03-24",
+      "grace_until": "2026-03-29",
+      "params": {
+        "recency_weight": 1.0,
+        "injury_discount": 0.0,
+        "home_advantage_adjustment": 0.0,
+        "regression_to_mean": 0.2,
+        "pace_adjustment": "season_average"
+      },
+      "lifetime_games": 0,
+      "lifetime_correct": 0
+    },
+    {
+      "id": "pace-adj-v1",
+      "description": "Use opponent-adjusted pace instead of season average pace for scoring model",
+      "weight": 0.5,
+      "born": "2026-03-24",
+      "grace_until": "2026-03-29",
+      "params": {
+        "recency_weight": 1.0,
+        "injury_discount": 0.0,
+        "home_advantage_adjustment": 0.0,
+        "regression_to_mean": 0.0,
+        "pace_adjustment": "opponent_adjusted"
+      },
+      "lifetime_games": 0,
+      "lifetime_correct": 0
+    }
+  ],
+  "graveyard": []
+}

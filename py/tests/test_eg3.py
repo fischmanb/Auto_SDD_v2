@@ -93,16 +93,19 @@ class TestDetectBuildCmdNextjs:
     def test_nextjs_config_js(self, tmp_path: Path) -> None:
         (tmp_path / "next.config.js").touch()
         (tmp_path / "tsconfig.json").touch()
+        (tmp_path / "app").mkdir()
         (tmp_path / "package.json").write_text('{"scripts": {"build": "next build"}}')
         assert detect_build_cmd(tmp_path) == "npm run build"
 
     def test_nextjs_config_mjs(self, tmp_path: Path) -> None:
         (tmp_path / "next.config.mjs").touch()
+        (tmp_path / "app").mkdir()
         (tmp_path / "package.json").write_text('{"scripts": {"build": "next build"}}')
         assert detect_build_cmd(tmp_path) == "npm run build"
 
     def test_nextjs_config_ts(self, tmp_path: Path) -> None:
         (tmp_path / "next.config.ts").touch()
+        (tmp_path / "app").mkdir()
         (tmp_path / "package.json").write_text('{"scripts": {"build": "next build"}}')
         assert detect_build_cmd(tmp_path) == "npm run build"
 
@@ -111,14 +114,24 @@ class TestDetectBuildCmdNextjs:
         (tmp_path / "next.config.js").touch()
         (tmp_path / "tsconfig.json").touch()
         (tmp_path / "tsconfig.build.json").touch()
+        (tmp_path / "app").mkdir()
         (tmp_path / "package.json").write_text('{"scripts": {"build": "next build"}}')
         result = detect_build_cmd(tmp_path)
         assert result == "npm run build"
         assert "tsc" not in result
 
+    def test_nextjs_without_app_dir_falls_to_tsc(self, tmp_path: Path) -> None:
+        """Next.js project without app/ or pages/ falls through to tsc."""
+        (tmp_path / "next.config.js").touch()
+        (tmp_path / "tsconfig.json").touch()
+        (tmp_path / "package.json").write_text('{"scripts": {"build": "next build"}}')
+        result = detect_build_cmd(tmp_path)
+        assert "tsc --noEmit" in result
+
     def test_nextjs_without_build_script_falls_through(self, tmp_path: Path) -> None:
         (tmp_path / "next.config.js").touch()
         (tmp_path / "tsconfig.json").touch()
+        (tmp_path / "app").mkdir()
         (tmp_path / "package.json").write_text('{"scripts": {"dev": "next dev"}}')
         result = detect_build_cmd(tmp_path)
         assert "tsc --noEmit" in result

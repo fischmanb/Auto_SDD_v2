@@ -19,6 +19,8 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from auto_sdd.lib.types import GateError
+
 logger = logging.getLogger(__name__)
 
 
@@ -30,23 +32,24 @@ class CommitAuthResult:
     """Result of the commit authorization gate."""
 
     authorized: bool = False
-    checks_passed: list[str] = field(default_factory=list)
-    checks_failed: list[str] = field(default_factory=list)
+    checks_passed: list[GateError] = field(default_factory=list)
+    checks_failed: list[GateError] = field(default_factory=list)
 
     @property
     def summary(self) -> str:
         if self.authorized:
             return f"Authorized ({len(self.checks_passed)} checks passed)"
+        failed_codes = ", ".join(e.code for e in self.checks_failed)
         return (
             f"Blocked ({len(self.checks_failed)} failed: "
-            f"{', '.join(self.checks_failed)})"
+            f"{failed_codes})"
         )
 
     def to_dict(self) -> dict:
         return {
             "authorized": self.authorized,
-            "checks_passed": self.checks_passed,
-            "checks_failed": self.checks_failed,
+            "checks_passed": [{"code": e.code, "detail": e.detail} for e in self.checks_passed],
+            "checks_failed": [{"code": e.code, "detail": e.detail} for e in self.checks_failed],
             "summary": self.summary,
         }
 
@@ -70,20 +73,20 @@ def _get_head(project_dir: Path) -> str:
 def _check_head_advanced(
     project_dir: Path,
     branch_start_commit: str,
-) -> tuple[bool, str]:
+) -> tuple[bool, GateError]:
     """Check 1: HEAD must have advanced past the starting commit."""
     if not branch_start_commit:
-        return True, "head_advanced (no baseline — skipped)"
+        return True, GateError("HEAD_ADVANCED", "no baseline — skipped")
 
     head_now = _get_head(project_dir)
     if not head_now:
-        return False, "head_advanced (could not read HEAD)"
+        return False, GateError("HEAD_ADVANCED", "could not read HEAD")
     if head_now == branch_start_commit:
-        return False, "head_advanced (HEAD unchanged — agent made no commits)"
-    return True, "head_advanced"
+        return False, GateError("HEAD_UNCHANGED", "HEAD unchanged — agent made no commits")
+    return True, GateError("HEAD_ADVANCED", "ok")
 
 
-def _check_tree_clean(project_dir: Path) -> tuple[bool, str]:
+def _check_tree_clean(project_dir: Path) -> tuple[bool, GateError]:
     """Check 2: No tracked modifications or staged changes remain."""
     try:
         result = subprocess.run(
@@ -92,7 +95,7 @@ def _check_tree_clean(project_dir: Path) -> tuple[bool, str]:
             cwd=str(project_dir), timeout=10,
         )
         if result.returncode != 0:
-            return False, "tree_clean (git status failed)"
+            return False, GateError("TREE_DIRTY", "git status failed")
 
         lines = [line for line in result.stdout.splitlines() if line.strip()]
 
@@ -108,19 +111,19 @@ def _check_tree_clean(project_dir: Path) -> tuple[bool, str]:
         # Filter to tracked changes only (ignore untracked '??')
         dirty = [line for line in lines if not line.startswith("??")]
         if dirty:
-            return False, f"tree_clean ({len(dirty)} uncommitted change(s))"
-        return True, "tree_clean"
+            return False, GateError("TREE_DIRTY", f"{len(dirty)} uncommitted change(s)")
+        return True, GateError("TREE_CLEAN", "ok")
     except (subprocess.TimeoutExpired, OSError):
-        return False, "tree_clean (git status error)"
+        return False, GateError("TREE_DIRTY", "git status error")
 
 
 def _check_no_contamination(
     project_dir: Path,
     branch_start_commit: str,
-) -> tuple[bool, str]:
+) -> tuple[bool, GateError]:
     """Check 3: No files outside project root were modified."""
     if not branch_start_commit:
-        return True, "no_contamination (no baseline — skipped)"
+        return True, GateError("NO_CONTAMINATION", "no baseline — skipped")
 
     try:
         result = subprocess.run(
@@ -129,7 +132,7 @@ def _check_no_contamination(
             cwd=str(project_dir), timeout=30,
         )
         if result.returncode != 0:
-            return False, "no_contamination (git diff failed)"
+            return False, GateError("CONTAMINATION", "git diff failed")
 
         resolved_root = project_dir.resolve()
         contaminated: list[str] = []
@@ -144,29 +147,30 @@ def _check_no_contamination(
                 contaminated.append(path)
 
         if contaminated:
-            return False, (
-                f"no_contamination ({len(contaminated)} file(s) outside root: "
-                f"{', '.join(contaminated[:3])})"
+            return False, GateError(
+                "CONTAMINATION",
+                f"{len(contaminated)} file(s) outside root: "
+                f"{', '.join(contaminated[:3])}",
             )
-        return True, "no_contamination"
+        return True, GateError("NO_CONTAMINATION", "ok")
     except (subprocess.TimeoutExpired, OSError):
-        return False, "no_contamination (git diff error)"
+        return False, GateError("CONTAMINATION", "git diff error")
 
 
 def _check_test_regression(
     current_test_count: int | None,
     baseline_test_count: int | None,
-) -> tuple[bool, str]:
+) -> tuple[bool, GateError]:
     """Check 4: Test count did not decrease from baseline."""
     if baseline_test_count is None or current_test_count is None:
-        return True, "test_regression (no baseline — skipped)"
+        return True, GateError("TEST_REGRESSION", "no baseline — skipped")
 
     if current_test_count < baseline_test_count:
-        return False, (
-            f"test_regression (count dropped: "
-            f"{baseline_test_count} → {current_test_count})"
+        return False, GateError(
+            "TEST_REGRESSION",
+            f"count dropped: {baseline_test_count} → {current_test_count}",
         )
-    return True, f"test_regression ({current_test_count} >= {baseline_test_count})"
+    return True, GateError("TEST_REGRESSION", f"{current_test_count} >= {baseline_test_count}")
 
 
 # ── Main gate ────────────────────────────────────────────────────────────────
@@ -200,11 +204,11 @@ def authorize_commit(
         _check_test_regression(current_test_count, baseline_test_count),
     ]
 
-    for passed, label in checks:
+    for passed, gate_error in checks:
         if passed:
-            result.checks_passed.append(label)
+            result.checks_passed.append(gate_error)
         else:
-            result.checks_failed.append(label)
+            result.checks_failed.append(gate_error)
 
     result.authorized = len(result.checks_failed) == 0
 

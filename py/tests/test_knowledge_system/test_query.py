@@ -142,6 +142,32 @@ class TestQueryEdgeExpansion:
         # K-00001 is connected to L-00001 via co_occurs
         assert "K-00001" in ids
 
+    def test_generalizes_edge_boosts_universal_from_instance(self, store):
+        """When an instance matches, its universal ancestor gets a score boost via generalizes."""
+        uid = store.add_node(
+            "universal",
+            "Environment validation principle",
+            "Validate environment configuration before deployment",
+            node_id="U-00001",
+            status="promoted",
+        )
+        iid = store.add_node(
+            "instance",
+            "Check environment variables before build",
+            "Always verify environment variables are configured correctly before running build",
+            node_id="L-00001",
+            stack="nextjs",
+        )
+        store.add_edge(uid, iid, "generalizes")
+        # Query should find L-00001 via FTS, then pull in U-00001 via edge expansion
+        results = store.query(
+            feature_spec="environment variables configuration build",
+            max_results=10,
+        )
+        ids = [r["id"] for r in results]
+        assert "L-00001" in ids
+        assert "U-00001" in ids
+
 
 class TestQueryStatusFilter:
     def test_min_status_active_includes_all(self, populated_store):

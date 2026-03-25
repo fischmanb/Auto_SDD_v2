@@ -52,6 +52,7 @@ from auto_sdd.exec_gates.eg2_signal_parse import extract_and_validate, ParsedSig
 from auto_sdd.exec_gates.eg3_build_check import check_build, detect_build_cmd, BuildCheckResult
 from auto_sdd.exec_gates.eg4_test_check import check_tests, detect_test_cmd, TestCheckResult
 from auto_sdd.exec_gates.eg5_commit_auth import authorize_commit, CommitAuthResult
+from auto_sdd.exec_gates.eg6_spec_adherence import check_spec_adherence, SpecAdherenceResult
 from auto_sdd.lib.constants import BUILD_AGENT_TOOLS
 
 logger = logging.getLogger(__name__)
@@ -59,11 +60,16 @@ logger = logging.getLogger(__name__)
 # ── Optional KG integration (graceful degradation if unavailable) ─────────────
 try:
     from auto_sdd_v2.knowledge_system.build_integration import (
+        capture_reflection as _capture_reflection,
         detect_project_stack as _detect_project_stack,
+        format_reflection_for_prompt as _format_reflection_for_prompt,
         inject_hardened_clues as _inject_hardened_clues,
+        inject_knowledge_combined as _inject_knowledge_combined,
         inject_relevant_knowledge as _inject_relevant_knowledge,
         init_store_optional as _init_store_optional,
         kg_post_gate as _kg_post_gate_fn,
+        reflect_on_failure as _reflect_on_failure,
+        synthesize_universals as _synthesize_universals,
     )
     _KG_MODULE_AVAILABLE = True
 except Exception:
@@ -94,6 +100,8 @@ class FeatureRecord:
     attempt: int = 0
     error: str = ""
     test_count: int | None = None
+    turn_count: int = 0
+    tool_call_count: int = 0
     timestamp: str = ""
 
 
@@ -120,7 +128,7 @@ class GateResult:
     eg3_build: BuildCheckResult | None = None
     eg4_tests: TestCheckResult | None = None
     eg5_commit: CommitAuthResult | None = None
-    # eg6_spec_adherence: reserved
+    eg6_adherence: "SpecAdherenceResult | None" = None
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -177,6 +185,193 @@ def _get_head(project_dir: Path) -> str:
         return result.stdout.strip() if result.returncode == 0 else ""
     except (subprocess.TimeoutExpired, OSError):
         return ""
+
+
+def _get_diff(project_dir: Path, base_commit: str) -> str:
+    """Get git diff between base_commit and HEAD (agent's changes).
+
+    Returns the diff text (capped at 8000 chars to fit in prompt context),
+    or empty string on error.
+    """
+    if not base_commit:
+        return ""
+    try:
+        result = subprocess.run(
+            ["git", "diff", base_commit, "HEAD", "--stat"],
+            capture_output=True, text=True,
+            cwd=str(project_dir), timeout=15,
+        )
+        stat = result.stdout.strip() if result.returncode == 0 else ""
+
+        result = subprocess.run(
+            ["git", "diff", base_commit, "HEAD"],
+            capture_output=True, text=True,
+            cwd=str(project_dir), timeout=30,
+        )
+        full = result.stdout.strip() if result.returncode == 0 else ""
+
+        if not stat and not full:
+            return ""
+
+        # Stat summary always fits; cap the full diff to leave room in prompt
+        diff = f"### File summary\n{stat}\n\n### Full diff\n{full}"
+        if len(diff) > 8000:
+            diff = diff[:8000] + "\n... (diff truncated)"
+        return diff
+    except (subprocess.TimeoutExpired, OSError):
+        return ""
+
+
+def _smart_truncate(text: str, max_len: int) -> str:
+    """Truncate text keeping both start and end for context.
+
+    If the text exceeds max_len, keeps the first 60% and last 40%
+    with an elision marker in the middle. This preserves the error
+    summary (usually at the start) and the specific failure details
+    (usually at the end).
+    """
+    if len(text) <= max_len:
+        return text
+    head = int(max_len * 0.6)
+    tail = max_len - head - 30  # 30 chars for marker
+    return f"{text[:head]}\n\n... ({len(text) - max_len} chars elided) ...\n\n{text[-tail:]}"
+
+
+def _extract_error_codes(gate: "GateResult") -> list[str]:
+    """Extract structured error codes from a failed GateResult."""
+    codes: list[str] = []
+    if gate.failed_gate == "EG2" and gate.eg2_signals:
+        codes = [e.code for e in gate.eg2_signals.errors]
+    elif gate.failed_gate == "EG5" and gate.eg5_commit:
+        codes = [e.code for e in gate.eg5_commit.checks_failed]
+    elif gate.failed_gate == "EG6" and gate.eg6_adherence:
+        codes = [e.code for e in gate.eg6_adherence.checks_failed]
+    # EG3/EG4 don't have structured codes yet — gate name is enough
+    return codes
+
+
+# ── Retry guidance by failure type ────────────────────────────────────────
+
+_RETRY_GUIDANCE: dict[str, str] = {
+    # EG2 signal errors
+    "MISSING_FEATURE_BUILT": (
+        "You forgot to emit the FEATURE_BUILT signal. After committing, "
+        "print: FEATURE_BUILT: <feature name>"
+    ),
+    "FEATURE_NAME_MISMATCH": (
+        "Your FEATURE_BUILT signal doesn't match the feature you were asked "
+        "to build. Emit: FEATURE_BUILT: <exact feature name from the spec>"
+    ),
+    "MISSING_SPEC_FILE": (
+        "You forgot to emit the SPEC_FILE signal. After committing, "
+        "print: SPEC_FILE: <path to spec>"
+    ),
+    "SOURCE_MISSING": (
+        "One or more SOURCE_FILES you declared don't exist on disk. "
+        "Either create the missing files or fix the SOURCE_FILES signal "
+        "to list only files you actually created."
+    ),
+    "SPEC_NOT_FOUND": (
+        "The SPEC_FILE you referenced doesn't exist. Check the path and "
+        "make sure you're pointing to the actual spec file in .specs/."
+    ),
+    "SPEC_TOO_SHORT": (
+        "The spec file has too little content (<25 chars). This is a "
+        "pre-build issue — write a substantive spec before building."
+    ),
+    # EG6 spec adherence errors
+    "SOURCE_NOT_IN_DIFF": (
+        "Your SOURCE_FILES signal lists files that weren't actually "
+        "changed. Update the signal to match only the files you modified."
+    ),
+    "FILE_MISPLACED": (
+        "You created files in unexpected directories. Check the project's "
+        "systems-design.md for the expected directory structure."
+    ),
+    "TOKEN_UNKNOWN": (
+        "You referenced design tokens that don't exist in tokens.md. "
+        "Use only tokens defined in .specs/design-system/tokens.md."
+    ),
+    "NAMING_VIOLATION": (
+        "File names don't follow conventions: React components should be "
+        "PascalCase (.tsx), Python modules should be snake_case (.py)."
+    ),
+    # EG5 commit errors
+    "HEAD_UNCHANGED": (
+        "You didn't commit your changes. Use git add and git commit "
+        "before emitting signals."
+    ),
+    "TREE_DIRTY": (
+        "You left uncommitted changes. Run git add for all modified files "
+        "and commit them before emitting signals."
+    ),
+    "TEST_REGRESSION": (
+        "Your changes caused existing tests to fail. Review the test "
+        "output, identify which tests broke, and fix your implementation "
+        "to preserve existing behavior."
+    ),
+}
+
+# Gate-level fallback guidance when no specific error codes match
+_GATE_GUIDANCE: dict[str, str] = {
+    "BUILD": (
+        "The agent crashed or timed out. Simplify your approach — "
+        "implement the minimum viable version first."
+    ),
+    "EG2": (
+        "Signal validation failed. After implementing and committing, "
+        "emit FEATURE_BUILT, SPEC_FILE, and SOURCE_FILES signals."
+    ),
+    "EG3": (
+        "The project failed to compile. Check for syntax errors, missing "
+        "imports, and type errors in the files you wrote. Do NOT introduce "
+        "new dependencies unless the spec requires them."
+    ),
+    "EG4": (
+        "Tests failed. Read the test output carefully. Fix your "
+        "implementation to make tests pass — do NOT modify existing tests "
+        "unless the feature spec requires it."
+    ),
+    "EG5": (
+        "Commit authorization failed. Make sure you commit all changes "
+        "and don't modify files outside the project scope."
+    ),
+    "EG6": (
+        "Spec adherence check failed. Your code doesn't match the "
+        "structural requirements: check file placement, naming conventions, "
+        "design token references, and that SOURCE_FILES matches what you "
+        "actually changed."
+    ),
+}
+
+
+def _retry_guidance(failed_gate: str, error_codes: list[str]) -> str:
+    """Build targeted retry instructions based on failure type."""
+    parts: list[str] = []
+
+    # Specific guidance per error code
+    for code in error_codes:
+        if code in _RETRY_GUIDANCE:
+            parts.append(f"- {_RETRY_GUIDANCE[code]}")
+
+    # Gate-level fallback if no specific codes matched
+    if not parts and failed_gate in _GATE_GUIDANCE:
+        parts.append(_GATE_GUIDANCE[failed_gate])
+
+    if parts:
+        guidance = "## RETRY STRATEGY\n" + "\n".join(parts) + "\n\n"
+    else:
+        guidance = ""
+
+    # Always include the general instruction
+    guidance += (
+        "Fix ONLY the errors above. The import signatures for all "
+        "existing modules are already provided in this prompt. Do "
+        "NOT re-read files whose exports are listed above. Read "
+        "ONLY your own files if you need to see what you wrote, "
+        "then write corrected versions immediately.\n"
+    )
+    return guidance
 
 
 def _format_duration(seconds: int) -> str:
@@ -491,6 +686,80 @@ def _build_system_prompt(
     return prompt
 
 
+def _is_ui_feature(spec_content: str) -> bool:
+    """Heuristic: does this feature spec describe UI work?
+
+    Returns True if the spec references design tokens, UI components,
+    or visual elements — meaning design patterns are relevant context.
+    """
+    import re
+    lower = spec_content.lower()
+
+    # Backtick-wrapped token references like `emerald-500`, `p-4`
+    if re.search(r"`[a-z]+-[a-z0-9]+(?:-[a-z0-9]+)*`", spec_content):
+        return True
+
+    # Explicit UI signals in the spec text.
+    # Avoid ambiguous words like "table" (could be DB table) or "input"
+    # (could be CLI input) — use compound phrases for those.
+    ui_keywords = (
+        "design token", "component", "layout", "render", "button",
+        "modal", "form field", "card", "sidebar", "navbar", "dashboard",
+        "chart", "data table", "dialog", "tooltip", "dropdown",
+        "checkbox", "toggle", "tabs", "panel", "grid layout", "flexbox",
+        ".tsx", ".jsx", "classname", "tailwind", "css",
+        "ui ", " ui", "user interface",
+    )
+    return any(kw in lower for kw in ui_keywords)
+
+
+def _read_arch_summary(project_dir: Path) -> str:
+    """Read vision.md and systems-design.md into a brief architecture context.
+
+    Caps total at 1500 chars to avoid bloating the prompt.
+    """
+    parts: list[str] = []
+    vision_path = project_dir / ".specs" / "vision.md"
+    systems_path = project_dir / ".specs" / "systems-design.md"
+
+    if vision_path.is_file():
+        content = vision_path.read_text().strip()
+        if content:
+            parts.append(f"### Project Vision\n{content[:600]}")
+
+    if systems_path.is_file():
+        content = systems_path.read_text().strip()
+        if content:
+            parts.append(f"### Systems Design\n{content[:800]}")
+
+    if not parts:
+        return ""
+
+    summary = "\n\n".join(parts)
+    if len(summary) > 1500:
+        summary = summary[:1500] + "\n..."
+    return f"## Architecture Context\n\n{summary}\n"
+
+
+def _find_spec_content(feature: Feature, project_dir: Path) -> str:
+    """Find and read the spec file for a feature. Returns content or empty string.
+
+    Searches .specs/features/**/*.md for a file whose stem matches the
+    feature name. Called once per feature and cached across retries.
+    """
+    spec_dir = project_dir / ".specs" / "features"
+    if not spec_dir.is_dir():
+        return ""
+    target = feature.name.lower().replace(" ", "-")
+    for p in spec_dir.rglob("*.md"):
+        if target in p.stem.lower():
+            try:
+                return p.read_text()
+            except OSError:
+                return ""
+    return ""
+
+
 def _build_user_prompt(
     feature: Feature,
     project_dir: Path,
@@ -522,15 +791,26 @@ def _build_user_prompt(
         f"Specification:\n{spec_content}\n",
     ]
 
-    # Inject design patterns (layout rules, component anatomy, spacing)
-    patterns_path = project_dir / ".specs" / "design-system" / "patterns.md"
-    if patterns_path.is_file():
-        patterns_content = patterns_path.read_text()
-        if patterns_content.strip():
-            parts.append(
-                f"\n## Design Patterns (apply to all components)\n\n"
-                f"{patterns_content}\n"
-            )
+    # Inject architecture context (vision + systems design)
+    arch_summary = _read_arch_summary(project_dir)
+    if arch_summary:
+        parts.append(f"\n{arch_summary}")
+
+    # Inject design patterns only for UI features (skip for backend/data)
+    if _is_ui_feature(spec_content):
+        patterns_path = project_dir / ".specs" / "design-system" / "patterns.md"
+        if patterns_path.is_file():
+            patterns_content = patterns_path.read_text()
+            if patterns_content.strip():
+                parts.append(
+                    f"\n## Design Patterns (apply to all components)\n\n"
+                    f"{patterns_content}\n"
+                )
+    else:
+        logger.debug(
+            "Skipping design patterns for non-UI feature: %s",
+            feature.name,
+        )
 
     if codebase_summary:
         parts.append(f"\n## Codebase Context\n\n{codebase_summary}\n")
@@ -569,15 +849,19 @@ class BuildLoopV2:
         max_retries: int = 2,
         main_branch: str = "main",
         auto_approve: bool = False,
+        eg6_warn_only: bool = True,
     ) -> None:
         self.config = model_config
         self.project_dir = project_dir.resolve()
+        self._build_cmd_explicit = build_cmd  # empty = auto-detect
+        self._test_cmd_explicit = test_cmd
         self.build_cmd = build_cmd or detect_build_cmd(self.project_dir)
         self.test_cmd = test_cmd or detect_test_cmd(self.project_dir)
         self.max_features = max_features
         self.max_retries = max_retries
         self.main_branch = main_branch
         self.auto_approve = auto_approve
+        self.eg6_warn_only = eg6_warn_only
         self._codebase_summary: str = ""
         self._campaign_blocked: list[str] = []  # cross-feature EG1 rejections
         self._campaign_id: str = ""
@@ -866,6 +1150,10 @@ class BuildLoopV2:
         branch_name = branch_result.branch_name
 
         last_gate_error: str = ""
+        last_diff: str = ""
+        last_failed_gate: str = ""
+        last_error_codes: list[str] = []
+        last_reflection: dict | None = None
         base_max_turns = self.config.max_turns
         scaled_turns = _turns_for_complexity(feature.complexity, base_max_turns)
         self.config.max_turns = scaled_turns
@@ -873,6 +1161,20 @@ class BuildLoopV2:
             "Turn budget: %d (base=%d, complexity=%s)",
             scaled_turns, base_max_turns, feature.complexity,
         )
+
+        # Capture baseline once per feature — retries reset to this state,
+        # so head_before and baseline_test_count are stable across attempts.
+        head_before = _get_head(self.project_dir)
+        baseline_test_result = check_tests(
+            self.test_cmd, self.project_dir,
+        )
+        baseline_test_count = baseline_test_result.test_count
+
+        # Cache test file discovery and spec content — stable across retries
+        # (agent can't modify test files, and spec files don't change mid-build).
+        protected = _discover_test_files(self.project_dir, self.test_cmd)
+        feature_spec_content = _find_spec_content(feature, self.project_dir)
+
         # Reset injected IDs once per feature (not per attempt) so retries
         # that return no KG results still reference the first-attempt injection.
         self._kg_injected_ids = []
@@ -886,21 +1188,19 @@ class BuildLoopV2:
                 )
 
             # ── SELECT ───────────────────────────────────────────────
-            # Capture baseline state before agent runs
-            head_before = _get_head(self.project_dir)
-            baseline_test_result = check_tests(
-                self.test_cmd, self.project_dir,
-            )
-            baseline_test_count = baseline_test_result.test_count
 
-            # KG: query for relevant knowledge (optional — silently skipped if unavailable)
+            # KG: single query for both relevant knowledge and hardened clues
             kg_section = ""
             kg_clues = ""
             if _KG_MODULE_AVAILABLE and self._kg is not None:
                 error_for_query = last_gate_error if attempt > 0 else None
-                kg_section, new_ids = _inject_relevant_knowledge(
+                _spec_query = (
+                    f"{feature.name}\n{feature_spec_content}"
+                    if feature_spec_content else feature.name
+                )
+                kg_section, kg_clues, new_ids = _inject_knowledge_combined(
                     self._kg,
-                    feature_spec=feature.name,
+                    feature_spec=_spec_query,
                     stack=self._kg_stack,
                     error_pattern=error_for_query,
                 )
@@ -908,7 +1208,6 @@ class BuildLoopV2:
                 # keep IDs from the last successful query (preserves tracking).
                 if new_ids:
                     self._kg_injected_ids = new_ids
-                kg_clues = _inject_hardened_clues(self._kg, self._kg_stack)
 
             # Build prompts
             system_prompt = _build_system_prompt(
@@ -925,16 +1224,21 @@ class BuildLoopV2:
                 user_prompt += (
                     f"\n\n## PREVIOUS ATTEMPT FAILED\n"
                     f"Your previous implementation failed verification:\n"
-                    f"{last_gate_error[:2000]}\n\n"
-                    f"Fix ONLY the errors above. The import signatures for all "
-                    f"existing modules are already provided in this prompt. Do "
-                    f"NOT re-read files whose exports are listed above. Read "
-                    f"ONLY your own files if you need to see what you wrote, "
-                    f"then write corrected versions immediately.\n"
+                    f"{_smart_truncate(last_gate_error, 5000)}\n\n"
                 )
+                # Show agent what it wrote so it doesn't waste turns re-reading
+                if last_diff:
+                    user_prompt += (
+                        f"## YOUR PREVIOUS CHANGES (git diff)\n"
+                        f"```diff\n{last_diff}\n```\n\n"
+                    )
+                # Targeted retry guidance based on failure type
+                user_prompt += _retry_guidance(last_failed_gate, last_error_codes)
+                # Append structured reflection if available
+                if last_reflection is not None and _KG_MODULE_AVAILABLE:
+                    user_prompt += _format_reflection_for_prompt(last_reflection)
 
             # Create executor (EG1 gate) scoped to this feature
-            protected = _discover_test_files(self.project_dir, self.test_cmd)
             executor = BuildAgentExecutor(
                 project_root=self.project_dir,
                 allowed_branch=branch_name,
@@ -976,9 +1280,20 @@ class BuildLoopV2:
                     agent_result.turn_count,
                     agent_result.finish_reason,
                 )
+                # Capture diff before git reset wipes the agent's changes
+                last_diff = _get_diff(self.project_dir, head_before)
+                last_failed_gate = "BUILD"
+                last_error_codes = []
                 last_gate_error = f"BUILD: {agent_result.error}"
+                last_reflection = self._reflect_and_capture(
+                    feature, "BUILD", agent_result.error or "",
+                    agent_result.output or "",
+                )
                 self._record(feature, "failed", attempt,
-                             error=agent_result.error)
+                             error=agent_result.error,
+                             duration=int(time.time() - attempt_start),
+                             turn_count=agent_result.turn_count,
+                             tool_call_count=len(agent_result.tool_calls))
                 self._kg_post_gate(
                     feature=feature,
                     attempt=attempt,
@@ -1011,13 +1326,16 @@ class BuildLoopV2:
                 agent_result=agent_result,
                 head_before=head_before,
                 baseline_test_count=baseline_test_count,
+                feature=feature,
             )
 
             if not gate.passed:
                 # Auto-clean: if EG5 failed on tree_clean only (framework
                 # artifacts like next-env.d.ts, tsconfig.tsbuildinfo), add
                 # them to the commit and re-check without burning a retry.
-                if gate.failed_gate == "EG5" and "tree_clean" in gate.error:
+                if gate.failed_gate == "EG5" and gate.eg5_commit and any(
+                    e.code == "TREE_DIRTY" for e in gate.eg5_commit.checks_failed
+                ):
                     cleaned = self._auto_clean_artifacts()
                     if cleaned:
                         _status(f"EG5 auto-clean: committed {cleaned} artifact(s), re-checking")
@@ -1026,6 +1344,7 @@ class BuildLoopV2:
                             agent_result=agent_result,
                             head_before=head_before,
                             baseline_test_count=baseline_test_count,
+                            feature=feature,
                         )
 
             if not gate.passed:
@@ -1033,9 +1352,20 @@ class BuildLoopV2:
                 logger.warning(
                     "GATE FAILED at %s: %s", gate.failed_gate, gate.error,
                 )
+                # Capture diff before git reset wipes the agent's changes
+                last_diff = _get_diff(self.project_dir, head_before)
+                last_failed_gate = gate.failed_gate
+                last_error_codes = _extract_error_codes(gate)
                 last_gate_error = f"{gate.failed_gate}: {gate.error}"
+                last_reflection = self._reflect_and_capture(
+                    feature, gate.failed_gate, gate.error,
+                    agent_result.output or "",
+                )
                 self._record(feature, "failed", attempt,
-                             error=last_gate_error)
+                             error=last_gate_error,
+                             duration=int(time.time() - attempt_start),
+                             turn_count=agent_result.turn_count,
+                             tool_call_count=len(agent_result.tool_calls))
                 self._kg_post_gate(
                     feature=feature,
                     attempt=attempt,
@@ -1065,7 +1395,18 @@ class BuildLoopV2:
                 )
             except BranchError as exc:
                 logger.error("Merge failed for %s: %s", feature.name, exc)
-                self._record(feature, "failed", attempt, error=str(exc))
+                self._record(feature, "failed", attempt, error=str(exc),
+                             duration=int(time.time() - attempt_start),
+                             turn_count=agent_result.turn_count,
+                             tool_call_count=len(agent_result.tool_calls))
+                self._kg_post_gate(
+                    feature=feature,
+                    attempt=attempt,
+                    outcome="failure",
+                    gate_failed="MERGE",
+                    error_pattern=str(exc),
+                    duration=time.time() - attempt_start,
+                )
                 delete_feature_branch(
                     self.project_dir, branch_name, self.main_branch,
                 )
@@ -1074,7 +1415,20 @@ class BuildLoopV2:
             self._record(
                 feature, "built", attempt,
                 test_count=current_test_count,
+                duration=int(time.time() - attempt_start),
+                turn_count=agent_result.turn_count,
+                tool_call_count=len(agent_result.tool_calls),
             )
+
+            # Refresh codebase summary after merge so the next feature
+            # sees an up-to-date view of the project (new modules, exports).
+            try:
+                self._codebase_summary = generate_codebase_summary(
+                    self.project_dir, self.config,
+                )
+            except Exception as exc:
+                logger.warning("Codebase summary refresh failed (continuing): %s", exc)
+
             self._kg_post_gate(
                 feature=feature,
                 attempt=attempt,
@@ -1120,10 +1474,69 @@ class BuildLoopV2:
             stack=self._kg_stack,
         )
 
-    # ── Post-campaign promotion ────────────────────────────────────
+    # ── Structured reflection ────────────────────────────────────
+
+    def _make_llm_call(self, prompt: str) -> str:
+        """Single-turn LLM completion (no tools) for reflection/synthesis.
+
+        Reuses the same model server as the build agent but with no tools
+        and max_tokens capped to keep it cheap and fast.
+        """
+        from openai import OpenAI
+        client = OpenAI(
+            base_url=self.config.base_url,
+            api_key=self.config.api_key,
+        )
+        role = self.config.system_role
+        resp = client.chat.completions.create(
+            model=self.config.model,
+            messages=[
+                {"role": role, "content": "You are a concise engineering analyst."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=512,
+            temperature=0.3,
+        )
+        return resp.choices[0].message.content or ""
+
+    def _reflect_and_capture(
+        self,
+        feature: Feature,
+        gate_failed: str,
+        error_pattern: str,
+        agent_output: str,
+    ) -> dict | None:
+        """Run structured reflection on a failure, capture to KG.
+
+        Returns the reflection dict (for prompt injection) or None.
+        """
+        if not _KG_MODULE_AVAILABLE:
+            return None
+        try:
+            reflection = _reflect_on_failure(
+                llm_call=self._make_llm_call,
+                feature_name=feature.name,
+                gate_failed=gate_failed,
+                error_pattern=error_pattern,
+                agent_output=agent_output,
+            )
+            if reflection:
+                _capture_reflection(
+                    self._kg,
+                    reflection,
+                    feature_name=feature.name,
+                    gate_failed=gate_failed,
+                    campaign_id=getattr(self, "_campaign_id", None),
+                )
+            return reflection
+        except Exception as exc:
+            logger.warning("KG: reflection failed (continuing): %s", exc)
+            return None
+
+    # ── Post-campaign promotion + synthesis ───────────────────────
 
     def _run_promotion(self) -> None:
-        """Run the KG promotion job after a campaign. No-op if KG unavailable."""
+        """Run KG promotion and cluster synthesis after a campaign."""
         if not _KG_MODULE_AVAILABLE or self._kg is None:
             return
         try:
@@ -1147,6 +1560,23 @@ class BuildLoopV2:
         except Exception as exc:
             logger.warning("KG promotion failed (continuing): %s", exc)
 
+        # Synthesize universals from unlinked clusters
+        try:
+            results = _synthesize_universals(
+                self._kg,
+                llm_call=self._make_llm_call,
+                max_synthesize=5,
+                campaign_id=getattr(self, "_campaign_id", None),
+            )
+            if results:
+                logger.info(
+                    "KG synthesis: created %d universal(s): %s",
+                    len(results),
+                    [r["title"][:60] for r in results],
+                )
+        except Exception as exc:
+            logger.warning("KG synthesis failed (continuing): %s", exc)
+
     # ── GATE: deterministic ExecGate checks (EG2–EG5) ─────────────
 
     def _auto_complete_if_needed(
@@ -1161,6 +1591,9 @@ class BuildLoopV2:
         Models write files and stop without committing or emitting
         FEATURE_BUILT signals. Rather than failing at EG2, detect
         the situation and complete the loop in Python.
+
+        Note: does NOT force agent_result.success — EG2 will still
+        validate the injected signals against disk state.
         """
         output = agent_result.output or ""
         has_signal = "FEATURE_BUILT" in output
@@ -1175,7 +1608,17 @@ class BuildLoopV2:
             len(executor._written_files),
         )
 
-        # Auto-commit if there are uncommitted changes
+        # Derive source files from executor's write log (trusted, not agent-declared)
+        source_files = []
+        for f in executor._written_files:
+            try:
+                rel = str(Path(f).relative_to(self.project_dir))
+                source_files.append(rel)
+            except ValueError:
+                source_files.append(f)
+
+        # Auto-commit only the files the agent actually wrote — never `git add -A`
+        # which could stage untracked temp files, debug logs, or other artifacts.
         try:
             status = subprocess.run(
                 ["git", "status", "--porcelain"],
@@ -1183,18 +1626,19 @@ class BuildLoopV2:
                 cwd=str(self.project_dir),
             )
             if status.stdout.strip():
-                subprocess.run(
-                    ["git", "add", "-A"],
-                    capture_output=True, text=True,
-                    cwd=str(self.project_dir),
-                )
+                for sf in source_files:
+                    subprocess.run(
+                        ["git", "add", "--", sf],
+                        capture_output=True, text=True,
+                        cwd=str(self.project_dir),
+                    )
                 subprocess.run(
                     ["git", "commit", "-m",
                      f"Auto-commit: {feature.name} (agent forgot to commit)"],
                     capture_output=True, text=True,
                     cwd=str(self.project_dir),
                 )
-                logger.info("Auto-complete: committed changes")
+                logger.info("Auto-complete: committed %d file(s)", len(source_files))
         except Exception as exc:
             logger.warning("Auto-complete: git commit failed: %s", exc)
 
@@ -1208,23 +1652,15 @@ class BuildLoopV2:
                     spec_file = str(p.relative_to(self.project_dir))
                     break
 
-        # Derive source files from executor's written files
-        source_files = []
-        for f in executor._written_files:
-            try:
-                rel = str(Path(f).relative_to(self.project_dir))
-                source_files.append(rel)
-            except ValueError:
-                source_files.append(f)
-
-        # Inject signals into agent output
+        # Inject signals into agent output — EG2 will still validate them
         signals = (
             f"\nFEATURE_BUILT: {feature.name}\n"
             f"SPEC_FILE: {spec_file}\n"
             f"SOURCE_FILES: {','.join(source_files)}\n"
         )
         agent_result.output = output + signals
-        agent_result.success = True
+        # Do NOT set agent_result.success = True here. The original
+        # agent status is preserved; EG2 validates the injected signals.
         logger.info("Auto-complete: injected signals for %s", feature.name)
         return agent_result
 
@@ -1233,6 +1669,7 @@ class BuildLoopV2:
         agent_result: AgentResult,
         head_before: str,
         baseline_test_count: int | None,
+        feature: Feature | None = None,
     ) -> GateResult:
         """Run all GATE checks in sequence. Short-circuits on first failure.
 
@@ -1252,12 +1689,13 @@ class BuildLoopV2:
         # ── EG2: Signal parse ────────────────────────────────────
         signals = extract_and_validate(
             agent_result.output, self.project_dir,
+            expected_feature=feature.name if feature else "",
         )
         gate.eg2_signals = signals
 
         if not signals.valid:
             gate.failed_gate = "EG2"
-            gate.error = "; ".join(signals.errors)
+            gate.error = "; ".join(e.detail for e in signals.errors)
             return gate
 
         logger.info(
@@ -1268,12 +1706,16 @@ class BuildLoopV2:
         _status(f"EG2 ✓ signals valid (sources={len(signals.source_files)})")
 
         # ── EG3: Build check ─────────────────────────────────────
+        # Re-detect build command: agent may have created app/ or pages/
+        # this turn, upgrading the check from tsc to next build.
+        if not self._build_cmd_explicit:
+            self.build_cmd = detect_build_cmd(self.project_dir)
         build_result = check_build(self.build_cmd, self.project_dir)
         gate.eg3_build = build_result
 
         if not build_result.passed:
             gate.failed_gate = "EG3"
-            gate.error = f"Build failed: {build_result.output[-200:]}"
+            gate.error = f"Build failed: {build_result.output[-2000:]}"
             return gate
 
         _status("EG3 ✓ build passed")
@@ -1284,7 +1726,7 @@ class BuildLoopV2:
 
         if not test_result.passed:
             gate.failed_gate = "EG4"
-            gate.error = f"Tests failed: {test_result.output[-200:]}"
+            gate.error = f"Tests failed: {test_result.output[-2000:]}"
             return gate
 
         _status(f"EG4 ✓ tests passed (count={test_result.test_count})")
@@ -1305,9 +1747,29 @@ class BuildLoopV2:
 
         _status("EG5 ✓ commit authorized")
 
-        # ── EG6: Spec adherence (reserved) ───────────────────────
-        # Not yet implemented. Will be deterministic diff-based
-        # static analysis when added.
+        # ── EG6: Spec adherence ─────────────────────────────────
+        adherence_result = check_spec_adherence(
+            project_dir=self.project_dir,
+            source_files=signals.source_files,
+            base_commit=head_before,
+        )
+        gate.eg6_adherence = adherence_result
+
+        if not adherence_result.passed:
+            if self.eg6_warn_only:
+                # Warn mode: log deviations but don't block the build.
+                # Use this to validate EG6 checks against real campaigns
+                # before enforcing. Switch to enforce with --eg6-enforce.
+                logger.warning(
+                    "EG6 WARN (not blocking): %s", adherence_result.summary,
+                )
+                _status(f"EG6 ⚠ spec adherence warnings: {adherence_result.summary[:200]}")
+            else:
+                gate.failed_gate = "EG6"
+                gate.error = adherence_result.summary
+                return gate
+        else:
+            _status(f"EG6 ✓ spec adherence ({len(adherence_result.checks_passed)} checks)")
 
         # All checks passed
         gate.passed = True
@@ -1324,6 +1786,9 @@ class BuildLoopV2:
         attempt: int,
         error: str = "",
         test_count: int | None = None,
+        duration: int = 0,
+        turn_count: int = 0,
+        tool_call_count: int = 0,
     ) -> None:
         """Record a feature build result."""
         self.records.append(FeatureRecord(
@@ -1332,6 +1797,9 @@ class BuildLoopV2:
             attempt=attempt,
             error=error,
             test_count=test_count,
+            duration=duration,
+            turn_count=turn_count,
+            tool_call_count=tool_call_count,
             timestamp=datetime.now(timezone.utc).isoformat(),
         ))
 
@@ -1442,6 +1910,10 @@ class BuildLoopV2:
                     "name": r.name,
                     "status": r.status,
                     "attempt": r.attempt,
+                    "duration_seconds": r.duration,
+                    "duration_human": _format_duration(r.duration),
+                    "turn_count": r.turn_count,
+                    "tool_call_count": r.tool_call_count,
                     "test_count": r.test_count,
                     "error": r.error,
                     "timestamp": r.timestamp,
@@ -1519,6 +1991,12 @@ def main() -> None:
         default=os.environ.get("VISION_INPUT", ""),
         help="User input for Phase 1 (VISION). Required if --pre-build and no .specs/vision.md",
     )
+    parser.add_argument(
+        "--eg6-enforce",
+        action="store_true",
+        default=False,
+        help="Enforce EG6 spec adherence (default: warn-only mode, logs but doesn't block)",
+    )
     args = parser.parse_args()
 
     # Validate project dir
@@ -1578,6 +2056,7 @@ def main() -> None:
         max_features=args.max_features,
         max_retries=args.max_retries,
         auto_approve=args.auto_approve,
+        eg6_warn_only=not args.eg6_enforce,
     )
 
     exit_code = loop.run()
