@@ -124,5 +124,26 @@ Reason: Conversational interface to Skyline workflows. Not applicable to build l
 4. Quarantine gates → EG7 (new gate, tested pattern)
 5. Doctrine export (new module, additive, non-blocking)
 6. Project audit airlock (new module, optional safety layer)
+7. Knowledge ingestion gate (new module, depends on item 5, closes the learning loop)
 
-Estimated scope: ~800 lines new code, ~200 lines adapted from Skyline, 6 sessions.
+### 7. Knowledge ingestion gate → bidirectional learning
+
+Source: `services/doctrine/capture.py`, `normalize.py`, `gaps.py`
+Also: `services/skill_intake/intake.py` (intake validation pattern)
+
+Purpose: Accept external knowledge sources (doctrine files from other projects, exported learnings, structured notes) into the knowledge graph. Validate schema, deduplicate against existing nodes, assign initial status (active), and make available for injection into future builds.
+
+Integration point: `py/auto_sdd_v2/knowledge_system/` currently has `migration.py` (one-time markdown import) but no live intake path. Add `ingest.py` with:
+- `ingest_doctrine_topics(path)` — reads Skyline-format doctrine JSON, creates knowledge nodes
+- `ingest_exported_learnings(path)` — reads Auto_SDD_v2 doctrine export JSON (from item 5), creates nodes with source provenance
+- `ingest_structured_notes(path)` — reads hand-written YAML/JSON notes (stack, pattern, clue fields), validates schema, creates nodes
+- All three deduplicate by content hash before inserting
+- All three tag nodes with `source_project` for cross-project traceability
+- Validation gate: reject nodes missing required fields, reject nodes with empty clue text, reject duplicate content hashes
+
+Wire: New CLI entry point `python -m auto_sdd_v2.knowledge_system.ingest --source <path> --format doctrine|learnings|notes`. Also callable from build loop via `--ingest-knowledge <path>` flag at campaign start (before first feature).
+
+New module: `py/auto_sdd_v2/knowledge_system/ingest.py`
+Tests: Schema validation, dedup, provenance tagging, rejection of malformed input, round-trip with doctrine export (item 5 writes, item 7 reads).
+
+Estimated scope: ~800 lines new code, ~200 lines adapted from Skyline, 7 sessions.
