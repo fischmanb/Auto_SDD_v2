@@ -26,3 +26,6 @@ logs/
 # Environment
 .env
 .env.local
+
+.syncthing-conflicts/
+.stfolder/
