@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-03-24",
+  "last_updated": "2026-04-09",
   "rolling_7d": {
     "accuracy": null,
     "ev_realized": null,
@@ -17,7 +17,7 @@
     "ev_realized": null,
     "total_games": 0,
     "total_correct": 0,
-    "total_bets_recommended": 19,
+    "total_bets_recommended": 25,
     "total_bets_won": 0
   },
   "variant_performance": {
