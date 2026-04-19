@@ -1,0 +1,148 @@
+{
+  "date": "2026-04-19",
+  "sport": "basketball_nba",
+  "champion_id": "season-avg-v1",
+  "data_notes": "Team stats sourced from web search snippets (ESPN, StatMuse, CBS Sports). Last-10 game stats estimated from season averages. ODDS_API_KEY and API_SPORTS_KEY not available; odds sourced from search results (OddsShark, CBS Sports, FanDuel, DraftKings). Some opponent PPG and home/away records estimated from available data.",
+  "predictions": [
+    {
+      "game": "Philadelphia 76ers @ Boston Celtics",
+      "home": "Boston Celtics",
+      "away": "Philadelphia 76ers",
+      "series": "East R1 G1: #2 BOS vs #7 PHI",
+      "odds": {
+        "spread_home": -12.5,
+        "ml_home": -614,
+        "ml_away": 614,
+        "total": 213.5,
+        "book": "consensus"
+      },
+      "blend_home_wp": 0.8168,
+      "blend_away_wp": 0.1832,
+      "blend_margin": 16.15,
+      "blend_ev": 0.3081,
+      "best_ev": 0.6710,
+      "worst_ev": -0.1678,
+      "robustness": "5/6",
+      "robustness_n": 5,
+      "favored": "HOME",
+      "recommended_bet": "PHI ML +614",
+      "recommended_bet_type": "ml_away",
+      "verdict": "LEAN",
+      "kelly": 0.0502,
+      "notes": "All 6 models predict Celtics win, but line is extreme. 5/6 models see value on 76ers ML. Injury-rest model disagrees due to Embiid absence (4 key injuries).",
+      "model_results": {
+        "season-avg-v1": {"home_win_prob":0.8082,"expected_margin":15.52,"spread_ev_home":0.0825,"ml_ev_away":0.3697,"best_ev":0.3697,"best_bet":"ml_away"},
+        "recency-v1": {"home_win_prob":0.8218,"expected_margin":16.25,"spread_ev_home":0.1161,"ml_ev_away":0.2723,"best_ev":0.2723,"best_bet":"ml_away"},
+        "injury-rest-v1": {"home_win_prob":0.8834,"expected_margin":21.08,"spread_ev_home":0.3137,"ml_ev_away":-0.1678,"best_ev":0.3137,"best_bet":"spread_home"},
+        "home-swing-v1": {"home_win_prob":0.829,"expected_margin":16.86,"spread_ev_home":0.1394,"ml_ev_away":0.2209,"best_ev":0.2209,"best_bet":"ml_away"},
+        "regression-v1": {"home_win_prob":0.766,"expected_margin":12.86,"spread_ev_home":-0.0311,"ml_ev_away":0.671,"best_ev":0.671,"best_bet":"ml_away"},
+        "pace-adj-v1": {"home_win_prob":0.801,"expected_margin":14.94,"spread_ev_home":0.0584,"ml_ev_away":0.4209,"best_ev":0.4209,"best_bet":"ml_away"}
+      }
+    },
+    {
+      "game": "Phoenix Suns @ Oklahoma City Thunder",
+      "home": "Oklahoma City Thunder",
+      "away": "Phoenix Suns",
+      "series": "West R1 G1: #1 OKC vs #8 PHX",
+      "odds": {
+        "spread_home": -14.5,
+        "ml_home": -1200,
+        "ml_away": 725,
+        "total": 215.5,
+        "book": "consensus"
+      },
+      "blend_home_wp": 0.8141,
+      "blend_away_wp": 0.1859,
+      "blend_margin": 15.79,
+      "blend_ev": 0.5333,
+      "best_ev": 0.8917,
+      "worst_ev": 0.3220,
+      "robustness": "6/6",
+      "robustness_n": 6,
+      "favored": "HOME",
+      "recommended_bet": "PHX ML +725",
+      "recommended_bet_type": "ml_away",
+      "verdict": "BET",
+      "kelly": 0.0736,
+      "notes": "Massive EV on Suns ML. Books imply ~92% Thunder win probability but models see 77-84%. All 6 models agree on positive Suns ML EV. Strongest edge of the day.",
+      "model_results": {
+        "season-avg-v1": {"home_win_prob":0.811,"expected_margin":15.62,"ml_ev_away":0.5591,"best_ev":0.5591,"best_bet":"ml_away"},
+        "recency-v1": {"home_win_prob":0.8176,"expected_margin":16.0,"ml_ev_away":0.5046,"best_ev":0.5046,"best_bet":"ml_away"},
+        "injury-rest-v1": {"home_win_prob":0.8398,"expected_margin":17.49,"ml_ev_away":0.322,"best_ev":0.322,"best_bet":"ml_away"},
+        "home-swing-v1": {"home_win_prob":0.8338,"expected_margin":17.12,"ml_ev_away":0.371,"best_ev":0.371,"best_bet":"ml_away"},
+        "regression-v1": {"home_win_prob":0.7707,"expected_margin":13.06,"ml_ev_away":0.8917,"best_ev":0.8917,"best_bet":"ml_away"},
+        "pace-adj-v1": {"home_win_prob":0.8151,"expected_margin":15.64,"ml_ev_away":0.5254,"best_ev":0.5254,"best_bet":"ml_away"}
+      }
+    },
+    {
+      "game": "Portland Trail Blazers @ San Antonio Spurs",
+      "home": "San Antonio Spurs",
+      "away": "Portland Trail Blazers",
+      "series": "West R1 G1: #2 SAS vs #7 POR",
+      "odds": {
+        "spread_home": -10.5,
+        "ml_home": -535,
+        "ml_away": 400,
+        "total": 222.5,
+        "book": "consensus"
+      },
+      "blend_home_wp": 0.7742,
+      "blend_away_wp": 0.2258,
+      "blend_margin": 13.27,
+      "blend_ev": 0.1290,
+      "best_ev": 0.3027,
+      "worst_ev": 0.0014,
+      "robustness": "6/6",
+      "robustness_n": 6,
+      "favored": "HOME",
+      "recommended_bet": "POR ML +400",
+      "recommended_bet_type": "ml_away",
+      "verdict": "BET",
+      "kelly": 0.0323,
+      "notes": "All 6 models agree on positive Blazers ML EV, though home-swing barely positive at 0.14%. Spurs heavy favorites but implied probability (~84%) exceeds model estimates (~77%). Tight edge.",
+      "model_results": {
+        "season-avg-v1": {"home_win_prob":0.7754,"expected_margin":13.29,"ml_ev_away":0.1232,"best_ev":0.1232,"best_bet":"ml_away"},
+        "recency-v1": {"home_win_prob":0.7811,"expected_margin":13.65,"ml_ev_away":0.0945,"best_ev":0.0945,"best_bet":"ml_away"},
+        "injury-rest-v1": {"home_win_prob":0.7748,"expected_margin":13.31,"ml_ev_away":0.126,"best_ev":0.126,"best_bet":"ml_away"},
+        "home-swing-v1": {"home_win_prob":0.7997,"expected_margin":14.88,"ml_ev_away":0.0014,"best_ev":0.1398,"best_bet":"spread_home"},
+        "regression-v1": {"home_win_prob":0.7395,"expected_margin":11.23,"ml_ev_away":0.3027,"best_ev":0.3027,"best_bet":"ml_away"},
+        "pace-adj-v1": {"home_win_prob":0.7737,"expected_margin":13.25,"ml_ev_away":0.1317,"best_ev":0.1317,"best_bet":"ml_away"}
+      }
+    },
+    {
+      "game": "Orlando Magic @ Detroit Pistons",
+      "home": "Detroit Pistons",
+      "away": "Orlando Magic",
+      "series": "East R1 G1: #1 DET vs #8 ORL",
+      "odds": {
+        "spread_home": -8.5,
+        "ml_home": -375,
+        "ml_away": 290,
+        "total": 219.5,
+        "book": "consensus"
+      },
+      "blend_home_wp": 0.7043,
+      "blend_away_wp": 0.2957,
+      "blend_margin": 9.49,
+      "blend_ev": 0.1532,
+      "best_ev": 0.2735,
+      "worst_ev": 0.0494,
+      "robustness": "6/6",
+      "robustness_n": 6,
+      "favored": "HOME",
+      "recommended_bet": "ORL ML +290",
+      "recommended_bet_type": "ml_away",
+      "verdict": "BET",
+      "kelly": 0.0528,
+      "notes": "All 6 models see value on Magic ML. Pistons implied at ~79% but models average ~70%. Best value among the closer matchups. Magic came through play-in with momentum.",
+      "model_results": {
+        "season-avg-v1": {"home_win_prob":0.698,"expected_margin":9.1,"ml_ev_away":0.178,"best_ev":0.178,"best_bet":"ml_away"},
+        "recency-v1": {"home_win_prob":0.7052,"expected_margin":9.47,"ml_ev_away":0.1498,"best_ev":0.1498,"best_bet":"ml_away"},
+        "injury-rest-v1": {"home_win_prob":0.7309,"expected_margin":11.04,"ml_ev_away":0.0494,"best_ev":0.0624,"best_bet":"spread_home"},
+        "home-swing-v1": {"home_win_prob":0.73,"expected_margin":10.73,"ml_ev_away":0.0529,"best_ev":0.0529,"best_bet":"ml_away"},
+        "regression-v1": {"home_win_prob":0.6735,"expected_margin":7.92,"ml_ev_away":0.2735,"best_ev":0.2735,"best_bet":"ml_away"},
+        "pace-adj-v1": {"home_win_prob":0.6947,"expected_margin":9.07,"ml_ev_away":0.1908,"best_ev":0.1908,"best_bet":"ml_away"}
+      }
+    }
+  ]
+}
