@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-19",
+  "last_updated": "2026-04-22",
   "rolling_7d": {
     "accuracy": null,
     "ev_realized": null,
@@ -17,7 +17,7 @@
     "ev_realized": null,
     "total_games": 0,
     "total_correct": 0,
-    "total_bets_recommended": 29,
+    "total_bets_recommended": 36,
     "total_bets_won": 0
   },
   "variant_performance": {
@@ -59,5 +59,12 @@
       "promoted_on": "2026-03-24",
       "reason": "initial champion"
     }
-  ]
+  ],
+  "today_summary": {
+    "date": "2026-04-22",
+    "games_analyzed": 9,
+    "bets_recommended": 7,
+    "sports": ["basketball_nba", "icehockey_nhl", "baseball_mlb"],
+    "notes": "First operational run with live data. No prior results to eval. API keys not configured - used web search for odds/stats."
+  }
 }
