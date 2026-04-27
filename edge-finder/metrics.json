@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-22",
+  "last_updated": "2026-04-27",
   "rolling_7d": {
     "accuracy": null,
     "ev_realized": null,
@@ -17,7 +17,7 @@
     "ev_realized": null,
     "total_games": 0,
     "total_correct": 0,
-    "total_bets_recommended": 36,
+    "total_bets_recommended": 45,
     "total_bets_won": 0
   },
   "variant_performance": {
@@ -61,10 +61,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-04-22",
-    "games_analyzed": 9,
-    "bets_recommended": 7,
-    "sports": ["basketball_nba", "icehockey_nhl", "baseball_mlb"],
-    "notes": "First operational run with live data. No prior results to eval. API keys not configured - used web search for odds/stats."
+    "date": "2026-04-27",
+    "games_analyzed": 10,
+    "bets_recommended": 8,
+    "leans": 1,
+    "sports": [
+      "baseball_mlb",
+      "basketball_nba",
+      "icehockey_nhl"
+    ],
+    "notes": "Playoff edition: NBA (3 games), NHL (2 games), MLB (5 games). 8 BETs, 1 LEAN, 1 NO BET. No prior results to eval (gap since last run on 2026-04-22)."
   }
 }
