@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-05-15",
+  "last_updated": "2026-05-17",
   "rolling_7d": {
     "accuracy": null,
     "ev_realized": null,
@@ -17,7 +17,7 @@
     "ev_realized": null,
     "total_games": 0,
     "total_correct": 0,
-    "total_bets_recommended": 45,
+    "total_bets_recommended": 55,
     "total_bets_won": 0
   },
   "variant_performance": {
@@ -61,14 +61,14 @@
     }
   ],
   "today_summary": {
-    "date": "2026-05-15",
-    "games_analyzed": 10,
-    "bets_recommended": 3,
-    "leans": 7,
+    "date": "2026-05-17",
+    "games_analyzed": 16,
+    "bets_recommended": 10,
+    "leans": 4,
     "sports": [
       "basketball_nba",
       "baseball_mlb"
     ],
-    "notes": "Rivalry Weekend: NBA playoff Game 6s (2), MLB (8). 3 BETs, 7 LEANs. No eval of prior predictions (gap since 2026-04-27)."
+    "notes": "NBA Playoffs Game 7 (CLE@DET) + 15 MLB games. 10 BETs, 4 LEANs."
   }
 }
