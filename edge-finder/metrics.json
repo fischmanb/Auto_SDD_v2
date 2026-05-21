@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-05-17",
+  "last_updated": "2026-05-21",
   "rolling_7d": {
     "accuracy": null,
     "ev_realized": null,
@@ -17,7 +17,7 @@
     "ev_realized": null,
     "total_games": 0,
     "total_correct": 0,
-    "total_bets_recommended": 55,
+    "total_bets_recommended": 61,
     "total_bets_won": 0
   },
   "variant_performance": {
@@ -61,14 +61,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-05-17",
-    "games_analyzed": 16,
-    "bets_recommended": 10,
-    "leans": 4,
+    "date": "2026-05-21",
+    "games_analyzed": 8,
+    "bets_recommended": 6,
+    "leans": 1,
     "sports": [
-      "basketball_nba",
-      "baseball_mlb"
+      "icehockey_nhl",
+      "baseball_mlb",
+      "basketball_nba"
     ],
-    "notes": "NBA Playoffs Game 7 (CLE@DET) + 15 MLB games. 10 BETs, 4 LEANs."
+    "notes": "NBA ECF Gm2 (CLE@NYK) + NHL ECF Gm1 (MTL@CAR) + 6 MLB games. 6 BETs, 1 LEANs."
   }
 }
