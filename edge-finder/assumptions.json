@@ -26,8 +26,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 0,
-      "lifetime_correct": 0
+      "lifetime_games": 8,
+      "lifetime_correct": 4
     },
     {
       "id": "injury-rest-v1",
@@ -42,8 +42,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 0,
-      "lifetime_correct": 0
+      "lifetime_games": 8,
+      "lifetime_correct": 4
     },
     {
       "id": "home-swing-v1",
@@ -58,8 +58,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 0,
-      "lifetime_correct": 0
+      "lifetime_games": 8,
+      "lifetime_correct": 3
     },
     {
       "id": "regression-v1",
@@ -74,8 +74,8 @@
         "regression_to_mean": 0.2,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 0,
-      "lifetime_correct": 0
+      "lifetime_games": 8,
+      "lifetime_correct": 4
     },
     {
       "id": "pace-adj-v1",
@@ -90,8 +90,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "opponent_adjusted"
       },
-      "lifetime_games": 0,
-      "lifetime_correct": 0
+      "lifetime_games": 8,
+      "lifetime_correct": 4
     }
   ],
   "graveyard": []

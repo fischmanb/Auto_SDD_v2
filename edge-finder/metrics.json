@@ -1,55 +1,55 @@
 {
-  "last_updated": "2026-05-21",
+  "last_updated": "2026-05-22",
   "rolling_7d": {
-    "accuracy": null,
-    "ev_realized": null,
-    "total_games": 0,
-    "total_correct": 0
+    "accuracy": 0.714,
+    "ev_realized": 0.347,
+    "total_games": 8,
+    "total_correct": 5
   },
   "rolling_30d": {
-    "accuracy": null,
-    "ev_realized": null,
-    "total_games": 0,
-    "total_correct": 0
+    "accuracy": 0.714,
+    "ev_realized": 0.347,
+    "total_games": 8,
+    "total_correct": 5
   },
   "all_time": {
-    "accuracy": null,
-    "ev_realized": null,
-    "total_games": 0,
-    "total_correct": 0,
-    "total_bets_recommended": 61,
-    "total_bets_won": 0
+    "accuracy": 0.714,
+    "ev_realized": 0.347,
+    "total_games": 8,
+    "total_correct": 5,
+    "total_bets_recommended": 7,
+    "total_bets_won": 5
   },
   "variant_performance": {
     "season-avg-v1": {
-      "lifetime_games": 0,
-      "lifetime_correct": 0,
+      "lifetime_games": 8,
+      "lifetime_correct": 4,
       "weight": 1.0,
       "role": "champion"
     },
     "recency-v1": {
-      "lifetime_games": 0,
-      "lifetime_correct": 0,
+      "lifetime_games": 8,
+      "lifetime_correct": 4,
       "weight": 0.5
     },
     "injury-rest-v1": {
-      "lifetime_games": 0,
-      "lifetime_correct": 0,
+      "lifetime_games": 8,
+      "lifetime_correct": 4,
       "weight": 0.5
     },
     "home-swing-v1": {
-      "lifetime_games": 0,
-      "lifetime_correct": 0,
+      "lifetime_games": 8,
+      "lifetime_correct": 3,
       "weight": 0.5
     },
     "regression-v1": {
-      "lifetime_games": 0,
-      "lifetime_correct": 0,
+      "lifetime_games": 8,
+      "lifetime_correct": 4,
       "weight": 0.5
     },
     "pace-adj-v1": {
-      "lifetime_games": 0,
-      "lifetime_correct": 0,
+      "lifetime_games": 8,
+      "lifetime_correct": 4,
       "weight": 0.5
     }
   },
@@ -62,14 +62,12 @@
   ],
   "today_summary": {
     "date": "2026-05-21",
-    "games_analyzed": 8,
-    "bets_recommended": 6,
-    "leans": 1,
-    "sports": [
-      "icehockey_nhl",
-      "baseball_mlb",
-      "basketball_nba"
-    ],
-    "notes": "NBA ECF Gm2 (CLE@NYK) + NHL ECF Gm1 (MTL@CAR) + 6 MLB games. 6 BETs, 1 LEANs."
+    "eval_results": {
+      "games_evaluated": 8,
+      "bet_record": "4-2",
+      "lean_record": "1-0",
+      "pnl_units": 2.426,
+      "roi_pct": 34.7
+    }
   }
 }
