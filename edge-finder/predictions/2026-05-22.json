@@ -1,0 +1,775 @@
+{
+  "date": "2026-05-22",
+  "predictions": [
+    {
+      "game": "OKC Thunder @ SAS Spurs (WCF G3)",
+      "sport": "basketball_nba",
+      "home_team": "San Antonio Spurs",
+      "away_team": "Oklahoma City Thunder",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -120,
+        "ml_away": 102,
+        "total": 217.0,
+        "book": "fanduel"
+      },
+      "blend_home_wp": 0.4735,
+      "blend_away_wp": 0.5265,
+      "blend_margin": -1.2,
+      "best_bet_type": "spread_ev_away",
+      "best_blend_ev": 0.0707,
+      "best_model_ev": 0.0941,
+      "worst_model_ev": 0.0251,
+      "robustness": "6/6",
+      "agree_count": 6,
+      "verdict": "BET",
+      "side": "AWAY",
+      "side_team": "Oklahoma City Thunder",
+      "bet_market": "SPREAD",
+      "kelly": 0.0354,
+      "model_results": {
+        "season-avg-v1": {
+          "home_win_prob": 0.4617,
+          "expected_margin": -1.68,
+          "spread_ev_home": -0.1851,
+          "spread_ev_away": 0.0941,
+          "ml_ev_home": -0.1535,
+          "ml_ev_away": 0.0873
+        },
+        "recency-v1": {
+          "home_win_prob": 0.4748,
+          "expected_margin": -1.21,
+          "spread_ev_home": -0.1567,
+          "spread_ev_away": 0.0657,
+          "ml_ev_home": -0.1296,
+          "ml_ev_away": 0.0609
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.4669,
+          "expected_margin": -1.54,
+          "spread_ev_home": -0.1736,
+          "spread_ev_away": 0.0826,
+          "ml_ev_home": -0.1441,
+          "ml_ev_away": 0.0769
+        },
+        "home-swing-v1": {
+          "home_win_prob": 0.4975,
+          "expected_margin": -0.13,
+          "spread_ev_home": -0.1161,
+          "spread_ev_away": 0.0251,
+          "ml_ev_home": -0.0878,
+          "ml_ev_away": 0.015
+        },
+        "regression-v1": {
+          "home_win_prob": 0.4856,
+          "expected_margin": -0.63,
+          "spread_ev_home": -0.1376,
+          "spread_ev_away": 0.0466,
+          "ml_ev_home": -0.1097,
+          "ml_ev_away": 0.039
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.4662,
+          "expected_margin": -1.51,
+          "spread_ev_home": -0.1779,
+          "spread_ev_away": 0.0869,
+          "ml_ev_home": -0.1453,
+          "ml_ev_away": 0.0783
+        }
+      }
+    },
+    {
+      "game": "VGK Golden Knights @ COL Avalanche (WCF G2)",
+      "sport": "icehockey_nhl",
+      "home_team": "Colorado Avalanche",
+      "away_team": "Vegas Golden Knights",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -192,
+        "ml_away": 158,
+        "total": 6.5,
+        "book": "fanduel"
+      },
+      "blend_home_wp": 0.5672,
+      "blend_away_wp": 0.4328,
+      "blend_margin": 0.39,
+      "best_bet_type": "spread_ev_away",
+      "best_blend_ev": 0.3073,
+      "best_model_ev": 0.3819,
+      "worst_model_ev": -0.1045,
+      "robustness": "6/6",
+      "agree_count": 6,
+      "verdict": "LEAN",
+      "side": "HOME",
+      "side_team": "Colorado Avalanche",
+      "bet_market": "SPREAD",
+      "kelly": 0.05,
+      "model_results": {
+        "season-avg-v1": {
+          "home_win_prob": 0.5313,
+          "expected_margin": 0.18,
+          "spread_ev_home": -0.4653,
+          "spread_ev_away": 0.3743,
+          "ml_ev_home": -0.192,
+          "ml_ev_away": 0.2093
+        },
+        "recency-v1": {
+          "home_win_prob": 0.5354,
+          "expected_margin": 0.2,
+          "spread_ev_home": -0.4651,
+          "spread_ev_away": 0.3741,
+          "ml_ev_home": -0.1858,
+          "ml_ev_away": 0.1988
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.5316,
+          "expected_margin": 0.17,
+          "spread_ev_home": -0.4729,
+          "spread_ev_away": 0.3819,
+          "ml_ev_home": -0.1915,
+          "ml_ev_away": 0.2084
+        },
+        "home-swing-v1": {
+          "home_win_prob": 0.7731,
+          "expected_margin": 1.67,
+          "spread_ev_home": 0.0135,
+          "spread_ev_away": -0.1045,
+          "ml_ev_home": 0.1758,
+          "ml_ev_away": -0.4146
+        },
+        "regression-v1": {
+          "home_win_prob": 0.5354,
+          "expected_margin": 0.19,
+          "spread_ev_home": -0.4606,
+          "spread_ev_away": 0.3696,
+          "ml_ev_home": -0.1858,
+          "ml_ev_away": 0.1988
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.5326,
+          "expected_margin": 0.17,
+          "spread_ev_home": -0.4723,
+          "spread_ev_away": 0.3813,
+          "ml_ev_home": -0.1901,
+          "ml_ev_away": 0.206
+        }
+      }
+    },
+    {
+      "game": "STL Cardinals @ CIN Reds",
+      "sport": "baseball_mlb",
+      "home_team": "Cincinnati Reds",
+      "away_team": "St. Louis Cardinals",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -138,
+        "ml_away": 118,
+        "total": 9.5,
+        "book": "consensus"
+      },
+      "blend_home_wp": 0.6541,
+      "blend_away_wp": 0.3459,
+      "blend_margin": 1.49,
+      "best_bet_type": "ml_ev_home",
+      "best_blend_ev": 0.128,
+      "best_model_ev": 0.3198,
+      "worst_model_ev": 0.0603,
+      "robustness": "6/6",
+      "agree_count": 6,
+      "verdict": "BET",
+      "side": "HOME",
+      "side_team": "Cincinnati Reds",
+      "bet_market": "ML",
+      "kelly": 0.05,
+      "model_results": {
+        "season-avg-v1": {
+          "home_win_prob": 0.6363,
+          "expected_margin": 1.29,
+          "spread_ev_home": -0.076,
+          "spread_ev_away": -0.015,
+          "ml_ev_home": 0.0974,
+          "ml_ev_away": -0.2072
+        },
+        "recency-v1": {
+          "home_win_prob": 0.6522,
+          "expected_margin": 1.45,
+          "spread_ev_home": -0.0447,
+          "spread_ev_away": -0.0463,
+          "ml_ev_home": 0.1248,
+          "ml_ev_away": -0.2418
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.6359,
+          "expected_margin": 1.25,
+          "spread_ev_home": -0.0828,
+          "spread_ev_away": -0.0082,
+          "ml_ev_home": 0.0966,
+          "ml_ev_away": -0.2062
+        },
+        "home-swing-v1": {
+          "home_win_prob": 0.7653,
+          "expected_margin": 2.76,
+          "spread_ev_home": 0.21,
+          "spread_ev_away": -0.301,
+          "ml_ev_home": 0.3198,
+          "ml_ev_away": -0.4883
+        },
+        "regression-v1": {
+          "home_win_prob": 0.6148,
+          "expected_margin": 1.1,
+          "spread_ev_home": -0.1191,
+          "spread_ev_away": 0.0281,
+          "ml_ev_home": 0.0603,
+          "ml_ev_away": -0.1602
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.6377,
+          "expected_margin": 1.29,
+          "spread_ev_home": -0.0733,
+          "spread_ev_away": -0.0177,
+          "ml_ev_home": 0.0998,
+          "ml_ev_away": -0.2101
+        }
+      }
+    },
+    {
+      "game": "LAD Dodgers @ MIL Brewers",
+      "sport": "baseball_mlb",
+      "home_team": "Milwaukee Brewers",
+      "away_team": "Los Angeles Dodgers",
+      "odds": {
+        "spread_home": 1.5,
+        "ml_home": -110,
+        "ml_away": -110,
+        "total": 8.5,
+        "book": "consensus"
+      },
+      "blend_home_wp": 0.5142,
+      "blend_away_wp": 0.4858,
+      "blend_margin": 0.15,
+      "best_bet_type": "spread_ev_home",
+      "best_blend_ev": 0.2674,
+      "best_model_ev": 0.4705,
+      "worst_model_ev": 0.2238,
+      "robustness": "3/6",
+      "agree_count": 3,
+      "verdict": "LEAN",
+      "side": "HOME",
+      "side_team": "Milwaukee Brewers",
+      "bet_market": "SPREAD",
+      "kelly": 0.05,
+      "model_results": {
+        "season-avg-v1": {
+          "home_win_prob": 0.491,
+          "expected_margin": -0.07,
+          "spread_ev_home": 0.2306,
+          "spread_ev_away": -0.3216,
+          "ml_ev_home": -0.0626,
+          "ml_ev_away": -0.0283
+        },
+        "recency-v1": {
+          "home_win_prob": 0.5021,
+          "expected_margin": 0.03,
+          "spread_ev_home": 0.2481,
+          "spread_ev_away": -0.3391,
+          "ml_ev_home": -0.0414,
+          "ml_ev_away": -0.0495
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.4879,
+          "expected_margin": -0.1,
+          "spread_ev_home": 0.227,
+          "spread_ev_away": -0.318,
+          "ml_ev_home": -0.0685,
+          "ml_ev_away": -0.0224
+        },
+        "home-swing-v1": {
+          "home_win_prob": 0.6397,
+          "expected_margin": 1.38,
+          "spread_ev_home": 0.4705,
+          "spread_ev_away": -0.5615,
+          "ml_ev_home": 0.2213,
+          "ml_ev_away": -0.3122
+        },
+        "regression-v1": {
+          "home_win_prob": 0.5002,
+          "expected_margin": -0.0,
+          "spread_ev_home": 0.2409,
+          "spread_ev_away": -0.3319,
+          "ml_ev_home": -0.045,
+          "ml_ev_away": -0.0459
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.4873,
+          "expected_margin": -0.1,
+          "spread_ev_home": 0.2238,
+          "spread_ev_away": -0.3148,
+          "ml_ev_home": -0.0697,
+          "ml_ev_away": -0.0212
+        }
+      }
+    },
+    {
+      "game": "TB Rays @ NYY Yankees",
+      "sport": "baseball_mlb",
+      "home_team": "New York Yankees",
+      "away_team": "Tampa Bay Rays",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -155,
+        "ml_away": 125,
+        "total": 8.5,
+        "book": "fanduel"
+      },
+      "blend_home_wp": 0.4852,
+      "blend_away_wp": 0.5148,
+      "blend_margin": -0.13,
+      "best_bet_type": "spread_ev_away",
+      "best_blend_ev": 0.2676,
+      "best_model_ev": 0.367,
+      "worst_model_ev": 0.0156,
+      "robustness": "5/6",
+      "agree_count": 5,
+      "verdict": "BET",
+      "side": "AWAY",
+      "side_team": "Tampa Bay Rays",
+      "bet_market": "SPREAD",
+      "kelly": 0.05,
+      "model_results": {
+        "season-avg-v1": {
+          "home_win_prob": 0.4674,
+          "expected_margin": -0.3,
+          "spread_ev_home": -0.3936,
+          "spread_ev_away": 0.3026,
+          "ml_ev_home": -0.2311,
+          "ml_ev_away": 0.1983
+        },
+        "recency-v1": {
+          "home_win_prob": 0.4687,
+          "expected_margin": -0.29,
+          "spread_ev_home": -0.3948,
+          "spread_ev_away": 0.3038,
+          "ml_ev_home": -0.2289,
+          "ml_ev_away": 0.1955
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.428,
+          "expected_margin": -0.67,
+          "spread_ev_home": -0.458,
+          "spread_ev_away": 0.367,
+          "ml_ev_home": -0.2958,
+          "ml_ev_away": 0.2869
+        },
+        "home-swing-v1": {
+          "home_win_prob": 0.6193,
+          "expected_margin": 1.16,
+          "spread_ev_home": -0.1066,
+          "spread_ev_away": 0.0156,
+          "ml_ev_home": 0.0189,
+          "ml_ev_away": -0.1435
+        },
+        "regression-v1": {
+          "home_win_prob": 0.4765,
+          "expected_margin": -0.18,
+          "spread_ev_home": -0.3715,
+          "spread_ev_away": 0.2805,
+          "ml_ev_home": -0.216,
+          "ml_ev_away": 0.1778
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.4688,
+          "expected_margin": -0.3,
+          "spread_ev_home": -0.3924,
+          "spread_ev_away": 0.3014,
+          "ml_ev_home": -0.2288,
+          "ml_ev_away": 0.1952
+        }
+      }
+    },
+    {
+      "game": "DET Tigers @ BAL Orioles",
+      "sport": "baseball_mlb",
+      "home_team": "Baltimore Orioles",
+      "away_team": "Detroit Tigers",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -132,
+        "ml_away": 112,
+        "total": 8.0,
+        "book": "consensus"
+      },
+      "blend_home_wp": 0.6747,
+      "blend_away_wp": 0.3253,
+      "blend_margin": 1.67,
+      "best_bet_type": "ml_ev_home",
+      "best_blend_ev": 0.1858,
+      "best_model_ev": 0.38,
+      "worst_model_ev": 0.1158,
+      "robustness": "6/6",
+      "agree_count": 6,
+      "verdict": "BET",
+      "side": "HOME",
+      "side_team": "Baltimore Orioles",
+      "bet_market": "ML",
+      "kelly": 0.05,
+      "model_results": {
+        "season-avg-v1": {
+          "home_win_prob": 0.6604,
+          "expected_margin": 1.49,
+          "spread_ev_home": -0.0395,
+          "spread_ev_away": -0.0515,
+          "ml_ev_home": 0.1607,
+          "ml_ev_away": -0.28
+        },
+        "recency-v1": {
+          "home_win_prob": 0.6636,
+          "expected_margin": 1.54,
+          "spread_ev_home": -0.0289,
+          "spread_ev_away": -0.0621,
+          "ml_ev_home": 0.1664,
+          "ml_ev_away": -0.2869
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.6584,
+          "expected_margin": 1.46,
+          "spread_ev_home": -0.0415,
+          "spread_ev_away": -0.0495,
+          "ml_ev_home": 0.1573,
+          "ml_ev_away": -0.2759
+        },
+        "home-swing-v1": {
+          "home_win_prob": 0.7852,
+          "expected_margin": 2.95,
+          "spread_ev_home": 0.2478,
+          "spread_ev_away": -0.3388,
+          "ml_ev_home": 0.38,
+          "ml_ev_away": -0.5446
+        },
+        "regression-v1": {
+          "home_win_prob": 0.6348,
+          "expected_margin": 1.28,
+          "spread_ev_home": -0.0805,
+          "spread_ev_away": -0.0105,
+          "ml_ev_home": 0.1158,
+          "ml_ev_away": -0.2259
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.6599,
+          "expected_margin": 1.51,
+          "spread_ev_home": -0.0352,
+          "spread_ev_away": -0.0558,
+          "ml_ev_home": 0.1598,
+          "ml_ev_away": -0.2789
+        }
+      }
+    },
+    {
+      "game": "NYM Mets @ MIA Marlins",
+      "sport": "baseball_mlb",
+      "home_team": "Miami Marlins",
+      "away_team": "New York Mets",
+      "odds": {
+        "spread_home": 1.5,
+        "ml_home": -104,
+        "ml_away": -112,
+        "total": 8.0,
+        "book": "consensus"
+      },
+      "blend_home_wp": 0.3573,
+      "blend_away_wp": 0.6427,
+      "blend_margin": -1.35,
+      "best_bet_type": "ml_ev_away",
+      "best_blend_ev": 0.2167,
+      "best_model_ev": 0.3292,
+      "worst_model_ev": -0.0242,
+      "robustness": "6/6",
+      "agree_count": 6,
+      "verdict": "LEAN",
+      "side": "AWAY",
+      "side_team": "New York Mets",
+      "bet_market": "ML",
+      "kelly": 0.05,
+      "model_results": {
+        "season-avg-v1": {
+          "home_win_prob": 0.3403,
+          "expected_margin": -1.52,
+          "spread_ev_home": -0.058,
+          "spread_ev_away": -0.033,
+          "ml_ev_home": -0.3326,
+          "ml_ev_away": 0.2488
+        },
+        "recency-v1": {
+          "home_win_prob": 0.3309,
+          "expected_margin": -1.6,
+          "spread_ev_home": -0.0769,
+          "spread_ev_away": -0.0141,
+          "ml_ev_home": -0.3509,
+          "ml_ev_away": 0.2665
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.2978,
+          "expected_margin": -1.85,
+          "spread_ev_home": -0.1325,
+          "spread_ev_away": 0.0415,
+          "ml_ev_home": -0.4159,
+          "ml_ev_away": 0.3292
+        },
+        "home-swing-v1": {
+          "home_win_prob": 0.4845,
+          "expected_margin": -0.15,
+          "spread_ev_home": 0.2113,
+          "spread_ev_away": -0.3023,
+          "ml_ev_home": -0.0497,
+          "ml_ev_away": -0.0242
+        },
+        "regression-v1": {
+          "home_win_prob": 0.3673,
+          "expected_margin": -1.24,
+          "spread_ev_home": -0.0045,
+          "spread_ev_away": -0.0865,
+          "ml_ev_home": -0.2795,
+          "ml_ev_away": 0.1976
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.3397,
+          "expected_margin": -1.54,
+          "spread_ev_home": -0.067,
+          "spread_ev_away": -0.024,
+          "ml_ev_home": -0.3337,
+          "ml_ev_away": 0.2499
+        }
+      }
+    },
+    {
+      "game": "HOU Astros @ CHC Cubs",
+      "sport": "baseball_mlb",
+      "home_team": "Chicago Cubs",
+      "away_team": "Houston Astros",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -142,
+        "ml_away": 120,
+        "total": 8.5,
+        "book": "consensus"
+      },
+      "blend_home_wp": 0.648,
+      "blend_away_wp": 0.352,
+      "blend_margin": 1.43,
+      "best_bet_type": "ml_ev_home",
+      "best_blend_ev": 0.1043,
+      "best_model_ev": 0.292,
+      "worst_model_ev": 0.0381,
+      "robustness": "6/6",
+      "agree_count": 6,
+      "verdict": "BET",
+      "side": "HOME",
+      "side_team": "Chicago Cubs",
+      "bet_market": "ML",
+      "kelly": 0.05,
+      "model_results": {
+        "season-avg-v1": {
+          "home_win_prob": 0.6315,
+          "expected_margin": 1.24,
+          "spread_ev_home": -0.0855,
+          "spread_ev_away": -0.0055,
+          "ml_ev_home": 0.0762,
+          "ml_ev_away": -0.1892
+        },
+        "recency-v1": {
+          "home_win_prob": 0.6461,
+          "expected_margin": 1.39,
+          "spread_ev_home": -0.0616,
+          "spread_ev_away": -0.0294,
+          "ml_ev_home": 0.1012,
+          "ml_ev_away": -0.2215
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.6307,
+          "expected_margin": 1.22,
+          "spread_ev_home": -0.0971,
+          "spread_ev_away": 0.0061,
+          "ml_ev_home": 0.0749,
+          "ml_ev_away": -0.1875
+        },
+        "home-swing-v1": {
+          "home_win_prob": 0.7581,
+          "expected_margin": 2.7,
+          "spread_ev_home": 0.1983,
+          "spread_ev_away": -0.2893,
+          "ml_ev_home": 0.292,
+          "ml_ev_away": -0.4679
+        },
+        "regression-v1": {
+          "home_win_prob": 0.6092,
+          "expected_margin": 1.03,
+          "spread_ev_home": -0.1372,
+          "spread_ev_away": 0.0462,
+          "ml_ev_home": 0.0381,
+          "ml_ev_away": -0.1402
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.6287,
+          "expected_margin": 1.22,
+          "spread_ev_home": -0.0898,
+          "spread_ev_away": -0.0012,
+          "ml_ev_home": 0.0715,
+          "ml_ev_away": -0.1832
+        }
+      }
+    },
+    {
+      "game": "WAS Nationals @ ATL Braves",
+      "sport": "baseball_mlb",
+      "home_team": "Atlanta Braves",
+      "away_team": "Washington Nationals",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -225,
+        "ml_away": 185,
+        "total": 8.0,
+        "book": "draftkings"
+      },
+      "blend_home_wp": 0.7964,
+      "blend_away_wp": 0.2036,
+      "blend_margin": 3.14,
+      "best_bet_type": "spread_ev_home",
+      "best_blend_ev": 0.2831,
+      "best_model_ev": 0.4932,
+      "worst_model_ev": 0.1401,
+      "robustness": "6/6",
+      "agree_count": 6,
+      "verdict": "BET",
+      "side": "HOME",
+      "side_team": "Atlanta Braves",
+      "bet_market": "SPREAD",
+      "kelly": 0.05,
+      "model_results": {
+        "season-avg-v1": {
+          "home_win_prob": 0.7844,
+          "expected_margin": 2.94,
+          "spread_ev_home": 0.2509,
+          "spread_ev_away": -0.3419,
+          "ml_ev_home": 0.1331,
+          "ml_ev_away": -0.3857
+        },
+        "recency-v1": {
+          "home_win_prob": 0.796,
+          "expected_margin": 3.1,
+          "spread_ev_home": 0.2835,
+          "spread_ev_away": -0.3745,
+          "ml_ev_home": 0.1498,
+          "ml_ev_away": -0.4187
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.8108,
+          "expected_margin": 3.25,
+          "spread_ev_home": 0.3135,
+          "spread_ev_away": -0.4045,
+          "ml_ev_home": 0.1712,
+          "ml_ev_away": -0.4608
+        },
+        "home-swing-v1": {
+          "home_win_prob": 0.8785,
+          "expected_margin": 4.41,
+          "spread_ev_home": 0.4932,
+          "spread_ev_away": -0.5842,
+          "ml_ev_home": 0.2689,
+          "ml_ev_away": -0.6537
+        },
+        "regression-v1": {
+          "home_win_prob": 0.7371,
+          "expected_margin": 2.38,
+          "spread_ev_home": 0.1401,
+          "spread_ev_away": -0.2311,
+          "ml_ev_home": 0.0646,
+          "ml_ev_away": -0.2506
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.7838,
+          "expected_margin": 2.93,
+          "spread_ev_home": 0.2494,
+          "spread_ev_away": -0.3404,
+          "ml_ev_home": 0.1322,
+          "ml_ev_away": -0.3838
+        }
+      }
+    },
+    {
+      "game": "SEA Mariners @ KC Royals",
+      "sport": "baseball_mlb",
+      "home_team": "Kansas City Royals",
+      "away_team": "Seattle Mariners",
+      "odds": {
+        "spread_home": 1.5,
+        "ml_home": 114,
+        "ml_away": -134,
+        "total": 7.5,
+        "book": "fanduel"
+      },
+      "blend_home_wp": 0.4508,
+      "blend_away_wp": 0.5492,
+      "blend_margin": -0.44,
+      "best_bet_type": "spread_ev_home",
+      "best_blend_ev": 0.1605,
+      "best_model_ev": 0.3873,
+      "worst_model_ev": 0.0635,
+      "robustness": "5/6",
+      "agree_count": 5,
+      "verdict": "BET",
+      "side": "AWAY",
+      "side_team": "Seattle Mariners",
+      "bet_market": "SPREAD",
+      "kelly": 0.05,
+      "model_results": {
+        "season-avg-v1": {
+          "home_win_prob": 0.4356,
+          "expected_margin": -0.59,
+          "spread_ev_home": 0.1395,
+          "spread_ev_away": -0.2305,
+          "ml_ev_home": -0.0679,
+          "ml_ev_away": -0.0144
+        },
+        "recency-v1": {
+          "home_win_prob": 0.4208,
+          "expected_margin": -0.71,
+          "spread_ev_home": 0.1065,
+          "spread_ev_away": -0.1975,
+          "ml_ev_home": -0.0996,
+          "ml_ev_away": 0.0115
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.3957,
+          "expected_margin": -0.97,
+          "spread_ev_home": 0.0635,
+          "spread_ev_away": -0.1545,
+          "ml_ev_home": -0.1532,
+          "ml_ev_away": 0.0553
+        },
+        "home-swing-v1": {
+          "home_win_prob": 0.5865,
+          "expected_margin": 0.81,
+          "spread_ev_home": 0.3873,
+          "spread_ev_away": -0.4783,
+          "ml_ev_home": 0.2552,
+          "ml_ev_away": -0.278
+        },
+        "regression-v1": {
+          "home_win_prob": 0.4461,
+          "expected_margin": -0.47,
+          "spread_ev_home": 0.1538,
+          "spread_ev_away": -0.2448,
+          "ml_ev_home": -0.0453,
+          "ml_ev_away": -0.0327
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.4352,
+          "expected_margin": -0.59,
+          "spread_ev_home": 0.1337,
+          "spread_ev_away": -0.2247,
+          "ml_ev_home": -0.0687,
+          "ml_ev_away": -0.0137
+        }
+      }
+    }
+  ]
+}

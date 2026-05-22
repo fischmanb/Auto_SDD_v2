@@ -61,13 +61,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-05-21",
-    "eval_results": {
-      "games_evaluated": 8,
-      "bet_record": "4-2",
-      "lean_record": "1-0",
-      "pnl_units": 2.426,
-      "roi_pct": 34.7
-    }
+    "date": "2026-05-22",
+    "games_analyzed": 10,
+    "bets_recommended": 7,
+    "leans": 3,
+    "sports": [
+      "basketball_nba",
+      "icehockey_nhl",
+      "baseball_mlb"
+    ],
+    "notes": "NBA WCF G3 (OKC@SAS) + NHL WCF G2 (VGK@COL) + 8 MLB games. 7 BETs, 3 LEANs."
   }
 }
