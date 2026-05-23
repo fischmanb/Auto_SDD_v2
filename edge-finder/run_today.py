@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Edge-Finder daily runner for 2026-05-21.
+Edge-Finder daily runner for 2026-05-23.
 Compiles gathered odds/stats, runs sims, computes blended predictions.
 """
 
@@ -12,7 +12,7 @@ from datetime import date
 sys.path.insert(0, os.path.dirname(__file__))
 from sim import run_batch, SimResult
 
-TODAY = "2026-05-21"
+TODAY = "2026-05-23"
 
 # ── Assumption models from assumptions.json ─────────────────────────────
 with open(os.path.join(os.path.dirname(__file__), "assumptions.json")) as f:
@@ -23,61 +23,64 @@ challengers = assumptions["challengers"]
 all_models = [champion] + challengers
 
 # ── Games data ──────────────────────────────────────────────────────────
-# NBA ECF Game 2: Cleveland Cavaliers @ New York Knicks
-# NHL ECF Game 1: Montreal Canadiens @ Carolina Hurricanes
-# MLB: 6 games
+# NBA ECF Game 3: New York Knicks @ Cleveland Cavaliers (NYK leads 2-0)
+# NHL ECF Game 2: Montreal Canadiens @ Carolina Hurricanes (MTL leads 1-0)
+# MLB: 13 games (TB@NYY postponed, DET@BAL postponed)
 
 games_raw = [
     # === NBA ===
-    # ECF Game 2: Cavaliers @ Knicks. NYK leads 1-0.
-    # NYK: 53-29, 116.5 PPG, 110.1 OPP PPG. CLE: 52-30, 119.0 PPG, 115.0 OPP PPG.
-    # Both teams fully healthy. Game 1 was May 19 (not B2B).
-    # NYK last 5 playoff: 122.4 PPG, 102.4 OPP. CLE last 5 playoff: 110.4 PPG, 108.0 OPP.
+    # ECF Game 3: Knicks @ Cavaliers. NYK leads 2-0.
+    # CLE: 52-30, 119.0 PPG, 115.0 OPP. Playoff last 5: ~108 PPG, 112 OPP (struggling).
+    # NYK: 53-29, 116.5 PPG, 110.1 OPP. Playoff last 5: 119.2 PPG, 105.6 OPP (dominant).
+    # CLE is desperate at home. Jalen Brunson status questionable (knee soreness).
+    # Key: CLE hasn't lost at home this postseason until now. Must-win.
     {
         "sport": "basketball_nba",
         "home": {
+            "name": "Cleveland Cavaliers",
+            "season_ppg": 119.0,
+            "season_opp_ppg": 115.0,
+            "last10_ppg": 108.0,
+            "last10_opp_ppg": 112.0,
+            "season_pace": 99.5,
+            "home_record_pct": 0.707,
+            "away_record_pct": 0.561,
+            "is_back_to_back": False,
+            "key_injuries": 1
+        },
+        "away": {
             "name": "New York Knicks",
             "season_ppg": 116.5,
             "season_opp_ppg": 110.1,
-            "last10_ppg": 122.4,
-            "last10_opp_ppg": 102.4,
+            "last10_ppg": 119.2,
+            "last10_opp_ppg": 105.6,
             "season_pace": 99.8,
             "home_record_pct": 0.756,
             "away_record_pct": 0.537,
             "is_back_to_back": False,
             "key_injuries": 0
         },
-        "away": {
-            "name": "Cleveland Cavaliers",
-            "season_ppg": 119.0,
-            "season_opp_ppg": 115.0,
-            "last10_ppg": 110.4,
-            "last10_opp_ppg": 108.0,
-            "season_pace": 99.5,
-            "home_record_pct": 0.707,
-            "away_record_pct": 0.561,
-            "is_back_to_back": False,
-            "key_injuries": 0
-        },
         "odds": {
-            "spread_home": -6.5,
-            "ml_home": -225,
-            "ml_away": 185,
-            "total": 214.5,
+            "spread_home": -2.5,
+            "ml_home": -126,
+            "ml_away": 108,
+            "total": 213.5,
             "book": "fanduel"
         }
     },
     # === NHL ===
-    # ECF Game 1: Canadiens @ Hurricanes. CAR 8-0 in playoffs (swept PHI).
-    # CAR: 53-22-7, estimated 3.4 GPG, 2.5 OPP GPG. MTL: 48-24-10, ~3.0 GPG, 2.8 OPP GPG.
+    # ECF Game 2: Canadiens @ Hurricanes. MTL stole Game 1 (6-2).
+    # CAR: 53-22-7, 3.4 GPG, 2.5 OPP. Playoff: 3.6 GPG, 2.1 OPP (dominant until G1 loss).
+    # MTL: 48-24-10, 3.0 GPG, 2.8 OPP. Playoff: 3.3 GPG, 2.4 OPP (riding momentum).
+    # CAR expected to bounce back hard at home after embarrassing G1 loss.
     {
         "sport": "icehockey_nhl",
         "home": {
             "name": "Carolina Hurricanes",
             "season_ppg": 3.4,
             "season_opp_ppg": 2.5,
-            "last10_ppg": 3.6,
-            "last10_opp_ppg": 2.1,
+            "last10_ppg": 3.5,
+            "last10_opp_ppg": 2.3,
             "season_pace": 1.0,
             "home_record_pct": 0.720,
             "away_record_pct": 0.580,
@@ -88,8 +91,8 @@ games_raw = [
             "name": "Montreal Canadiens",
             "season_ppg": 3.0,
             "season_opp_ppg": 2.8,
-            "last10_ppg": 3.1,
-            "last10_opp_ppg": 2.6,
+            "last10_ppg": 3.3,
+            "last10_opp_ppg": 2.4,
             "season_pace": 1.0,
             "home_record_pct": 0.620,
             "away_record_pct": 0.500,
@@ -98,62 +101,249 @@ games_raw = [
         },
         "odds": {
             "spread_home": -1.5,
-            "ml_home": -205,
-            "ml_away": 170,
+            "ml_home": -207,
+            "ml_away": 171,
             "total": 5.5,
-            "book": "betmgm"
+            "book": "fanduel"
         }
     },
     # === MLB ===
-    # CLE Guardians (29-22) @ DET Tigers (20-30)
-    # Joey Cantillo vs Casey Mize. DET missing 3 starters, 2-13 last 15.
+    # STL Cardinals @ CIN Reds (DH Game 1 - yesterday PPD)
+    # CIN: 24-25, ~4.4 RPG, 4.2 OPP. Last 10: 4.6 RPG, 3.9 OPP. Home: .520
+    # STL: 28-20, ~4.3 RPG, 3.8 OPP. Last 10: 4.1 RPG, 4.0 OPP. Away: .500
     {
         "sport": "baseball_mlb",
         "home": {
-            "name": "Detroit Tigers",
-            "season_ppg": 3.6,
-            "season_opp_ppg": 4.4,
-            "last10_ppg": 2.5,
-            "last10_opp_ppg": 4.8,
+            "name": "Cincinnati Reds",
+            "season_ppg": 4.4,
+            "season_opp_ppg": 4.2,
+            "last10_ppg": 4.6,
+            "last10_opp_ppg": 3.9,
             "season_pace": 1.0,
-            "home_record_pct": 0.400,
-            "away_record_pct": 0.300,
+            "home_record_pct": 0.520,
+            "away_record_pct": 0.460,
             "is_back_to_back": False,
-            "key_injuries": 3
+            "key_injuries": 1
         },
         "away": {
-            "name": "Cleveland Guardians",
+            "name": "St. Louis Cardinals",
+            "season_ppg": 4.3,
+            "season_opp_ppg": 3.8,
+            "last10_ppg": 4.1,
+            "last10_opp_ppg": 4.0,
+            "season_pace": 1.0,
+            "home_record_pct": 0.580,
+            "away_record_pct": 0.500,
+            "is_back_to_back": False,
+            "key_injuries": 1
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -125,
+            "ml_away": 105,
+            "total": 9.5,
+            "book": "consensus"
+        }
+    },
+    # HOU Astros @ CHC Cubs
+    # CHC: 22-27, ~4.0 RPG, 4.5 OPP. On 6-game losing streak.
+    # HOU: 26-23, ~4.2 RPG, 3.9 OPP. Last 10: 4.5 RPG, 3.5 OPP. Road: .520
+    {
+        "sport": "baseball_mlb",
+        "home": {
+            "name": "Chicago Cubs",
+            "season_ppg": 4.0,
+            "season_opp_ppg": 4.5,
+            "last10_ppg": 3.4,
+            "last10_opp_ppg": 5.0,
+            "season_pace": 1.0,
+            "home_record_pct": 0.480,
+            "away_record_pct": 0.400,
+            "is_back_to_back": False,
+            "key_injuries": 2
+        },
+        "away": {
+            "name": "Houston Astros",
+            "season_ppg": 4.2,
+            "season_opp_ppg": 3.9,
+            "last10_ppg": 4.5,
+            "last10_opp_ppg": 3.5,
+            "season_pace": 1.0,
+            "home_record_pct": 0.560,
+            "away_record_pct": 0.520,
+            "is_back_to_back": False,
+            "key_injuries": 1
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -142,
+            "ml_away": 120,
+            "total": 8.5,
+            "book": "consensus"
+        }
+    },
+    # LAD Dodgers @ MIL Brewers
+    # MIL: 30-18, ~4.6 RPG, 3.5 OPP. On 5-game win streak. Home: .600
+    # LAD: 32-17, ~5.1 RPG, 3.8 OPP. Last 10: 4.5 RPG, 4.2 OPP. Sasaki pitching.
+    {
+        "sport": "baseball_mlb",
+        "home": {
+            "name": "Milwaukee Brewers",
             "season_ppg": 4.6,
-            "season_opp_ppg": 3.7,
-            "last10_ppg": 5.1,
-            "last10_opp_ppg": 3.3,
+            "season_opp_ppg": 3.5,
+            "last10_ppg": 5.0,
+            "last10_opp_ppg": 3.2,
             "season_pace": 1.0,
             "home_record_pct": 0.600,
-            "away_record_pct": 0.520,
+            "away_record_pct": 0.560,
+            "is_back_to_back": False,
+            "key_injuries": 0
+        },
+        "away": {
+            "name": "Los Angeles Dodgers",
+            "season_ppg": 5.1,
+            "season_opp_ppg": 3.8,
+            "last10_ppg": 4.5,
+            "last10_opp_ppg": 4.2,
+            "season_pace": 1.0,
+            "home_record_pct": 0.700,
+            "away_record_pct": 0.560,
             "is_back_to_back": False,
             "key_injuries": 0
         },
         "odds": {
             "spread_home": 1.5,
-            "ml_home": -115,
-            "ml_away": 100,
+            "ml_home": 108,
+            "ml_away": -126,
+            "total": 9.0,
+            "book": "fanduel"
+        }
+    },
+    # WAS Nationals @ ATL Braves
+    # ATL: 35-16, ~5.1 RPG, 3.4 OPP. 4-game win streak. Home: .700
+    # WAS: 25-26, ~4.0 RPG, 4.3 OPP. Road: .440
+    {
+        "sport": "baseball_mlb",
+        "home": {
+            "name": "Atlanta Braves",
+            "season_ppg": 5.1,
+            "season_opp_ppg": 3.4,
+            "last10_ppg": 5.4,
+            "last10_opp_ppg": 3.2,
+            "season_pace": 1.0,
+            "home_record_pct": 0.700,
+            "away_record_pct": 0.620,
+            "is_back_to_back": False,
+            "key_injuries": 0
+        },
+        "away": {
+            "name": "Washington Nationals",
+            "season_ppg": 4.0,
+            "season_opp_ppg": 4.3,
+            "last10_ppg": 3.6,
+            "last10_opp_ppg": 4.6,
+            "season_pace": 1.0,
+            "home_record_pct": 0.520,
+            "away_record_pct": 0.440,
+            "is_back_to_back": False,
+            "key_injuries": 1
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -178,
+            "ml_away": 150,
             "total": 8.0,
             "book": "draftkings"
         }
     },
-    # PIT Pirates (25-24) @ STL Cardinals (28-20)
-    # Braxton Ashcraft vs Dustin May
+    # NYM Mets @ MIA Marlins
+    # MIA: 22-29, ~3.6 RPG, 4.5 OPP. Won yesterday 2-1. Max Meyer pitching (2.85 ERA).
+    # NYM: 21-29, ~3.9 RPG, 4.4 OPP. Lost yesterday. Freddy Peralta pitching (3.31 ERA).
     {
         "sport": "baseball_mlb",
         "home": {
-            "name": "St. Louis Cardinals",
-            "season_ppg": 4.3,
-            "season_opp_ppg": 3.8,
-            "last10_ppg": 4.5,
-            "last10_opp_ppg": 3.6,
+            "name": "Miami Marlins",
+            "season_ppg": 3.6,
+            "season_opp_ppg": 4.5,
+            "last10_ppg": 3.5,
+            "last10_opp_ppg": 4.6,
             "season_pace": 1.0,
-            "home_record_pct": 0.580,
-            "away_record_pct": 0.500,
+            "home_record_pct": 0.440,
+            "away_record_pct": 0.320,
+            "is_back_to_back": False,
+            "key_injuries": 2
+        },
+        "away": {
+            "name": "New York Mets",
+            "season_ppg": 3.9,
+            "season_opp_ppg": 4.4,
+            "last10_ppg": 3.6,
+            "last10_opp_ppg": 4.8,
+            "season_pace": 1.0,
+            "home_record_pct": 0.440,
+            "away_record_pct": 0.360,
+            "is_back_to_back": False,
+            "key_injuries": 1
+        },
+        "odds": {
+            "spread_home": 1.5,
+            "ml_home": -115,
+            "ml_away": -105,
+            "total": 8.0,
+            "book": "consensus"
+        }
+    },
+    # SEA Mariners @ KC Royals
+    # SEA: 30-19, ~4.1 RPG, 3.2 OPP. Won yesterday 2-0. Road: .560
+    # KC: 22-28, ~3.8 RPG, 4.3 OPP. Home: .440
+    {
+        "sport": "baseball_mlb",
+        "home": {
+            "name": "Kansas City Royals",
+            "season_ppg": 3.8,
+            "season_opp_ppg": 4.3,
+            "last10_ppg": 3.5,
+            "last10_opp_ppg": 4.5,
+            "season_pace": 1.0,
+            "home_record_pct": 0.440,
+            "away_record_pct": 0.400,
+            "is_back_to_back": False,
+            "key_injuries": 1
+        },
+        "away": {
+            "name": "Seattle Mariners",
+            "season_ppg": 4.1,
+            "season_opp_ppg": 3.2,
+            "last10_ppg": 4.3,
+            "last10_opp_ppg": 3.0,
+            "season_pace": 1.0,
+            "home_record_pct": 0.620,
+            "away_record_pct": 0.560,
+            "is_back_to_back": False,
+            "key_injuries": 0
+        },
+        "odds": {
+            "spread_home": 1.5,
+            "ml_home": 110,
+            "ml_away": -142,
+            "total": 7.5,
+            "book": "fanduel"
+        }
+    },
+    # PIT Pirates @ TOR Blue Jays
+    # PIT: 26-25, ~4.1 RPG, 4.0 OPP. Away: .480
+    # TOR: 24-27, ~3.8 RPG, 4.3 OPP. Home: .480
+    {
+        "sport": "baseball_mlb",
+        "home": {
+            "name": "Toronto Blue Jays",
+            "season_ppg": 3.8,
+            "season_opp_ppg": 4.3,
+            "last10_ppg": 3.5,
+            "last10_opp_ppg": 4.5,
+            "season_pace": 1.0,
+            "home_record_pct": 0.480,
+            "away_record_pct": 0.400,
             "is_back_to_back": False,
             "key_injuries": 1
         },
@@ -164,160 +354,238 @@ games_raw = [
             "last10_ppg": 4.3,
             "last10_opp_ppg": 3.8,
             "season_pace": 1.0,
-            "home_record_pct": 0.520,
+            "home_record_pct": 0.540,
             "away_record_pct": 0.480,
-            "is_back_to_back": False,
-            "key_injuries": 1
-        },
-        "odds": {
-            "spread_home": 1.5,
-            "ml_home": 104,
-            "ml_away": -126,
-            "total": 8.5,
-            "book": "consensus"
-        }
-    },
-    # NYM Mets (21-28) @ WSH Nationals (25-25)
-    # David Peterson vs Cade Cavalli
-    {
-        "sport": "baseball_mlb",
-        "home": {
-            "name": "Washington Nationals",
-            "season_ppg": 4.0,
-            "season_opp_ppg": 4.2,
-            "last10_ppg": 3.8,
-            "last10_opp_ppg": 4.4,
-            "season_pace": 1.0,
-            "home_record_pct": 0.500,
-            "away_record_pct": 0.500,
-            "is_back_to_back": False,
-            "key_injuries": 1
-        },
-        "away": {
-            "name": "New York Mets",
-            "season_ppg": 3.9,
-            "season_opp_ppg": 4.5,
-            "last10_ppg": 3.7,
-            "last10_opp_ppg": 4.7,
-            "season_pace": 1.0,
-            "home_record_pct": 0.440,
-            "away_record_pct": 0.360,
-            "is_back_to_back": False,
-            "key_injuries": 1
-        },
-        "odds": {
-            "spread_home": 1.5,
-            "ml_home": -105,
-            "ml_away": -115,
-            "total": 8.0,
-            "book": "consensus"
-        }
-    },
-    # ATL Braves (34-16) @ MIA Marlins (22-28)
-    # Spencer Strider vs Sandy Alcantara
-    {
-        "sport": "baseball_mlb",
-        "home": {
-            "name": "Miami Marlins",
-            "season_ppg": 3.6,
-            "season_opp_ppg": 4.6,
-            "last10_ppg": 3.4,
-            "last10_opp_ppg": 4.8,
-            "season_pace": 1.0,
-            "home_record_pct": 0.440,
-            "away_record_pct": 0.340,
-            "is_back_to_back": False,
-            "key_injuries": 2
-        },
-        "away": {
-            "name": "Atlanta Braves",
-            "season_ppg": 5.0,
-            "season_opp_ppg": 3.3,
-            "last10_ppg": 5.2,
-            "last10_opp_ppg": 3.1,
-            "season_pace": 1.0,
-            "home_record_pct": 0.700,
-            "away_record_pct": 0.600,
             "is_back_to_back": False,
             "key_injuries": 0
         },
         "odds": {
             "spread_home": 1.5,
-            "ml_home": 119,
-            "ml_away": -143,
+            "ml_home": 128,
+            "ml_away": -152,
             "total": 7.5,
-            "book": "consensus"
-        }
-    },
-    # TOR Blue Jays (22-27) @ NYY Yankees (30-20)
-    # Braydon Fisher vs Carlos Rodon
-    {
-        "sport": "baseball_mlb",
-        "home": {
-            "name": "New York Yankees",
-            "season_ppg": 4.8,
-            "season_opp_ppg": 4.0,
-            "last10_ppg": 5.0,
-            "last10_opp_ppg": 3.8,
-            "season_pace": 1.0,
-            "home_record_pct": 0.600,
-            "away_record_pct": 0.520,
-            "is_back_to_back": False,
-            "key_injuries": 1
-        },
-        "away": {
-            "name": "Toronto Blue Jays",
-            "season_ppg": 3.8,
-            "season_opp_ppg": 4.4,
-            "last10_ppg": 3.6,
-            "last10_opp_ppg": 4.6,
-            "season_pace": 1.0,
-            "home_record_pct": 0.440,
-            "away_record_pct": 0.380,
-            "is_back_to_back": False,
-            "key_injuries": 1
-        },
-        "odds": {
-            "spread_home": -1.5,
-            "ml_home": -171,
-            "ml_away": 141,
-            "total": 8.5,
             "book": "fanduel"
         }
     },
-    # OAK Athletics @ LAA Angels
-    # Luis Severino vs Jose Soriano. Pick'em game.
+    # CLE Guardians @ PHI Phillies
+    # PHI: 31-19, ~4.8 RPG, 3.6 OPP. Home: .640
+    # CLE: 29-22, ~4.6 RPG, 3.7 OPP. Away: .500
     {
         "sport": "baseball_mlb",
         "home": {
-            "name": "Los Angeles Angels",
-            "season_ppg": 3.8,
-            "season_opp_ppg": 4.5,
-            "last10_ppg": 3.6,
-            "last10_opp_ppg": 4.7,
+            "name": "Philadelphia Phillies",
+            "season_ppg": 4.8,
+            "season_opp_ppg": 3.6,
+            "last10_ppg": 5.0,
+            "last10_opp_ppg": 3.4,
             "season_pace": 1.0,
-            "home_record_pct": 0.400,
-            "away_record_pct": 0.340,
+            "home_record_pct": 0.640,
+            "away_record_pct": 0.560,
             "is_back_to_back": False,
-            "key_injuries": 2
+            "key_injuries": 0
         },
         "away": {
-            "name": "Sacramento Athletics",
-            "season_ppg": 4.2,
+            "name": "Cleveland Guardians",
+            "season_ppg": 4.6,
+            "season_opp_ppg": 3.7,
+            "last10_ppg": 4.8,
+            "last10_opp_ppg": 3.5,
+            "season_pace": 1.0,
+            "home_record_pct": 0.600,
+            "away_record_pct": 0.500,
+            "is_back_to_back": False,
+            "key_injuries": 0
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -175,
+            "ml_away": 148,
+            "total": 8.0,
+            "book": "consensus"
+        }
+    },
+    # MIN Twins @ BOS Red Sox
+    # BOS: 28-22, ~4.5 RPG, 4.0 OPP. Home: .560
+    # MIN: 26-24, ~4.3 RPG, 4.1 OPP. Away: .480
+    {
+        "sport": "baseball_mlb",
+        "home": {
+            "name": "Boston Red Sox",
+            "season_ppg": 4.5,
             "season_opp_ppg": 4.0,
-            "last10_ppg": 4.4,
+            "last10_ppg": 4.7,
             "last10_opp_ppg": 3.8,
             "season_pace": 1.0,
-            "home_record_pct": 0.520,
+            "home_record_pct": 0.560,
+            "away_record_pct": 0.480,
+            "is_back_to_back": False,
+            "key_injuries": 1
+        },
+        "away": {
+            "name": "Minnesota Twins",
+            "season_ppg": 4.3,
+            "season_opp_ppg": 4.1,
+            "last10_ppg": 4.1,
+            "last10_opp_ppg": 4.3,
+            "season_pace": 1.0,
+            "home_record_pct": 0.540,
             "away_record_pct": 0.480,
             "is_back_to_back": False,
             "key_injuries": 1
         },
         "odds": {
+            "spread_home": -1.5,
+            "ml_home": -112,
+            "ml_away": -104,
+            "total": 8.5,
+            "book": "consensus"
+        }
+    },
+    # CWS White Sox @ SF Giants
+    # SF: 25-25, ~3.9 RPG, 3.8 OPP. Home: .520
+    # CWS: 14-37, ~3.2 RPG, 5.1 OPP. Worst team in MLB. Away: .260
+    {
+        "sport": "baseball_mlb",
+        "home": {
+            "name": "San Francisco Giants",
+            "season_ppg": 3.9,
+            "season_opp_ppg": 3.8,
+            "last10_ppg": 4.1,
+            "last10_opp_ppg": 3.6,
+            "season_pace": 1.0,
+            "home_record_pct": 0.520,
+            "away_record_pct": 0.440,
+            "is_back_to_back": False,
+            "key_injuries": 1
+        },
+        "away": {
+            "name": "Chicago White Sox",
+            "season_ppg": 3.2,
+            "season_opp_ppg": 5.1,
+            "last10_ppg": 3.0,
+            "last10_opp_ppg": 5.3,
+            "season_pace": 1.0,
+            "home_record_pct": 0.320,
+            "away_record_pct": 0.260,
+            "is_back_to_back": False,
+            "key_injuries": 2
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -170,
+            "ml_away": 145,
+            "total": 7.5,
+            "book": "consensus"
+        }
+    },
+    # TEX Rangers @ LAA Angels
+    # LAA: 18-34, ~3.7 RPG, 4.8 OPP. Home: .380
+    # TEX: 24-26, ~4.1 RPG, 4.3 OPP. Away: .440
+    {
+        "sport": "baseball_mlb",
+        "home": {
+            "name": "Los Angeles Angels",
+            "season_ppg": 3.7,
+            "season_opp_ppg": 4.8,
+            "last10_ppg": 3.4,
+            "last10_opp_ppg": 5.0,
+            "season_pace": 1.0,
+            "home_record_pct": 0.380,
+            "away_record_pct": 0.300,
+            "is_back_to_back": False,
+            "key_injuries": 2
+        },
+        "away": {
+            "name": "Texas Rangers",
+            "season_ppg": 4.1,
+            "season_opp_ppg": 4.3,
+            "last10_ppg": 4.3,
+            "last10_opp_ppg": 4.1,
+            "season_pace": 1.0,
+            "home_record_pct": 0.520,
+            "away_record_pct": 0.440,
+            "is_back_to_back": False,
+            "key_injuries": 1
+        },
+        "odds": {
             "spread_home": 1.5,
-            "ml_home": -108,
-            "ml_away": -108,
+            "ml_home": 116,
+            "ml_away": -136,
             "total": 8.0,
+            "book": "fanduel"
+        }
+    },
+    # SAC Athletics @ SD Padres
+    # SD: 29-22, ~4.5 RPG, 3.7 OPP. Home: .600
+    # SAC: 23-28, ~4.0 RPG, 4.2 OPP. Away: .400
+    {
+        "sport": "baseball_mlb",
+        "home": {
+            "name": "San Diego Padres",
+            "season_ppg": 4.5,
+            "season_opp_ppg": 3.7,
+            "last10_ppg": 4.8,
+            "last10_opp_ppg": 3.5,
+            "season_pace": 1.0,
+            "home_record_pct": 0.600,
+            "away_record_pct": 0.520,
+            "is_back_to_back": False,
+            "key_injuries": 0
+        },
+        "away": {
+            "name": "Sacramento Athletics",
+            "season_ppg": 4.0,
+            "season_opp_ppg": 4.2,
+            "last10_ppg": 3.8,
+            "last10_opp_ppg": 4.4,
+            "season_pace": 1.0,
+            "home_record_pct": 0.480,
+            "away_record_pct": 0.400,
+            "is_back_to_back": False,
+            "key_injuries": 1
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -175,
+            "ml_away": 148,
+            "total": 8.0,
+            "book": "consensus"
+        }
+    },
+    # COL Rockies @ ARI Diamondbacks
+    # ARI: 27-24, ~4.4 RPG, 4.0 OPP. Home: .560
+    # COL: 18-33, ~3.8 RPG, 5.0 OPP. Road: .280 (worst road team in MLB)
+    {
+        "sport": "baseball_mlb",
+        "home": {
+            "name": "Arizona Diamondbacks",
+            "season_ppg": 4.4,
+            "season_opp_ppg": 4.0,
+            "last10_ppg": 4.6,
+            "last10_opp_ppg": 3.8,
+            "season_pace": 1.0,
+            "home_record_pct": 0.560,
+            "away_record_pct": 0.480,
+            "is_back_to_back": False,
+            "key_injuries": 1
+        },
+        "away": {
+            "name": "Colorado Rockies",
+            "season_ppg": 3.8,
+            "season_opp_ppg": 5.0,
+            "last10_ppg": 3.5,
+            "last10_opp_ppg": 5.3,
+            "season_pace": 1.0,
+            "home_record_pct": 0.420,
+            "away_record_pct": 0.280,
+            "is_back_to_back": False,
+            "key_injuries": 1
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -185,
+            "ml_away": 155,
+            "total": 9.0,
             "book": "consensus"
         }
     },
@@ -406,10 +674,10 @@ for game_key, data in games_results.items():
     blend_ml_ev_away /= total_weight
 
     ev_options = {
-        "spread_home": blend_spread_ev_home,
-        "spread_away": blend_spread_ev_away,
-        "ml_home": blend_ml_ev_home,
-        "ml_away": blend_ml_ev_away,
+        "spread_ev_home": blend_spread_ev_home,
+        "spread_ev_away": blend_spread_ev_away,
+        "ml_ev_home": blend_ml_ev_home,
+        "ml_ev_away": blend_ml_ev_away,
     }
     best_bet_type = max(ev_options, key=ev_options.get)
     best_blend_ev = ev_options[best_bet_type]
@@ -447,13 +715,13 @@ for game_key, data in games_results.items():
 
     any_flips = False
     for mid, info in evs_by_model.items():
-        if best_bet_type == "spread_home" and info["spread_ev_home"] < 0:
+        if best_bet_type == "spread_ev_home" and info["spread_ev_home"] < 0:
             any_flips = True
-        elif best_bet_type == "spread_away" and info["spread_ev_away"] < 0:
+        elif best_bet_type == "spread_ev_away" and info["spread_ev_away"] < 0:
             any_flips = True
-        elif best_bet_type == "ml_home" and info["ml_ev_home"] < 0:
+        elif best_bet_type == "ml_ev_home" and info["ml_ev_home"] < 0:
             any_flips = True
-        elif best_bet_type == "ml_away" and info["ml_ev_away"] < 0:
+        elif best_bet_type == "ml_ev_away" and info["ml_ev_away"] < 0:
             any_flips = True
 
     if best_blend_ev > 0.03 and agree_count >= 4 and not any_flips:
@@ -517,7 +785,7 @@ for sport in sports_order:
 
     name = sport_names[sport]
     print(f"\n{'='*78}")
-    print(f" {name} -- Wednesday May 21, 2026")
+    print(f" {name} -- Saturday May 23, 2026")
     print(f"{'='*78}")
     print(f"{'Game':<30} {'Spread':>7} {'Blend EV':>9} {'Best EV':>8} {'Worst EV':>9} {'Rob.':>5} {'Verdict':<16}")
     print(f"{'-'*30} {'-'*7} {'-'*9} {'-'*8} {'-'*9} {'-'*5} {'-'*16}")
@@ -570,48 +838,3 @@ total_no = sum(1 for p in predictions if p["verdict"] == "NO BET")
 print(f"\n{'='*78}")
 print(f" SUMMARY: {len(predictions)} games analyzed | {total_bets} BETs | {total_leans} LEANs | {total_no} NO BETs")
 print(f"{'='*78}")
-
-# ── Update metrics.json ─────────────────────────────────────────────────
-metrics_file = os.path.join(os.path.dirname(__file__), "metrics.json")
-with open(metrics_file) as f:
-    metrics = json.load(f)
-
-metrics["last_updated"] = TODAY
-metrics["all_time"]["total_bets_recommended"] = metrics["all_time"].get("total_bets_recommended", 0) + total_bets
-metrics["today_summary"] = {
-    "date": TODAY,
-    "games_analyzed": len(predictions),
-    "bets_recommended": total_bets,
-    "leans": total_leans,
-    "sports": list(set(p["sport"] for p in predictions)),
-    "notes": f"NBA ECF Gm2 (CLE@NYK) + NHL ECF Gm1 (MTL@CAR) + {sum(1 for p in predictions if p['sport']=='baseball_mlb')} MLB games. {total_bets} BETs, {total_leans} LEANs."
-}
-
-for model in all_models:
-    mid = model["id"]
-    if mid not in metrics["variant_performance"]:
-        metrics["variant_performance"][mid] = {
-            "lifetime_games": 0,
-            "lifetime_correct": 0,
-            "weight": model.get("weight", 1.0),
-            "role": "champion" if mid == champion["id"] else "challenger"
-        }
-    metrics["variant_performance"][mid]["weight"] = model.get("weight", 1.0) if mid != champion["id"] else 1.0
-
-with open(metrics_file, "w") as f:
-    json.dump(metrics, f, indent=2)
-
-print(f"\nMetrics updated in metrics.json")
-
-print(f"\n  Edge-Finder Metrics")
-print(f"  {'='*40}")
-print(f"  Champion: {champion['id']} (promoted {champion['promoted_on']})")
-print(f"  7-day:  {metrics['rolling_7d']['accuracy'] or 'N/A'} accuracy | {metrics['rolling_7d']['ev_realized'] or 'N/A'} realized EV | {metrics['rolling_7d']['total_games']} games")
-print(f"  30-day: {metrics['rolling_30d']['accuracy'] or 'N/A'} accuracy | {metrics['rolling_30d']['ev_realized'] or 'N/A'} realized EV | {metrics['rolling_30d']['total_games']} games")
-cw = ", ".join(f"{c['id']}={c['weight']}" for c in challengers)
-print(f"  Challengers: {cw}")
-gcount = len(assumptions.get("graveyard", []))
-print(f"  Graveyard: {gcount} retired variants")
-
-print(f"\n  NOTE: This analysis is for entertainment purposes only.")
-print(f"  Past performance does not guarantee future results.")
