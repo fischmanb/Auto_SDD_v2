@@ -47,3 +47,45 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-05-21	baseball_mlb	Sacramento Athletics @ Los Angeles Angels	home-swing-v1	home	0.59	0.5621	away	-1	0	0.3487	0.0826	spread_home	win
 2026-05-21	baseball_mlb	Sacramento Athletics @ Los Angeles Angels	regression-v1	away	-0.66	0.4265	away	-1	1	0.1142	-0.1787	spread_home	win
 2026-05-21	baseball_mlb	Sacramento Athletics @ Los Angeles Angels	pace-adj-v1	away	-0.85	0.4092	away	-1	1	0.08	-0.2119	ml_away	win
+2026-05-22	basketball_nba	Oklahoma City Thunder @ San Antonio Spurs	season-avg-v1	away	-1.68	0.4617	away	-15	1	0.0941	0.0873	spread_away	win
+2026-05-22	basketball_nba	Oklahoma City Thunder @ San Antonio Spurs	recency-v1	away	-1.21	0.4748	away	-15	1	0.0657	0.0609	spread_away	win
+2026-05-22	basketball_nba	Oklahoma City Thunder @ San Antonio Spurs	injury-rest-v1	away	-1.54	0.4669	away	-15	1	0.0826	0.0769	spread_away	win
+2026-05-22	basketball_nba	Oklahoma City Thunder @ San Antonio Spurs	home-swing-v1	away	-0.13	0.4975	away	-15	1	0.0251	0.015	spread_away	win
+2026-05-22	basketball_nba	Oklahoma City Thunder @ San Antonio Spurs	regression-v1	away	-0.63	0.4856	away	-15	1	0.0466	0.039	spread_away	win
+2026-05-22	basketball_nba	Oklahoma City Thunder @ San Antonio Spurs	pace-adj-v1	away	-1.51	0.4662	away	-15	1	0.0869	0.0783	spread_away	win
+2026-05-22	icehockey_nhl	Vegas Golden Knights @ Colorado Avalanche	season-avg-v1	home	0.18	0.5313	away	-2	0	-0.4653	0.2093	spread_away	win
+2026-05-22	icehockey_nhl	Vegas Golden Knights @ Colorado Avalanche	recency-v1	home	0.2	0.5354	away	-2	0	-0.4651	0.1988	spread_away	win
+2026-05-22	icehockey_nhl	Vegas Golden Knights @ Colorado Avalanche	injury-rest-v1	home	0.17	0.5316	away	-2	0	-0.4729	0.2084	spread_away	win
+2026-05-22	icehockey_nhl	Vegas Golden Knights @ Colorado Avalanche	home-swing-v1	home	1.67	0.7731	away	-2	0	0.0135	-0.4146	spread_home	loss
+2026-05-22	icehockey_nhl	Vegas Golden Knights @ Colorado Avalanche	regression-v1	home	0.19	0.5354	away	-2	0	-0.4606	0.1988	spread_away	win
+2026-05-22	icehockey_nhl	Vegas Golden Knights @ Colorado Avalanche	pace-adj-v1	home	0.17	0.5326	away	-2	0	-0.4723	0.206	spread_away	win
+2026-05-22	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	season-avg-v1	away	-0.07	0.491	home	4	0	0.2306	-0.0283	spread_home	win
+2026-05-22	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	recency-v1	home	0.03	0.5021	home	4	1	0.2481	-0.0414	spread_home	win
+2026-05-22	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	injury-rest-v1	away	-0.1	0.4879	home	4	0	0.227	-0.0224	spread_home	win
+2026-05-22	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	home-swing-v1	home	1.38	0.6397	home	4	1	0.4705	0.2213	spread_home	win
+2026-05-22	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	regression-v1	away	-0.0	0.5002	home	4	0	0.2409	-0.045	spread_home	win
+2026-05-22	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	pace-adj-v1	away	-0.1	0.4873	home	4	0	0.2238	-0.0212	spread_home	win
+2026-05-22	baseball_mlb	New York Mets @ Miami Marlins	season-avg-v1	away	-1.52	0.3403	home	1	0	-0.058	0.2488	ml_away	loss
+2026-05-22	baseball_mlb	New York Mets @ Miami Marlins	recency-v1	away	-1.6	0.3309	home	1	0	-0.0769	0.2665	ml_away	loss
+2026-05-22	baseball_mlb	New York Mets @ Miami Marlins	injury-rest-v1	away	-1.85	0.2978	home	1	0	-0.1325	0.3292	ml_away	loss
+2026-05-22	baseball_mlb	New York Mets @ Miami Marlins	home-swing-v1	away	-0.15	0.4845	home	1	0	0.2113	-0.0242	spread_home	loss
+2026-05-22	baseball_mlb	New York Mets @ Miami Marlins	regression-v1	away	-1.24	0.3673	home	1	0	-0.0045	0.1976	ml_away	loss
+2026-05-22	baseball_mlb	New York Mets @ Miami Marlins	pace-adj-v1	away	-1.54	0.3397	home	1	0	-0.067	0.2499	ml_away	loss
+2026-05-22	baseball_mlb	Houston Astros @ Chicago Cubs	season-avg-v1	home	1.24	0.6315	away	-2	0	-0.0855	0.0762	ml_home	loss
+2026-05-22	baseball_mlb	Houston Astros @ Chicago Cubs	recency-v1	home	1.39	0.6461	away	-2	0	-0.0616	0.1012	ml_home	loss
+2026-05-22	baseball_mlb	Houston Astros @ Chicago Cubs	injury-rest-v1	home	1.22	0.6307	away	-2	0	-0.0971	0.0749	ml_home	loss
+2026-05-22	baseball_mlb	Houston Astros @ Chicago Cubs	home-swing-v1	home	2.7	0.7581	away	-2	0	0.1983	0.292	ml_home	loss
+2026-05-22	baseball_mlb	Houston Astros @ Chicago Cubs	regression-v1	home	1.03	0.6092	away	-2	0	-0.1372	0.0381	ml_home	loss
+2026-05-22	baseball_mlb	Houston Astros @ Chicago Cubs	pace-adj-v1	home	1.22	0.6287	away	-2	0	-0.0898	0.0715	ml_home	loss
+2026-05-22	baseball_mlb	Washington Nationals @ Atlanta Braves	season-avg-v1	home	2.94	0.7844	home	1	1	0.2509	0.1331	spread_home	loss
+2026-05-22	baseball_mlb	Washington Nationals @ Atlanta Braves	recency-v1	home	3.1	0.796	home	1	1	0.2835	0.1498	spread_home	loss
+2026-05-22	baseball_mlb	Washington Nationals @ Atlanta Braves	injury-rest-v1	home	3.25	0.8108	home	1	1	0.3135	0.1712	spread_home	loss
+2026-05-22	baseball_mlb	Washington Nationals @ Atlanta Braves	home-swing-v1	home	4.41	0.8785	home	1	1	0.4932	0.2689	spread_home	loss
+2026-05-22	baseball_mlb	Washington Nationals @ Atlanta Braves	regression-v1	home	2.38	0.7371	home	1	1	0.1401	0.0646	spread_home	loss
+2026-05-22	baseball_mlb	Washington Nationals @ Atlanta Braves	pace-adj-v1	home	2.93	0.7838	home	1	1	0.2494	0.1322	spread_home	loss
+2026-05-22	baseball_mlb	Seattle Mariners @ Kansas City Royals	season-avg-v1	away	-0.59	0.4356	away	-2	1	0.1395	-0.0679	spread_home	loss
+2026-05-22	baseball_mlb	Seattle Mariners @ Kansas City Royals	recency-v1	away	-0.71	0.4208	away	-2	1	0.1065	-0.0996	spread_home	loss
+2026-05-22	baseball_mlb	Seattle Mariners @ Kansas City Royals	injury-rest-v1	away	-0.97	0.3957	away	-2	1	0.0635	-0.1532	spread_home	loss
+2026-05-22	baseball_mlb	Seattle Mariners @ Kansas City Royals	home-swing-v1	home	0.81	0.5865	away	-2	0	0.3873	0.2552	spread_home	loss
+2026-05-22	baseball_mlb	Seattle Mariners @ Kansas City Royals	regression-v1	away	-0.47	0.4461	away	-2	1	0.1538	-0.0453	spread_home	loss
+2026-05-22	baseball_mlb	Seattle Mariners @ Kansas City Royals	pace-adj-v1	away	-0.59	0.4352	away	-2	1	0.1337	-0.0687	spread_home	loss
