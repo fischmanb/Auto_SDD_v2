@@ -61,15 +61,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-05-22",
-    "games_analyzed": 10,
-    "bets_recommended": 7,
-    "leans": 3,
+    "date": "2026-05-25",
+    "games_analyzed": 13,
+    "bets_recommended": 11,
+    "leans": 1,
     "sports": [
       "basketball_nba",
       "icehockey_nhl",
       "baseball_mlb"
     ],
-    "notes": "NBA WCF G3 (OKC@SAS) + NHL WCF G2 (VGK@COL) + 8 MLB games. 7 BETs, 3 LEANs."
+    "notes": "NBA ECF G4 (NYK@CLE) + NHL ECF G3 (CAR@MTL) + 11 MLB games. 11 BETs, 1 LEAN, 1 NO BET."
   }
 }
