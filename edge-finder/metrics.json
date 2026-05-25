@@ -1,55 +1,55 @@
 {
-  "last_updated": "2026-05-22",
+  "last_updated": "2026-05-25",
   "rolling_7d": {
-    "accuracy": 0.714,
-    "ev_realized": 0.347,
-    "total_games": 8,
-    "total_correct": 5
+    "accuracy": 0.529,
+    "ev_realized": 0.2352,
+    "total_games": 17,
+    "total_correct": 9
   },
   "rolling_30d": {
-    "accuracy": 0.714,
-    "ev_realized": 0.347,
-    "total_games": 8,
-    "total_correct": 5
+    "accuracy": 0.529,
+    "ev_realized": 0.2352,
+    "total_games": 17,
+    "total_correct": 9
   },
   "all_time": {
-    "accuracy": 0.714,
-    "ev_realized": 0.347,
-    "total_games": 8,
-    "total_correct": 5,
-    "total_bets_recommended": 7,
-    "total_bets_won": 5
+    "accuracy": 0.529,
+    "ev_realized": 0.2352,
+    "total_games": 17,
+    "total_correct": 9,
+    "total_bets_recommended": 17,
+    "total_bets_won": 11
   },
   "variant_performance": {
     "season-avg-v1": {
-      "lifetime_games": 8,
-      "lifetime_correct": 4,
+      "lifetime_games": 17,
+      "lifetime_correct": 9,
       "weight": 1.0,
       "role": "champion"
     },
     "recency-v1": {
-      "lifetime_games": 8,
-      "lifetime_correct": 4,
+      "lifetime_games": 17,
+      "lifetime_correct": 9,
       "weight": 0.5
     },
     "injury-rest-v1": {
-      "lifetime_games": 8,
-      "lifetime_correct": 4,
+      "lifetime_games": 17,
+      "lifetime_correct": 9,
       "weight": 0.5
     },
     "home-swing-v1": {
-      "lifetime_games": 8,
-      "lifetime_correct": 3,
+      "lifetime_games": 17,
+      "lifetime_correct": 7,
       "weight": 0.5
     },
     "regression-v1": {
-      "lifetime_games": 8,
-      "lifetime_correct": 4,
+      "lifetime_games": 17,
+      "lifetime_correct": 10,
       "weight": 0.5
     },
     "pace-adj-v1": {
-      "lifetime_games": 8,
-      "lifetime_correct": 4,
+      "lifetime_games": 17,
+      "lifetime_correct": 9,
       "weight": 0.5
     }
   },
