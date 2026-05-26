@@ -60,5 +60,16 @@
       "reason": "initial champion"
     }
   ],
-  "today_summary": null
+  "today_summary": {
+    "date": "2026-05-26",
+    "games_analyzed": 17,
+    "bets_recommended": 9,
+    "leans": 7,
+    "sports": [
+      "basketball_nba",
+      "icehockey_nhl",
+      "baseball_mlb"
+    ],
+    "notes": "NBA WCF G5 (SAS@OKC) + NHL WCF G4 (COL@VGK) + 15 MLB games. 9 BETs, 7 LEANs, 1 NO BETs."
+  }
 }
