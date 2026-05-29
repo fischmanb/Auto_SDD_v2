@@ -10,7 +10,7 @@
       "pace_adjustment": "season_average"
     },
     "promoted_on": "2026-03-24",
-    "rolling_10d_accuracy": 0.5
+    "rolling_10d_accuracy": 0.8235
   },
   "challengers": [
     {
@@ -26,13 +26,13 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 30,
-      "lifetime_correct": 15
+      "lifetime_games": 47,
+      "lifetime_correct": 29
     },
     {
       "id": "injury-rest-v1",
       "description": "Apply estimated impact for known absences and back-to-back games",
-      "weight": 0.5,
+      "weight": 0.4,
       "born": "2026-03-24",
       "grace_until": "2026-03-29",
       "params": {
@@ -42,13 +42,13 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 30,
-      "lifetime_correct": 15
+      "lifetime_games": 47,
+      "lifetime_correct": 28
     },
     {
       "id": "home-swing-v1",
       "description": "Adjust home court/field advantage by +1.5 points from baseline",
-      "weight": 0.4,
+      "weight": 0.3,
       "born": "2026-03-24",
       "grace_until": "2026-03-29",
       "params": {
@@ -58,8 +58,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 30,
-      "lifetime_correct": 12
+      "lifetime_games": 47,
+      "lifetime_correct": 22
     },
     {
       "id": "regression-v1",
@@ -74,8 +74,8 @@
         "regression_to_mean": 0.2,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 30,
-      "lifetime_correct": 16
+      "lifetime_games": 47,
+      "lifetime_correct": 30
     },
     {
       "id": "pace-adj-v1",
@@ -90,8 +90,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "opponent_adjusted"
       },
-      "lifetime_games": 30,
-      "lifetime_correct": 15
+      "lifetime_games": 47,
+      "lifetime_correct": 29
     }
   ],
   "graveyard": []
