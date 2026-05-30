@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Edge-Finder daily runner for 2026-05-29.
-Phase 1: Eval May 26 predictions, update weights.
+Edge-Finder daily runner for 2026-05-30.
+Phase 1: Eval May 29 predictions, update weights.
 Phase 2-5: Simulate tonight's games, produce blended predictions.
 """
 
@@ -14,15 +14,15 @@ sys.path.insert(0, os.path.dirname(__file__))
 from sim import run_batch
 
 BASE = os.path.dirname(__file__)
-TODAY = "2026-05-29"
-EVAL_DATE = "2026-05-26"
+TODAY = "2026-05-30"
+EVAL_DATE = "2026-05-29"
 
 # ════════════════════════════════════════════════════════════════════════
-# PHASE 1 — EVALUATE MAY 26 PREDICTIONS
+# PHASE 1 — EVALUATE MAY 29 PREDICTIONS
 # ════════════════════════════════════════════════════════════════════════
 
 print("=" * 78)
-print(" PHASE 1 — Evaluating 2026-05-26 predictions")
+print(" PHASE 1 — Evaluating 2026-05-29 predictions")
 print("=" * 78)
 
 with open(os.path.join(BASE, "assumptions.json")) as f:
@@ -31,25 +31,23 @@ with open(os.path.join(BASE, "assumptions.json")) as f:
 with open(os.path.join(BASE, "predictions", f"{EVAL_DATE}.json")) as f:
     past_preds = json.load(f)
 
-# Actual results for May 26, 2026 (verified via ESPN/web)
 actual_results = {
-    "San Antonio Spurs @ Oklahoma City Thunder": {"winner": "home", "home_score": 127, "away_score": 114},
-    "Colorado Avalanche @ Vegas Golden Knights": {"winner": "home", "home_score": 2, "away_score": 1},
-    "Washington Nationals @ Cleveland Guardians": {"winner": "away", "home_score": 3, "away_score": 6},
-    "Tampa Bay Rays @ Baltimore Orioles": {"winner": "home", "home_score": 6, "away_score": 1},
-    "Los Angeles Angels @ Detroit Tigers": {"winner": "away", "home_score": 6, "away_score": 10},
-    "Chicago Cubs @ Pittsburgh Pirates": {"winner": "home", "home_score": 12, "away_score": 1},
-    "Atlanta Braves @ Boston Red Sox": {"winner": "away", "home_score": 6, "away_score": 7},
-    "Miami Marlins @ Toronto Blue Jays": {"winner": "home", "home_score": 8, "away_score": 1},
-    "Cincinnati Reds @ New York Mets": {"winner": "away", "home_score": 2, "away_score": 7},
-    "Minnesota Twins @ Chicago White Sox": {"winner": "away", "home_score": 3, "away_score": 5},
-    "New York Yankees @ Kansas City Royals": {"winner": "away", "home_score": 1, "away_score": 15},
-    "St. Louis Cardinals @ Milwaukee Brewers": {"winner": "home", "home_score": 6, "away_score": 0},
-    "Houston Astros @ Texas Rangers": {"winner": "home", "home_score": 10, "away_score": 7},
-    "Seattle Mariners @ Sacramento Athletics": {"winner": "away", "home_score": 1, "away_score": 4},
-    "Philadelphia Phillies @ San Diego Padres": {"winner": "away", "home_score": 3, "away_score": 4},
-    "Arizona Diamondbacks @ San Francisco Giants": {"winner": "away", "home_score": 5, "away_score": 7},
-    "Colorado Rockies @ Los Angeles Dodgers": {"winner": "home", "home_score": 15, "away_score": 6},
+    "Montreal Canadiens @ Carolina Hurricanes": {"winner": "home", "home_score": 6, "away_score": 1},
+    "Atlanta Braves @ Cincinnati Reds": {"winner": "away", "home_score": 3, "away_score": 8},
+    "Minnesota Twins @ Pittsburgh Pirates": {"winner": "home", "home_score": 6, "away_score": 5},
+    "Cleveland Guardians @ Boston Red Sox": {"winner": "away", "home_score": 3, "away_score": 4},
+    "Baltimore Orioles @ Toronto Blue Jays": {"winner": "home", "home_score": 6, "away_score": 5},
+    "Miami Marlins @ New York Mets": {"winner": "home", "home_score": 9, "away_score": 7},
+    "San Diego Padres @ Washington Nationals": {"winner": "away", "home_score": 5, "away_score": 7},
+    "Detroit Tigers @ Chicago White Sox": {"winner": "home", "home_score": 4, "away_score": 3},
+    "Los Angeles Angels @ Tampa Bay Rays": {"winner": "home", "home_score": 8, "away_score": 5},
+    "Milwaukee Brewers @ Houston Astros": {"winner": "away", "home_score": 4, "away_score": 5},
+    "Texas Rangers @ Kansas City Royals": {"winner": "away", "home_score": 1, "away_score": 9},
+    "Chicago Cubs @ St. Louis Cardinals": {"winner": "home", "home_score": 6, "away_score": 5},
+    "San Francisco Giants @ Colorado Rockies": {"winner": "home", "home_score": 8, "away_score": 6},
+    "Arizona Diamondbacks @ Seattle Mariners": {"winner": "home", "home_score": 7, "away_score": 6},
+    "Philadelphia Phillies @ Los Angeles Dodgers": {"winner": "home", "home_score": 4, "away_score": 2},
+    "New York Yankees @ Sacramento Athletics": {"winner": "away", "home_score": 2, "away_score": 8},
 }
 
 champion = assumptions["champion"]
@@ -57,7 +55,6 @@ challengers = assumptions["challengers"]
 all_models = [champion] + challengers
 model_ids = [m["id"] for m in all_models]
 
-# Score each model on each game
 model_scores = {mid: {"correct": 0, "total": 0} for mid in model_ids}
 tsv_lines = []
 
@@ -104,7 +101,6 @@ for pred in past_preds["predictions"]:
             f"{mr['spread_ev_home']:.4f}\t{mr['ml_ev_home']:.4f}\t{bet_type}\t{bet_result}"
         )
 
-# Append to results.tsv
 with open(os.path.join(BASE, "results.tsv"), "a") as f:
     for line in tsv_lines:
         f.write(line + "\n")
@@ -152,19 +148,17 @@ for c in challengers:
         else:
             c_misses.add(game_key)
 
-    # Games where they disagreed
-    outperformed = c_hits - champ_hits  # challenger right, champion wrong
-    underperformed = champ_hits - c_hits  # champion right, challenger wrong
+    outperformed = c_hits - champ_hits
+    underperformed = champ_hits - c_hits
     disagreements = len(outperformed) + len(underperformed)
 
     old_weight = c["weight"]
     if disagreements > 0:
         if len(outperformed) / disagreements >= 0.6:
-            c["weight"] = min(1.0, c["weight"] + 0.1)
+            c["weight"] = min(1.0, round(c["weight"] + 0.1, 1))
         elif len(underperformed) / disagreements >= 0.6:
-            c["weight"] = max(0.1, c["weight"] - 0.1)
+            c["weight"] = max(0.1, round(c["weight"] - 0.1, 1))
 
-    # Update lifetime stats
     c["lifetime_games"] = c.get("lifetime_games", 0) + model_scores[cid]["total"]
     c["lifetime_correct"] = c.get("lifetime_correct", 0) + model_scores[cid]["correct"]
 
@@ -172,19 +166,17 @@ for c in challengers:
         weight_changes.append(f"{cid}: {old_weight} -> {c['weight']}")
         print(f"  Weight change: {cid} {old_weight} -> {c['weight']} (outperformed {len(outperformed)}, underperformed {len(underperformed)} in {disagreements} disagreements)")
 
-# Update champion lifetime stats
 champion["rolling_10d_accuracy"] = model_scores[champ_id]["correct"] / model_scores[champ_id]["total"] if model_scores[champ_id]["total"] > 0 else 0.5
 
 # ── Step 1.5: Promotion check ──────────────────────────────────────
-# Check if any challenger's rolling accuracy exceeds champion's by >= 5%
 champ_acc = model_scores[champ_id]["correct"] / model_scores[champ_id]["total"]
 promotion_msg = ""
 for c in challengers:
     cid = c["id"]
-    c_acc = model_scores[cid]["correct"] / model_scores[cid]["total"]
     c_lifetime_acc = c["lifetime_correct"] / c["lifetime_games"] if c["lifetime_games"] > 0 else 0
-    champ_lifetime_acc = (assumptions["champion"].get("lifetime_correct", 15) + model_scores[champ_id]["correct"]) / \
-                         (assumptions["champion"].get("lifetime_games", 30) + model_scores[champ_id]["total"])
+    champ_lifetime_games = assumptions["champion"].get("lifetime_games", 47) + model_scores[champ_id]["total"]
+    champ_lifetime_correct = assumptions["champion"].get("lifetime_correct", 29) + model_scores[champ_id]["correct"]
+    champ_lifetime_acc = champ_lifetime_correct / champ_lifetime_games if champ_lifetime_games > 0 else 0.5
     if c_lifetime_acc - champ_lifetime_acc >= 0.05:
         promotion_msg = f"PROMOTION: {cid} replaces {champ_id} as champion"
         print(f"\n  *** {promotion_msg} ***")
@@ -197,7 +189,7 @@ if not promotion_msg:
 retirements = []
 for c in challengers:
     born = c.get("born", "2026-03-24")
-    days_alive = (date(2026, 5, 29) - date(int(born[:4]), int(born[5:7]), int(born[8:10]))).days
+    days_alive = (date(2026, 5, 30) - date(int(born[:4]), int(born[5:7]), int(born[8:10]))).days
     if c["weight"] <= 0.15 and days_alive > 5:
         retirements.append(c)
         print(f"  RETIRE: {c['id']} (weight={c['weight']}, age={days_alive}d)")
@@ -205,21 +197,19 @@ for c in challengers:
 if not retirements:
     print("  No retirements triggered.")
 
-# Save updated assumptions
 with open(os.path.join(BASE, "assumptions.json"), "w") as f:
     json.dump(assumptions, f, indent=2)
 print("\n  assumptions.json updated.")
 
 
 # ════════════════════════════════════════════════════════════════════════
-# PHASE 2-5 — TONIGHT'S PREDICTIONS (May 29, 2026)
+# PHASE 2-5 — TONIGHT'S PREDICTIONS (May 30, 2026)
 # ════════════════════════════════════════════════════════════════════════
 
 print(f"\n{'=' * 78}")
 print(f" PHASE 2-5 — Predicting games for {TODAY}")
 print(f"{'=' * 78}")
 
-# Reload assumptions after Phase 1 updates
 with open(os.path.join(BASE, "assumptions.json")) as f:
     assumptions = json.load(f)
 
@@ -230,57 +220,58 @@ all_models = [champion] + challengers
 # ── Tonight's games with live odds from web searches ─────────────────
 
 games_raw = [
-    # === NHL ECF Game 5: Canadiens @ Hurricanes ===
-    # Carolina leads 3-1. Won G4 4-0. Home in Raleigh.
-    # CAR: ~3.3 GPG, 2.3 OPP GPG reg season. 12 playoff wins.
-    # MTL: ~2.8 GPG, 2.7 OPP GPG. Cinderella run fading.
+    # === NBA WCF Game 7: Spurs @ Thunder ===
+    # Series tied 3-3. SAS blew out OKC 118-91 in Game 6.
+    # OKC: 118.9 OffRtg (#7), 107.7 DefRtg (#1), 11.1 NetRtg (#1)
+    # SAS: 119.6 OffRtg (#4), 111.3 DefRtg (#3), 8.3 NetRtg (#2)
+    # OKC home, SAS -3.5. Jalen Williams game-time decision (hamstring).
     {
-        "sport": "icehockey_nhl",
+        "sport": "basketball_nba",
         "home": {
-            "name": "Carolina Hurricanes",
-            "season_ppg": 3.3,
-            "season_opp_ppg": 2.3,
-            "last10_ppg": 3.5,
-            "last10_opp_ppg": 1.8,
-            "season_pace": 1.0,
-            "home_record_pct": 0.720,
-            "away_record_pct": 0.600,
+            "name": "Oklahoma City Thunder",
+            "season_ppg": 118.9,
+            "season_opp_ppg": 107.7,
+            "last10_ppg": 115.0,
+            "last10_opp_ppg": 109.5,
+            "season_pace": 100.8,
+            "home_record_pct": 0.780,
+            "away_record_pct": 0.650,
+            "is_back_to_back": False,
+            "key_injuries": 2
+        },
+        "away": {
+            "name": "San Antonio Spurs",
+            "season_ppg": 119.6,
+            "season_opp_ppg": 111.3,
+            "last10_ppg": 118.0,
+            "last10_opp_ppg": 108.0,
+            "season_pace": 101.5,
+            "home_record_pct": 0.700,
+            "away_record_pct": 0.560,
             "is_back_to_back": False,
             "key_injuries": 0
         },
-        "away": {
-            "name": "Montreal Canadiens",
-            "season_ppg": 2.8,
-            "season_opp_ppg": 2.7,
-            "last10_ppg": 2.5,
-            "last10_opp_ppg": 3.0,
-            "season_pace": 1.0,
-            "home_record_pct": 0.560,
-            "away_record_pct": 0.460,
-            "is_back_to_back": False,
-            "key_injuries": 1
-        },
         "odds": {
-            "spread_home": -1.5,
-            "ml_home": -239,
-            "ml_away": 194,
-            "total": 5.5,
+            "spread_home": -3.5,
+            "ml_home": -160,
+            "ml_away": 135,
+            "total": 212.5,
             "book": "fanduel"
         }
     },
+
     # === MLB Games ===
 
-    # 1. ATL Braves @ CIN Reds
-    # ATL favored. Holmes (3.81) vs Paddack (7.75).
-    # ATL 33-20, CIN 28-24. Braves hot: won 7-6 May 26, 10-2 May 28.
+    # 1. ATL Braves @ CIN Reds (Game 2 of series)
+    # ATL won yesterday 8-3. ATL 34-20, CIN 28-25.
     {
         "sport": "baseball_mlb",
         "home": {
             "name": "Cincinnati Reds",
             "season_ppg": 4.5,
             "season_opp_ppg": 4.0,
-            "last10_ppg": 5.0,
-            "last10_opp_ppg": 3.8,
+            "last10_ppg": 4.8,
+            "last10_opp_ppg": 4.2,
             "season_pace": 1.0,
             "home_record_pct": 0.540,
             "away_record_pct": 0.480,
@@ -291,8 +282,8 @@ games_raw = [
             "name": "Atlanta Braves",
             "season_ppg": 5.0,
             "season_opp_ppg": 3.5,
-            "last10_ppg": 5.2,
-            "last10_opp_ppg": 3.2,
+            "last10_ppg": 5.3,
+            "last10_opp_ppg": 3.3,
             "season_pace": 1.0,
             "home_record_pct": 0.700,
             "away_record_pct": 0.600,
@@ -301,23 +292,23 @@ games_raw = [
         },
         "odds": {
             "spread_home": 1.5,
-            "ml_home": 124,
-            "ml_away": -146,
+            "ml_home": 120,
+            "ml_away": -142,
             "total": 9.5,
             "book": "fanduel"
         }
     },
 
-    # 2. MIN Twins @ PIT Pirates
-    # PIT slight favorite. Bradley (2.77) vs Jones.
+    # 2. MIN Twins @ PIT Pirates (Game 2)
+    # PIT won yesterday 6-5. PIT home favorite.
     {
         "sport": "baseball_mlb",
         "home": {
             "name": "Pittsburgh Pirates",
             "season_ppg": 4.2,
             "season_opp_ppg": 3.8,
-            "last10_ppg": 4.5,
-            "last10_opp_ppg": 3.4,
+            "last10_ppg": 4.6,
+            "last10_opp_ppg": 3.5,
             "season_pace": 1.0,
             "home_record_pct": 0.580,
             "away_record_pct": 0.480,
@@ -328,8 +319,8 @@ games_raw = [
             "name": "Minnesota Twins",
             "season_ppg": 4.3,
             "season_opp_ppg": 3.9,
-            "last10_ppg": 4.2,
-            "last10_opp_ppg": 3.6,
+            "last10_ppg": 4.1,
+            "last10_opp_ppg": 3.7,
             "season_pace": 1.0,
             "home_record_pct": 0.560,
             "away_record_pct": 0.480,
@@ -338,97 +329,98 @@ games_raw = [
         },
         "odds": {
             "spread_home": -1.5,
-            "ml_home": -140,
-            "ml_away": 123,
+            "ml_home": -138,
+            "ml_away": 118,
             "total": 8.0,
             "book": "fanduel"
         }
     },
 
-    # 3. CLE Guardians @ BOS Red Sox
-    # CLE slight favorite. BOS slumping (lost 4 of 5).
+    # 3. BOS Red Sox @ CLE Guardians
+    # CLE won 4-3 yesterday (in BOS). New series at CLE.
+    # Messick (6-1, 2.24 ERA) on the mound for CLE.
     {
         "sport": "baseball_mlb",
         "home": {
-            "name": "Boston Red Sox",
-            "season_ppg": 4.2,
-            "season_opp_ppg": 4.1,
-            "last10_ppg": 3.8,
-            "last10_opp_ppg": 4.5,
-            "season_pace": 1.0,
-            "home_record_pct": 0.520,
-            "away_record_pct": 0.440,
-            "is_back_to_back": False,
-            "key_injuries": 1
-        },
-        "away": {
             "name": "Cleveland Guardians",
             "season_ppg": 4.5,
             "season_opp_ppg": 3.7,
-            "last10_ppg": 4.3,
-            "last10_opp_ppg": 3.8,
+            "last10_ppg": 4.4,
+            "last10_opp_ppg": 3.6,
             "season_pace": 1.0,
             "home_record_pct": 0.620,
             "away_record_pct": 0.540,
             "is_back_to_back": False,
             "key_injuries": 0
         },
+        "away": {
+            "name": "Boston Red Sox",
+            "season_ppg": 4.2,
+            "season_opp_ppg": 4.1,
+            "last10_ppg": 3.7,
+            "last10_opp_ppg": 4.4,
+            "season_pace": 1.0,
+            "home_record_pct": 0.520,
+            "away_record_pct": 0.440,
+            "is_back_to_back": False,
+            "key_injuries": 1
+        },
         "odds": {
-            "spread_home": 1.5,
-            "ml_home": 106,
-            "ml_away": -124,
+            "spread_home": -1.5,
+            "ml_home": -134,
+            "ml_away": 114,
             "total": 8.0,
             "book": "fanduel"
         }
     },
 
-    # 4. BAL Orioles @ TOR Blue Jays
-    # BAL slight favorite on road.
+    # 4. TOR Blue Jays @ BAL Orioles
+    # New series in Baltimore. TOR road favorite.
     {
         "sport": "baseball_mlb",
         "home": {
-            "name": "Toronto Blue Jays",
-            "season_ppg": 3.9,
-            "season_opp_ppg": 4.1,
-            "last10_ppg": 4.0,
-            "last10_opp_ppg": 3.8,
-            "season_pace": 1.0,
-            "home_record_pct": 0.480,
-            "away_record_pct": 0.400,
-            "is_back_to_back": False,
-            "key_injuries": 1
-        },
-        "away": {
             "name": "Baltimore Orioles",
             "season_ppg": 4.3,
             "season_opp_ppg": 4.0,
-            "last10_ppg": 4.8,
-            "last10_opp_ppg": 3.5,
+            "last10_ppg": 4.6,
+            "last10_opp_ppg": 3.7,
             "season_pace": 1.0,
             "home_record_pct": 0.540,
             "away_record_pct": 0.500,
             "is_back_to_back": False,
             "key_injuries": 0
         },
+        "away": {
+            "name": "Toronto Blue Jays",
+            "season_ppg": 4.0,
+            "season_opp_ppg": 4.0,
+            "last10_ppg": 4.3,
+            "last10_opp_ppg": 3.6,
+            "season_pace": 1.0,
+            "home_record_pct": 0.500,
+            "away_record_pct": 0.420,
+            "is_back_to_back": False,
+            "key_injuries": 0
+        },
         "odds": {
             "spread_home": 1.5,
-            "ml_home": -102,
-            "ml_away": -116,
+            "ml_home": 104,
+            "ml_away": -122,
             "total": 8.0,
             "book": "fanduel"
         }
     },
 
-    # 5. MIA Marlins @ NYM Mets
-    # Mets slight home favorite. Marlins 100 underdog.
+    # 5. MIA Marlins @ NYM Mets (Game 2)
+    # NYM won yesterday 9-7. Scott vs Phillips.
     {
         "sport": "baseball_mlb",
         "home": {
             "name": "New York Mets",
-            "season_ppg": 3.9,
-            "season_opp_ppg": 4.4,
-            "last10_ppg": 3.3,
-            "last10_opp_ppg": 4.8,
+            "season_ppg": 4.0,
+            "season_opp_ppg": 4.3,
+            "last10_ppg": 3.8,
+            "last10_opp_ppg": 4.5,
             "season_pace": 1.0,
             "home_record_pct": 0.460,
             "away_record_pct": 0.360,
@@ -439,8 +431,8 @@ games_raw = [
             "name": "Miami Marlins",
             "season_ppg": 3.5,
             "season_opp_ppg": 4.7,
-            "last10_ppg": 3.3,
-            "last10_opp_ppg": 4.8,
+            "last10_ppg": 3.4,
+            "last10_opp_ppg": 4.7,
             "season_pace": 1.0,
             "home_record_pct": 0.400,
             "away_record_pct": 0.320,
@@ -449,23 +441,23 @@ games_raw = [
         },
         "odds": {
             "spread_home": -1.5,
-            "ml_home": -120,
-            "ml_away": 100,
-            "total": 8.0,
+            "ml_home": -136,
+            "ml_away": 116,
+            "total": 7.0,
             "book": "fanduel"
         }
     },
 
-    # 6. SD Padres @ WAS Nationals
-    # Roughly even. Padres looking to snap 4-game skid.
+    # 6. SD Padres @ WAS Nationals (Game 2)
+    # SD won yesterday 7-5. SD road favorite again.
     {
         "sport": "baseball_mlb",
         "home": {
             "name": "Washington Nationals",
             "season_ppg": 4.3,
             "season_opp_ppg": 4.2,
-            "last10_ppg": 4.8,
-            "last10_opp_ppg": 3.8,
+            "last10_ppg": 4.6,
+            "last10_opp_ppg": 4.0,
             "season_pace": 1.0,
             "home_record_pct": 0.540,
             "away_record_pct": 0.460,
@@ -476,8 +468,8 @@ games_raw = [
             "name": "San Diego Padres",
             "season_ppg": 4.2,
             "season_opp_ppg": 3.9,
-            "last10_ppg": 3.5,
-            "last10_opp_ppg": 4.2,
+            "last10_ppg": 3.8,
+            "last10_opp_ppg": 4.0,
             "season_pace": 1.0,
             "home_record_pct": 0.540,
             "away_record_pct": 0.460,
@@ -486,25 +478,25 @@ games_raw = [
         },
         "odds": {
             "spread_home": 1.5,
-            "ml_home": -110,
-            "ml_away": -110,
+            "ml_home": 110,
+            "ml_away": -130,
             "total": 8.5,
             "book": "fanduel"
         }
     },
 
-    # 7. DET Tigers @ CHW White Sox
-    # DET slight favorite. Both struggling teams.
+    # 7. DET Tigers @ CHW White Sox (Game 2)
+    # CHW won yesterday 4-3. DET favored despite road.
     {
         "sport": "baseball_mlb",
         "home": {
             "name": "Chicago White Sox",
-            "season_ppg": 3.5,
-            "season_opp_ppg": 4.7,
-            "last10_ppg": 3.4,
-            "last10_opp_ppg": 4.4,
+            "season_ppg": 3.6,
+            "season_opp_ppg": 4.6,
+            "last10_ppg": 3.6,
+            "last10_opp_ppg": 4.2,
             "season_pace": 1.0,
-            "home_record_pct": 0.380,
+            "home_record_pct": 0.400,
             "away_record_pct": 0.300,
             "is_back_to_back": False,
             "key_injuries": 2
@@ -513,8 +505,8 @@ games_raw = [
             "name": "Detroit Tigers",
             "season_ppg": 3.9,
             "season_opp_ppg": 3.9,
-            "last10_ppg": 3.8,
-            "last10_opp_ppg": 4.0,
+            "last10_ppg": 3.7,
+            "last10_opp_ppg": 4.1,
             "season_pace": 1.0,
             "home_record_pct": 0.480,
             "away_record_pct": 0.420,
@@ -523,23 +515,23 @@ games_raw = [
         },
         "odds": {
             "spread_home": 1.5,
-            "ml_home": 100,
-            "ml_away": -120,
-            "total": 7.5,
+            "ml_home": 112,
+            "ml_away": -132,
+            "total": 8.0,
             "book": "fanduel"
         }
     },
 
-    # 8. LAA Angels @ TB Rays
-    # Rays big favorite. Angels worst road record in MLB.
+    # 8. LAA Angels @ TB Rays (Game 2)
+    # TB won yesterday 8-5. TB big home favorite.
     {
         "sport": "baseball_mlb",
         "home": {
             "name": "Tampa Bay Rays",
-            "season_ppg": 4.2,
+            "season_ppg": 4.3,
             "season_opp_ppg": 3.8,
-            "last10_ppg": 4.4,
-            "last10_opp_ppg": 3.5,
+            "last10_ppg": 4.5,
+            "last10_opp_ppg": 3.4,
             "season_pace": 1.0,
             "home_record_pct": 0.560,
             "away_record_pct": 0.520,
@@ -550,8 +542,8 @@ games_raw = [
             "name": "Los Angeles Angels",
             "season_ppg": 3.8,
             "season_opp_ppg": 4.4,
-            "last10_ppg": 4.0,
-            "last10_opp_ppg": 4.3,
+            "last10_ppg": 3.9,
+            "last10_opp_ppg": 4.4,
             "season_pace": 1.0,
             "home_record_pct": 0.400,
             "away_record_pct": 0.320,
@@ -560,23 +552,23 @@ games_raw = [
         },
         "odds": {
             "spread_home": -1.5,
-            "ml_home": -175,
-            "ml_away": 148,
+            "ml_home": -152,
+            "ml_away": 128,
             "total": 8.0,
             "book": "fanduel"
         }
     },
 
-    # 9. MIL Brewers @ HOU Astros
-    # Pick'em. Both good teams. O/U 8.5.
+    # 9. MIL Brewers @ HOU Astros (Game 2)
+    # MIL won yesterday 5-4. Pick'em today.
     {
         "sport": "baseball_mlb",
         "home": {
             "name": "Houston Astros",
             "season_ppg": 4.5,
             "season_opp_ppg": 3.8,
-            "last10_ppg": 4.8,
-            "last10_opp_ppg": 3.5,
+            "last10_ppg": 4.7,
+            "last10_opp_ppg": 3.6,
             "season_pace": 1.0,
             "home_record_pct": 0.580,
             "away_record_pct": 0.520,
@@ -587,8 +579,8 @@ games_raw = [
             "name": "Milwaukee Brewers",
             "season_ppg": 4.5,
             "season_opp_ppg": 3.7,
-            "last10_ppg": 4.6,
-            "last10_opp_ppg": 3.5,
+            "last10_ppg": 4.7,
+            "last10_opp_ppg": 3.4,
             "season_pace": 1.0,
             "home_record_pct": 0.600,
             "away_record_pct": 0.520,
@@ -604,54 +596,55 @@ games_raw = [
         }
     },
 
-    # 10. TEX Rangers @ KC Royals
-    # TEX favored. Gore (3-4, 4.42) vs Kolek (3-0, 2.77).
-    # TEX 25-31, KC 22-34.
+    # 10. KC Royals @ TEX Rangers (Game 2)
+    # TEX won yesterday 9-1. TEX home favorite.
+    # Lugo (2-4) vs Rocker (2-5).
     {
         "sport": "baseball_mlb",
         "home": {
+            "name": "Texas Rangers",
+            "season_ppg": 4.1,
+            "season_opp_ppg": 4.1,
+            "last10_ppg": 4.5,
+            "last10_opp_ppg": 3.8,
+            "season_pace": 1.0,
+            "home_record_pct": 0.520,
+            "away_record_pct": 0.440,
+            "is_back_to_back": False,
+            "key_injuries": 1
+        },
+        "away": {
             "name": "Kansas City Royals",
             "season_ppg": 3.8,
             "season_opp_ppg": 4.4,
-            "last10_ppg": 3.5,
-            "last10_opp_ppg": 4.6,
+            "last10_ppg": 3.4,
+            "last10_opp_ppg": 4.7,
             "season_pace": 1.0,
             "home_record_pct": 0.440,
             "away_record_pct": 0.400,
             "is_back_to_back": False,
             "key_injuries": 1
         },
-        "away": {
-            "name": "Texas Rangers",
-            "season_ppg": 4.0,
-            "season_opp_ppg": 4.2,
-            "last10_ppg": 4.2,
-            "last10_opp_ppg": 4.0,
-            "season_pace": 1.0,
-            "home_record_pct": 0.500,
-            "away_record_pct": 0.440,
-            "is_back_to_back": False,
-            "key_injuries": 1
-        },
         "odds": {
-            "spread_home": 1.5,
-            "ml_home": 108,
-            "ml_away": -126,
+            "spread_home": -1.5,
+            "ml_home": -124,
+            "ml_away": 106,
             "total": 8.5,
             "book": "fanduel"
         }
     },
 
-    # 11. CHC Cubs @ STL Cardinals
-    # CHC favored. Cubs struggling but better team.
+    # 11. CHC Cubs @ STL Cardinals (Game 2)
+    # STL won yesterday 6-5. CHC road favorite.
+    # Brown (1-2, 2.01) vs Leahy (5-3, 4.44).
     {
         "sport": "baseball_mlb",
         "home": {
             "name": "St. Louis Cardinals",
             "season_ppg": 3.9,
             "season_opp_ppg": 4.3,
-            "last10_ppg": 3.5,
-            "last10_opp_ppg": 4.5,
+            "last10_ppg": 3.7,
+            "last10_opp_ppg": 4.3,
             "season_pace": 1.0,
             "home_record_pct": 0.480,
             "away_record_pct": 0.420,
@@ -662,8 +655,8 @@ games_raw = [
             "name": "Chicago Cubs",
             "season_ppg": 3.8,
             "season_opp_ppg": 4.3,
-            "last10_ppg": 3.2,
-            "last10_opp_ppg": 4.6,
+            "last10_ppg": 3.3,
+            "last10_opp_ppg": 4.5,
             "season_pace": 1.0,
             "home_record_pct": 0.440,
             "away_record_pct": 0.380,
@@ -672,23 +665,23 @@ games_raw = [
         },
         "odds": {
             "spread_home": 1.5,
-            "ml_home": 116,
-            "ml_away": -136,
+            "ml_home": 118,
+            "ml_away": -138,
             "total": 8.5,
             "book": "fanduel"
         }
     },
 
-    # 12. SF Giants @ COL Rockies
-    # SF big road favorite. COL worst home record.
+    # 12. SF Giants @ COL Rockies (Game 2)
+    # COL won yesterday 8-6. SF road favorite.
     {
         "sport": "baseball_mlb",
         "home": {
             "name": "Colorado Rockies",
-            "season_ppg": 3.7,
+            "season_ppg": 3.8,
             "season_opp_ppg": 5.0,
-            "last10_ppg": 3.8,
-            "last10_opp_ppg": 5.2,
+            "last10_ppg": 4.0,
+            "last10_opp_ppg": 5.0,
             "season_pace": 1.0,
             "home_record_pct": 0.380,
             "away_record_pct": 0.260,
@@ -699,8 +692,8 @@ games_raw = [
             "name": "San Francisco Giants",
             "season_ppg": 4.0,
             "season_opp_ppg": 4.0,
-            "last10_ppg": 3.8,
-            "last10_opp_ppg": 4.2,
+            "last10_ppg": 3.9,
+            "last10_opp_ppg": 4.1,
             "season_pace": 1.0,
             "home_record_pct": 0.500,
             "away_record_pct": 0.440,
@@ -709,22 +702,22 @@ games_raw = [
         },
         "odds": {
             "spread_home": 1.5,
-            "ml_home": 136,
-            "ml_away": -162,
-            "total": 9.0,
+            "ml_home": 126,
+            "ml_away": -148,
+            "total": 9.5,
             "book": "fanduel"
         }
     },
 
-    # 13. ARI Diamondbacks @ SEA Mariners
-    # SEA home favorite. Kirby (5-4, 3.54) vs Gallen (3-4, 4.80).
+    # 13. ARI Diamondbacks @ SEA Mariners (Game 2)
+    # SEA won yesterday 7-6. SEA home favorite.
     {
         "sport": "baseball_mlb",
         "home": {
             "name": "Seattle Mariners",
             "season_ppg": 4.1,
             "season_opp_ppg": 3.5,
-            "last10_ppg": 4.5,
+            "last10_ppg": 4.6,
             "last10_opp_ppg": 3.2,
             "season_pace": 1.0,
             "home_record_pct": 0.600,
@@ -736,8 +729,8 @@ games_raw = [
             "name": "Arizona Diamondbacks",
             "season_ppg": 4.3,
             "season_opp_ppg": 3.9,
-            "last10_ppg": 4.5,
-            "last10_opp_ppg": 3.7,
+            "last10_ppg": 4.6,
+            "last10_opp_ppg": 3.8,
             "season_pace": 1.0,
             "home_record_pct": 0.560,
             "away_record_pct": 0.480,
@@ -746,24 +739,23 @@ games_raw = [
         },
         "odds": {
             "spread_home": -1.5,
-            "ml_home": -144,
-            "ml_away": 122,
-            "total": 8.0,
+            "ml_home": -150,
+            "ml_away": 125,
+            "total": 7.0,
             "book": "fanduel"
         }
     },
 
-    # 14. PHI Phillies @ LAD Dodgers
-    # Wheeler (1.70 ERA) vs Wrobleski (2.82). Late game.
-    # LAD slight home favorite but Wheeler is dominant.
+    # 14. PHI Phillies @ LAD Dodgers (Game 2)
+    # LAD won yesterday 4-2. LAD home favorite.
     {
         "sport": "baseball_mlb",
         "home": {
             "name": "Los Angeles Dodgers",
             "season_ppg": 5.0,
             "season_opp_ppg": 3.5,
-            "last10_ppg": 5.0,
-            "last10_opp_ppg": 3.3,
+            "last10_ppg": 5.1,
+            "last10_opp_ppg": 3.2,
             "season_pace": 1.0,
             "home_record_pct": 0.680,
             "away_record_pct": 0.580,
@@ -774,8 +766,8 @@ games_raw = [
             "name": "Philadelphia Phillies",
             "season_ppg": 4.6,
             "season_opp_ppg": 3.5,
-            "last10_ppg": 4.8,
-            "last10_opp_ppg": 3.2,
+            "last10_ppg": 4.7,
+            "last10_opp_ppg": 3.3,
             "season_pace": 1.0,
             "home_record_pct": 0.620,
             "away_record_pct": 0.540,
@@ -784,23 +776,24 @@ games_raw = [
         },
         "odds": {
             "spread_home": -1.5,
-            "ml_home": -120,
-            "ml_away": 100,
+            "ml_home": -126,
+            "ml_away": 108,
             "total": 8.0,
             "book": "fanduel"
         }
     },
 
-    # 15. NYY Yankees @ SAC Athletics
-    # NYY big road favorite. Rodon (0-2, 4.15) vs Severino (2-5, 4.23).
+    # 15. NYY Yankees @ SAC Athletics (Game 2)
+    # NYY won yesterday 8-2. NYY road favorite.
+    # Weathers (2-2, 3.14) vs Ginn (2-3, 3.19). NYY 34-22, SAC 27-29.
     {
         "sport": "baseball_mlb",
         "home": {
             "name": "Sacramento Athletics",
             "season_ppg": 3.8,
             "season_opp_ppg": 4.3,
-            "last10_ppg": 3.5,
-            "last10_opp_ppg": 4.6,
+            "last10_ppg": 3.4,
+            "last10_opp_ppg": 4.7,
             "season_pace": 1.0,
             "home_record_pct": 0.460,
             "away_record_pct": 0.400,
@@ -811,8 +804,8 @@ games_raw = [
             "name": "New York Yankees",
             "season_ppg": 5.0,
             "season_opp_ppg": 3.7,
-            "last10_ppg": 5.3,
-            "last10_opp_ppg": 3.4,
+            "last10_ppg": 5.4,
+            "last10_opp_ppg": 3.3,
             "season_pace": 1.0,
             "home_record_pct": 0.640,
             "away_record_pct": 0.580,
@@ -821,8 +814,8 @@ games_raw = [
         },
         "odds": {
             "spread_home": 1.5,
-            "ml_home": 129,
-            "ml_away": -156,
+            "ml_home": 124,
+            "ml_away": -146,
             "total": 9.5,
             "book": "fanduel"
         }
@@ -1009,9 +1002,9 @@ with open(pred_file, "w") as f:
 print(f"\nPredictions saved to predictions/{TODAY}.json")
 
 # ── Display results ─────────────────────────────────────────────────
-sports_order = ["icehockey_nhl", "baseball_mlb"]
-sport_names = {"icehockey_nhl": "NHL", "baseball_mlb": "MLB"}
-sport_dates = {"icehockey_nhl": "Friday May 29, 2026", "baseball_mlb": "Friday May 29, 2026"}
+sports_order = ["basketball_nba", "baseball_mlb"]
+sport_names = {"basketball_nba": "NBA", "baseball_mlb": "MLB"}
+sport_dates = {"basketball_nba": "Saturday May 30, 2026", "baseball_mlb": "Saturday May 30, 2026"}
 
 for sport in sports_order:
     sport_preds = [p for p in predictions if p["sport"] == sport]
@@ -1028,8 +1021,8 @@ for sport in sports_order:
     bets = []
     for p in sport_preds:
         spread = p["odds"]["spread_home"]
-        home_short = p["home_team"].split()[-1][:5]
-        away_short = p["away_team"].split()[-1][:5]
+        home_short = p["home_team"].split()[-1][:6]
+        away_short = p["away_team"].split()[-1][:6]
 
         if spread < 0:
             game_str = f"{home_short} {spread:+.1f} vs {away_short}"
@@ -1070,20 +1063,16 @@ metrics_file = os.path.join(BASE, "metrics.json")
 with open(metrics_file) as f:
     metrics = json.load(f)
 
-# Compute updated rolling stats from Phase 1 eval
 eval_games = model_scores[champ_id]["total"]
 eval_correct = model_scores[champ_id]["correct"]
 eval_acc = eval_correct / eval_games if eval_games > 0 else 0.5
 
-prev_7d = metrics["rolling_7d"]
-prev_30d = metrics["rolling_30d"]
 prev_all = metrics["all_time"]
 
-# BET verdicts from May 26
-may26_bets = [p for p in past_preds["predictions"] if p["verdict"] == "BET"]
-may26_bet_wins = 0
-may26_bet_total = len(may26_bets)
-for bp in may26_bets:
+may29_bets = [p for p in past_preds["predictions"] if p["verdict"] == "BET"]
+may29_bet_wins = 0
+may29_bet_total = len(may29_bets)
+for bp in may29_bets:
     gk = bp["game"]
     if gk not in actual_results:
         continue
@@ -1100,17 +1089,17 @@ for bp in may26_bets:
     else:
         won = actual["winner"] == "away"
     if won:
-        may26_bet_wins += 1
+        may29_bet_wins += 1
 
 new_all_games = prev_all["total_games"] + eval_games
 new_all_correct = prev_all["total_correct"] + eval_correct
-new_all_bets = prev_all["total_bets_recommended"] + may26_bet_total
-new_all_bets_won = prev_all["total_bets_won"] + may26_bet_wins
+new_all_bets = prev_all["total_bets_recommended"] + may29_bet_total
+new_all_bets_won = prev_all["total_bets_won"] + may29_bet_wins
 
 metrics["last_updated"] = TODAY
 metrics["rolling_7d"] = {
     "accuracy": round(eval_correct / eval_games, 4) if eval_games > 0 else 0.5,
-    "ev_realized": round((may26_bet_wins * 0.909 - (may26_bet_total - may26_bet_wins)) / max(may26_bet_total, 1), 4),
+    "ev_realized": round((may29_bet_wins * 0.909 - (may29_bet_total - may29_bet_wins)) / max(may29_bet_total, 1), 4),
     "total_games": eval_games,
     "total_correct": eval_correct
 }
@@ -1129,14 +1118,13 @@ metrics["all_time"] = {
     "total_bets_won": new_all_bets_won
 }
 
-# Update variant performance
 for model in all_models:
     mid = model["id"]
     s = model_scores.get(mid, {"correct": 0, "total": 0})
     vp = metrics.get("variant_performance", {}).get(mid, {})
     metrics.setdefault("variant_performance", {})[mid] = {
-        "lifetime_games": vp.get("lifetime_games", 30) + s["total"],
-        "lifetime_correct": vp.get("lifetime_correct", 15) + s["correct"],
+        "lifetime_games": vp.get("lifetime_games", 47) + s["total"],
+        "lifetime_correct": vp.get("lifetime_correct", 29) + s["correct"],
         "weight": 1.0 if mid == champion["id"] else next((c["weight"] for c in challengers if c["id"] == mid), 0.5),
         "role": "champion" if mid == champion["id"] else "challenger"
     }
@@ -1151,7 +1139,7 @@ metrics["today_summary"] = {
     "bets_recommended": total_bets_today,
     "leans": total_leans_today,
     "sports": list(set(p["sport"] for p in predictions)),
-    "notes": f"NHL ECF G5 (MTL@CAR) + {sum(1 for p in predictions if p['sport']=='baseball_mlb')} MLB games. {total_bets_today} BETs, {total_leans_today} LEANs, {total_no_today} NO BETs."
+    "notes": f"NBA WCF G7 (SAS@OKC) + {sum(1 for p in predictions if p['sport']=='baseball_mlb')} MLB games. {total_bets_today} BETs, {total_leans_today} LEANs, {total_no_today} NO BETs."
 }
 
 with open(metrics_file, "w") as f:
@@ -1165,8 +1153,8 @@ print(f"{'=' * 90}")
 print(f"\n  Edge-Finder Metrics")
 print(f"  {'=' * 50}")
 print(f"  Champion: {champion['id']} (promoted {champion['promoted_on']})")
-print(f"  May 26 eval: {eval_correct}/{eval_games} = {eval_acc:.1%} accuracy")
-print(f"  May 26 bets: {may26_bet_wins}/{may26_bet_total} = {may26_bet_wins/max(may26_bet_total,1):.1%} hit rate")
+print(f"  May 29 eval: {eval_correct}/{eval_games} = {eval_acc:.1%} accuracy")
+print(f"  May 29 bets: {may29_bet_wins}/{may29_bet_total} = {may29_bet_wins/max(may29_bet_total,1):.1%} hit rate")
 print(f"  All-time: {new_all_correct}/{new_all_games} = {new_all_correct/new_all_games:.1%} accuracy | {new_all_bets_won}/{new_all_bets} bets won")
 cw = ", ".join(f"{c['id'].replace('-v1','')}={c['weight']}" for c in challengers)
 print(f"  Challengers: {cw}")
