@@ -281,3 +281,99 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-05-26	baseball_mlb	Colorado Rockies @ Los Angeles Dodgers	home-swing-v1	home	4.71	0.8951	home	9	1	0.5384	0.2760	spread_home	win
 2026-05-26	baseball_mlb	Colorado Rockies @ Los Angeles Dodgers	regression-v1	home	2.67	0.7663	home	9	1	0.2015	0.0924	spread_home	win
 2026-05-26	baseball_mlb	Colorado Rockies @ Los Angeles Dodgers	pace-adj-v1	home	3.22	0.8106	home	9	1	0.3106	0.1556	spread_home	win
+2026-05-29	icehockey_nhl	Montreal Canadiens @ Carolina Hurricanes	season-avg-v1	home	1.51	0.7621	home	5	1	-0.0190	0.0810	ml_home	win
+2026-05-29	icehockey_nhl	Montreal Canadiens @ Carolina Hurricanes	recency-v1	home	1.70	0.7888	home	5	1	0.0458	0.1189	ml_home	win
+2026-05-29	icehockey_nhl	Montreal Canadiens @ Carolina Hurricanes	injury-rest-v1	home	1.72	0.7944	home	5	1	0.0519	0.1267	ml_home	win
+2026-05-29	icehockey_nhl	Montreal Canadiens @ Carolina Hurricanes	home-swing-v1	home	3.01	0.9150	home	5	1	0.4535	0.2979	spread_home	win
+2026-05-29	icehockey_nhl	Montreal Canadiens @ Carolina Hurricanes	regression-v1	home	1.30	0.7271	home	5	1	-0.1018	0.0313	ml_home	win
+2026-05-29	icehockey_nhl	Montreal Canadiens @ Carolina Hurricanes	pace-adj-v1	home	1.52	0.7638	home	5	1	-0.0227	0.0834	ml_home	win
+2026-05-29	baseball_mlb	Atlanta Braves @ Cincinnati Reds	season-avg-v1	away	-0.57	0.4376	away	-5	1	0.1330	-0.0199	spread_home	loss
+2026-05-29	baseball_mlb	Atlanta Braves @ Cincinnati Reds	recency-v1	away	-0.54	0.4424	away	-5	1	0.1441	-0.0091	spread_home	loss
+2026-05-29	baseball_mlb	Atlanta Braves @ Cincinnati Reds	injury-rest-v1	away	-0.53	0.4447	away	-5	1	0.1437	-0.0038	spread_home	loss
+2026-05-29	baseball_mlb	Atlanta Braves @ Cincinnati Reds	home-swing-v1	home	0.85	0.5876	away	-5	0	0.3931	0.3163	spread_home	loss
+2026-05-29	baseball_mlb	Atlanta Braves @ Cincinnati Reds	regression-v1	away	-0.39	0.4599	away	-5	1	0.1752	0.0303	spread_home	loss
+2026-05-29	baseball_mlb	Atlanta Braves @ Cincinnati Reds	pace-adj-v1	away	-0.55	0.4408	away	-5	1	0.1423	-0.0127	spread_home	loss
+2026-05-29	baseball_mlb	Minnesota Twins @ Pittsburgh Pirates	season-avg-v1	home	0.50	0.5552	home	1	1	-0.2445	-0.0482	spread_away	win
+2026-05-29	baseball_mlb	Minnesota Twins @ Pittsburgh Pirates	recency-v1	home	0.52	0.5597	home	1	1	-0.2392	-0.0405	spread_away	win
+2026-05-29	baseball_mlb	Minnesota Twins @ Pittsburgh Pirates	injury-rest-v1	home	0.47	0.5520	home	1	1	-0.2571	-0.0537	spread_away	win
+2026-05-29	baseball_mlb	Minnesota Twins @ Pittsburgh Pirates	home-swing-v1	home	1.89	0.6929	home	1	1	0.0387	0.1878	ml_home	win
+2026-05-29	baseball_mlb	Minnesota Twins @ Pittsburgh Pirates	regression-v1	home	0.48	0.5520	home	1	1	-0.2494	-0.0537	spread_away	win
+2026-05-29	baseball_mlb	Minnesota Twins @ Pittsburgh Pirates	pace-adj-v1	home	0.49	0.5541	home	1	1	-0.2500	-0.0501	spread_away	win
+2026-05-29	baseball_mlb	Cleveland Guardians @ Boston Red Sox	season-avg-v1	away	-0.54	0.4426	away	-1	1	0.1394	-0.0882	spread_home	win
+2026-05-29	baseball_mlb	Cleveland Guardians @ Boston Red Sox	recency-v1	away	-0.60	0.4340	away	-1	1	0.1301	-0.1060	spread_home	win
+2026-05-29	baseball_mlb	Cleveland Guardians @ Boston Red Sox	injury-rest-v1	away	-0.92	0.3984	away	-1	1	0.0685	-0.1792	ml_away	win
+2026-05-29	baseball_mlb	Cleveland Guardians @ Boston Red Sox	home-swing-v1	home	0.87	0.5906	away	-1	0	0.4003	0.2167	spread_home	win
+2026-05-29	baseball_mlb	Cleveland Guardians @ Boston Red Sox	regression-v1	away	-0.37	0.4599	away	-1	1	0.1770	-0.0526	spread_home	win
+2026-05-29	baseball_mlb	Cleveland Guardians @ Boston Red Sox	pace-adj-v1	away	-0.53	0.4401	away	-1	1	0.1433	-0.0933	spread_home	win
+2026-05-29	baseball_mlb	Baltimore Orioles @ Toronto Blue Jays	season-avg-v1	away	-0.38	0.4578	home	1	0	0.1798	-0.0933	spread_home	win
+2026-05-29	baseball_mlb	Baltimore Orioles @ Toronto Blue Jays	recency-v1	away	-0.43	0.4539	home	1	0	0.1695	-0.1011	spread_home	win
+2026-05-29	baseball_mlb	Baltimore Orioles @ Toronto Blue Jays	injury-rest-v1	away	-0.75	0.4161	home	1	0	0.1010	-0.1759	spread_home	win
+2026-05-29	baseball_mlb	Baltimore Orioles @ Toronto Blue Jays	home-swing-v1	home	1.05	0.6094	home	1	1	0.4299	0.2069	spread_home	win
+2026-05-29	baseball_mlb	Baltimore Orioles @ Toronto Blue Jays	regression-v1	away	-0.26	0.4712	home	1	0	0.1971	-0.0668	spread_home	win
+2026-05-29	baseball_mlb	Baltimore Orioles @ Toronto Blue Jays	pace-adj-v1	away	-0.38	0.4566	home	1	0	0.1799	-0.0957	spread_home	win
+2026-05-29	baseball_mlb	Miami Marlins @ New York Mets	season-avg-v1	home	0.59	0.5653	home	2	1	-0.2281	0.0365	spread_away	loss
+2026-05-29	baseball_mlb	Miami Marlins @ New York Mets	recency-v1	home	0.47	0.5519	home	2	1	-0.2469	0.0118	spread_away	loss
+2026-05-29	baseball_mlb	Miami Marlins @ New York Mets	injury-rest-v1	home	0.91	0.6026	home	2	1	-0.1698	0.1048	ml_home	win
+2026-05-29	baseball_mlb	Miami Marlins @ New York Mets	home-swing-v1	home	2.03	0.7066	home	2	1	0.0739	0.2954	ml_home	win
+2026-05-29	baseball_mlb	Miami Marlins @ New York Mets	regression-v1	home	0.50	0.5520	home	2	1	-0.2433	0.0120	spread_away	loss
+2026-05-29	baseball_mlb	Miami Marlins @ New York Mets	pace-adj-v1	home	0.55	0.5600	home	2	1	-0.2366	0.0267	spread_away	loss
+2026-05-29	baseball_mlb	San Diego Padres @ Washington Nationals	season-avg-v1	home	0.88	0.5968	away	-2	0	0.4099	0.1394	spread_home	loss
+2026-05-29	baseball_mlb	San Diego Padres @ Washington Nationals	recency-v1	home	1.14	0.6229	away	-2	0	0.4542	0.1891	spread_home	loss
+2026-05-29	baseball_mlb	San Diego Padres @ Washington Nationals	injury-rest-v1	home	1.28	0.6409	away	-2	0	0.4799	0.2235	spread_home	loss
+2026-05-29	baseball_mlb	San Diego Padres @ Washington Nationals	home-swing-v1	home	2.34	0.7321	away	-2	0	0.6091	0.3976	spread_home	loss
+2026-05-29	baseball_mlb	San Diego Padres @ Washington Nationals	regression-v1	home	0.77	0.5830	away	-2	0	0.3852	0.1130	spread_home	loss
+2026-05-29	baseball_mlb	San Diego Padres @ Washington Nationals	pace-adj-v1	home	0.89	0.5937	away	-2	0	0.4096	0.1334	spread_home	loss
+2026-05-29	baseball_mlb	Detroit Tigers @ Chicago White Sox	season-avg-v1	away	-0.49	0.4453	home	1	0	0.1586	-0.1094	spread_home	win
+2026-05-29	baseball_mlb	Detroit Tigers @ Chicago White Sox	recency-v1	away	-0.46	0.4493	home	1	0	0.1649	-0.1015	spread_home	win
+2026-05-29	baseball_mlb	Detroit Tigers @ Chicago White Sox	injury-rest-v1	away	-0.87	0.3983	home	1	0	0.0869	-0.2033	ml_away	loss
+2026-05-29	baseball_mlb	Detroit Tigers @ Chicago White Sox	home-swing-v1	home	0.89	0.5969	home	1	1	0.4045	0.1937	spread_home	win
+2026-05-29	baseball_mlb	Detroit Tigers @ Chicago White Sox	regression-v1	away	-0.34	0.4613	home	1	0	0.1871	-0.0774	spread_home	win
+2026-05-29	baseball_mlb	Detroit Tigers @ Chicago White Sox	pace-adj-v1	away	-0.49	0.4498	home	1	0	0.1593	-0.1003	spread_home	win
+2026-05-29	baseball_mlb	Los Angeles Angels @ Tampa Bay Rays	season-avg-v1	home	1.18	0.6274	home	3	1	-0.1044	-0.0140	spread_away	loss
+2026-05-29	baseball_mlb	Los Angeles Angels @ Tampa Bay Rays	recency-v1	home	1.21	0.6296	home	3	1	-0.0975	-0.0107	spread_away	loss
+2026-05-29	baseball_mlb	Los Angeles Angels @ Tampa Bay Rays	injury-rest-v1	home	1.88	0.7064	home	3	1	0.0498	0.1101	ml_home	win
+2026-05-29	baseball_mlb	Los Angeles Angels @ Tampa Bay Rays	home-swing-v1	home	2.63	0.7583	home	3	1	0.1929	0.1916	spread_home	win
+2026-05-29	baseball_mlb	Los Angeles Angels @ Tampa Bay Rays	regression-v1	home	1.00	0.6069	home	3	1	-0.1363	-0.0463	spread_away	loss
+2026-05-29	baseball_mlb	Los Angeles Angels @ Tampa Bay Rays	pace-adj-v1	home	1.20	0.6287	home	3	1	-0.0970	-0.0120	spread_away	loss
+2026-05-29	baseball_mlb	Milwaukee Brewers @ Houston Astros	season-avg-v1	home	0.30	0.5313	away	-1	0	-0.2845	0.0233	spread_away	win
+2026-05-29	baseball_mlb	Milwaukee Brewers @ Houston Astros	recency-v1	home	0.33	0.5377	away	-1	0	-0.2725	0.0356	spread_away	win
+2026-05-29	baseball_mlb	Milwaukee Brewers @ Houston Astros	injury-rest-v1	home	0.31	0.5333	away	-1	0	-0.2845	0.0271	spread_away	win
+2026-05-29	baseball_mlb	Milwaukee Brewers @ Houston Astros	home-swing-v1	home	1.73	0.6809	away	-1	0	0.0181	0.3114	ml_home	loss
+2026-05-29	baseball_mlb	Milwaukee Brewers @ Houston Astros	regression-v1	home	0.30	0.5321	away	-1	0	-0.2798	0.0249	spread_away	win
+2026-05-29	baseball_mlb	Milwaukee Brewers @ Houston Astros	pace-adj-v1	home	0.28	0.5297	away	-1	0	-0.2818	0.0201	spread_away	win
+2026-05-29	baseball_mlb	Texas Rangers @ Kansas City Royals	season-avg-v1	away	-0.45	0.4503	away	-8	1	0.1662	-0.0633	spread_home	loss
+2026-05-29	baseball_mlb	Texas Rangers @ Kansas City Royals	recency-v1	away	-0.54	0.4422	away	-8	1	0.1508	-0.0802	spread_home	loss
+2026-05-29	baseball_mlb	Texas Rangers @ Kansas City Royals	injury-rest-v1	away	-0.42	0.4524	away	-8	1	0.1792	-0.0591	spread_home	loss
+2026-05-29	baseball_mlb	Texas Rangers @ Kansas City Royals	home-swing-v1	home	0.95	0.5997	away	-8	0	0.4131	0.2474	spread_home	loss
+2026-05-29	baseball_mlb	Texas Rangers @ Kansas City Royals	regression-v1	away	-0.27	0.4685	away	-8	1	0.1977	-0.0256	spread_home	loss
+2026-05-29	baseball_mlb	Texas Rangers @ Kansas City Royals	pace-adj-v1	away	-0.47	0.4479	away	-8	1	0.1560	-0.0684	spread_home	loss
+2026-05-29	baseball_mlb	Chicago Cubs @ St. Louis Cardinals	season-avg-v1	home	0.51	0.5536	home	1	1	0.3474	0.1957	spread_home	win
+2026-05-29	baseball_mlb	Chicago Cubs @ St. Louis Cardinals	recency-v1	home	0.52	0.5581	home	1	1	0.3562	0.2054	spread_home	win
+2026-05-29	baseball_mlb	Chicago Cubs @ St. Louis Cardinals	injury-rest-v1	home	0.46	0.5513	home	1	1	0.3508	0.1908	spread_home	win
+2026-05-29	baseball_mlb	Chicago Cubs @ St. Louis Cardinals	home-swing-v1	home	1.86	0.6937	home	1	1	0.5552	0.4984	spread_home	win
+2026-05-29	baseball_mlb	Chicago Cubs @ St. Louis Cardinals	regression-v1	home	0.44	0.5471	home	1	1	0.3330	0.1818	spread_home	win
+2026-05-29	baseball_mlb	Chicago Cubs @ St. Louis Cardinals	pace-adj-v1	home	0.50	0.5552	home	1	1	0.3475	0.1991	spread_home	win
+2026-05-29	baseball_mlb	San Francisco Giants @ Colorado Rockies	season-avg-v1	away	-0.67	0.4274	home	2	0	0.1140	0.0088	spread_home	win
+2026-05-29	baseball_mlb	San Francisco Giants @ Colorado Rockies	recency-v1	away	-0.62	0.4331	home	2	0	0.1282	0.0222	spread_home	win
+2026-05-29	baseball_mlb	San Francisco Giants @ Colorado Rockies	injury-rest-v1	away	-1.39	0.3490	home	2	0	-0.0327	-0.1763	ml_away	loss
+2026-05-29	baseball_mlb	San Francisco Giants @ Colorado Rockies	home-swing-v1	home	0.77	0.5787	home	2	1	0.3773	0.3657	spread_home	win
+2026-05-29	baseball_mlb	San Francisco Giants @ Colorado Rockies	regression-v1	away	-0.47	0.4482	home	2	0	0.1586	0.0578	spread_home	win
+2026-05-29	baseball_mlb	San Francisco Giants @ Colorado Rockies	pace-adj-v1	away	-0.66	0.4277	home	2	0	0.1117	0.0093	spread_home	win
+2026-05-29	baseball_mlb	Arizona Diamondbacks @ Seattle Mariners	season-avg-v1	home	0.58	0.5621	home	1	1	-0.2300	-0.0476	spread_away	win
+2026-05-29	baseball_mlb	Arizona Diamondbacks @ Seattle Mariners	recency-v1	home	0.64	0.5695	home	1	1	-0.2216	-0.0351	spread_away	win
+2026-05-29	baseball_mlb	Arizona Diamondbacks @ Seattle Mariners	injury-rest-v1	home	0.58	0.5649	home	1	1	-0.2302	-0.0428	spread_away	win
+2026-05-29	baseball_mlb	Arizona Diamondbacks @ Seattle Mariners	home-swing-v1	home	2.04	0.7114	home	1	1	0.0777	0.2054	ml_home	win
+2026-05-29	baseball_mlb	Arizona Diamondbacks @ Seattle Mariners	regression-v1	home	0.54	0.5585	home	1	1	-0.2352	-0.0536	spread_away	win
+2026-05-29	baseball_mlb	Arizona Diamondbacks @ Seattle Mariners	pace-adj-v1	home	0.58	0.5642	home	1	1	-0.2288	-0.0441	spread_away	win
+2026-05-29	baseball_mlb	Philadelphia Phillies @ Los Angeles Dodgers	season-avg-v1	home	0.43	0.5442	home	2	1	-0.2602	-0.0023	spread_away	loss
+2026-05-29	baseball_mlb	Philadelphia Phillies @ Los Angeles Dodgers	recency-v1	home	0.39	0.5425	home	2	1	-0.2684	-0.0053	spread_away	loss
+2026-05-29	baseball_mlb	Philadelphia Phillies @ Los Angeles Dodgers	injury-rest-v1	away	0.01	0.4992	home	2	0	-0.3434	-0.0848	spread_away	loss
+2026-05-29	baseball_mlb	Philadelphia Phillies @ Los Angeles Dodgers	home-swing-v1	home	1.87	0.6894	home	2	1	0.0350	0.2640	ml_home	win
+2026-05-29	baseball_mlb	Philadelphia Phillies @ Los Angeles Dodgers	regression-v1	home	0.41	0.5452	home	2	1	-0.2609	-0.0004	spread_away	loss
+2026-05-29	baseball_mlb	Philadelphia Phillies @ Los Angeles Dodgers	pace-adj-v1	home	0.46	0.5499	home	2	1	-0.2580	0.0082	spread_away	loss
+2026-05-29	baseball_mlb	New York Yankees @ Sacramento Athletics	season-avg-v1	away	-1.79	0.3134	away	-6	1	-0.1175	-0.2822	ml_away	win
+2026-05-29	baseball_mlb	New York Yankees @ Sacramento Athletics	recency-v1	away	-1.96	0.2939	away	-6	1	-0.1578	-0.3269	ml_away	win
+2026-05-29	baseball_mlb	New York Yankees @ Sacramento Athletics	injury-rest-v1	away	-2.12	0.2789	away	-6	1	-0.1899	-0.3613	ml_away	win
+2026-05-29	baseball_mlb	New York Yankees @ Sacramento Athletics	home-swing-v1	away	-0.40	0.4549	away	-6	1	0.1603	0.0418	spread_home	loss
+2026-05-29	baseball_mlb	New York Yankees @ Sacramento Athletics	regression-v1	away	-1.40	0.3526	away	-6	1	-0.0359	-0.1925	ml_away	win
+2026-05-29	baseball_mlb	New York Yankees @ Sacramento Athletics	pace-adj-v1	away	-1.76	0.3142	away	-6	1	-0.1130	-0.2805	ml_away	win

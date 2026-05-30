@@ -1,59 +1,59 @@
 {
-  "last_updated": "2026-05-29",
+  "last_updated": "2026-05-30",
   "rolling_7d": {
-    "accuracy": 0.8235,
-    "ev_realized": 0.4848,
-    "total_games": 17,
-    "total_correct": 14
+    "accuracy": 0.6875,
+    "ev_realized": 0.1931,
+    "total_games": 16,
+    "total_correct": 11
   },
   "rolling_30d": {
-    "accuracy": 0.617,
-    "ev_realized": 0.0835,
-    "total_games": 47,
-    "total_correct": 29
+    "accuracy": 0.6349,
+    "ev_realized": 0.103,
+    "total_games": 63,
+    "total_correct": 40
   },
   "all_time": {
-    "accuracy": 0.617,
-    "ev_realized": 0.0835,
-    "total_games": 47,
-    "total_correct": 29,
-    "total_bets_recommended": 37,
-    "total_bets_won": 21
+    "accuracy": 0.6349,
+    "ev_realized": 0.103,
+    "total_games": 63,
+    "total_correct": 40,
+    "total_bets_recommended": 45,
+    "total_bets_won": 26
   },
   "variant_performance": {
     "season-avg-v1": {
-      "lifetime_games": 47,
-      "lifetime_correct": 29,
+      "lifetime_games": 63,
+      "lifetime_correct": 40,
       "weight": 1.0,
       "role": "champion"
     },
     "recency-v1": {
-      "lifetime_games": 47,
-      "lifetime_correct": 29,
+      "lifetime_games": 63,
+      "lifetime_correct": 40,
       "weight": 0.5,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 47,
-      "lifetime_correct": 28,
-      "weight": 0.4,
+      "lifetime_games": 63,
+      "lifetime_correct": 38,
+      "weight": 0.3,
       "role": "challenger"
     },
     "home-swing-v1": {
-      "lifetime_games": 47,
-      "lifetime_correct": 22,
-      "weight": 0.30000000000000004,
+      "lifetime_games": 63,
+      "lifetime_correct": 33,
+      "weight": 0.3,
       "role": "challenger"
     },
     "regression-v1": {
-      "lifetime_games": 47,
-      "lifetime_correct": 30,
+      "lifetime_games": 63,
+      "lifetime_correct": 41,
       "weight": 0.5,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 47,
-      "lifetime_correct": 29,
+      "lifetime_games": 63,
+      "lifetime_correct": 40,
       "weight": 0.5,
       "role": "challenger"
     }
@@ -66,14 +66,14 @@
     }
   ],
   "today_summary": {
-    "date": "2026-05-29",
+    "date": "2026-05-30",
     "games_analyzed": 16,
     "bets_recommended": 8,
     "leans": 7,
     "sports": [
-      "icehockey_nhl",
-      "baseball_mlb"
+      "baseball_mlb",
+      "basketball_nba"
     ],
-    "notes": "NHL ECF G5 (MTL@CAR) + 15 MLB games. 8 BETs, 7 LEANs, 1 NO BETs."
+    "notes": "NBA WCF G7 (SAS@OKC) + 15 MLB games. 8 BETs, 7 LEANs, 1 NO BETs."
   }
 }
