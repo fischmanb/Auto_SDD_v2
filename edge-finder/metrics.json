@@ -1,59 +1,59 @@
 {
   "last_updated": "2026-05-30",
   "rolling_7d": {
-    "accuracy": 0.6875,
+    "accuracy": 0.5938,
     "ev_realized": 0.1931,
-    "total_games": 16,
-    "total_correct": 11
+    "total_games": 32,
+    "total_correct": 19
   },
   "rolling_30d": {
-    "accuracy": 0.6349,
+    "accuracy": 0.6076,
     "ev_realized": 0.103,
-    "total_games": 63,
-    "total_correct": 40
+    "total_games": 79,
+    "total_correct": 48
   },
   "all_time": {
-    "accuracy": 0.6349,
-    "ev_realized": 0.103,
-    "total_games": 63,
-    "total_correct": 40,
-    "total_bets_recommended": 45,
-    "total_bets_won": 26
+    "accuracy": 0.6076,
+    "ev_realized": 0.0667,
+    "total_games": 79,
+    "total_correct": 48,
+    "total_bets_recommended": 60,
+    "total_bets_won": 34
   },
   "variant_performance": {
     "season-avg-v1": {
-      "lifetime_games": 63,
-      "lifetime_correct": 40,
+      "lifetime_games": 79,
+      "lifetime_correct": 48,
       "weight": 1.0,
       "role": "champion"
     },
     "recency-v1": {
-      "lifetime_games": 63,
-      "lifetime_correct": 40,
+      "lifetime_games": 79,
+      "lifetime_correct": 48,
       "weight": 0.5,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 63,
-      "lifetime_correct": 38,
+      "lifetime_games": 79,
+      "lifetime_correct": 47,
       "weight": 0.3,
       "role": "challenger"
     },
     "home-swing-v1": {
-      "lifetime_games": 63,
-      "lifetime_correct": 33,
+      "lifetime_games": 79,
+      "lifetime_correct": 42,
       "weight": 0.3,
       "role": "challenger"
     },
     "regression-v1": {
-      "lifetime_games": 63,
-      "lifetime_correct": 41,
+      "lifetime_games": 79,
+      "lifetime_correct": 49,
       "weight": 0.5,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 63,
-      "lifetime_correct": 40,
+      "lifetime_games": 79,
+      "lifetime_correct": 48,
       "weight": 0.5,
       "role": "challenger"
     }
@@ -71,9 +71,9 @@
     "bets_recommended": 8,
     "leans": 7,
     "sports": [
-      "baseball_mlb",
-      "basketball_nba"
+      "basketball_nba",
+      "baseball_mlb"
     ],
-    "notes": "NBA WCF G7 (SAS@OKC) + 15 MLB games. 8 BETs, 7 LEANs, 1 NO BETs."
+    "notes": "WCF G7 (SAS wins 111-103) + 15 MLB. Champion 50%, BETs 4/8, LEANs 4/7."
   }
 }
