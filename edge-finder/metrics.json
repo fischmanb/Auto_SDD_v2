@@ -66,14 +66,13 @@
     }
   ],
   "today_summary": {
-    "date": "2026-05-30",
-    "games_analyzed": 16,
-    "bets_recommended": 8,
-    "leans": 7,
+    "date": "2026-05-31",
+    "games_analyzed": 15,
+    "bets_recommended": 5,
+    "leans": 10,
     "sports": [
-      "basketball_nba",
       "baseball_mlb"
     ],
-    "notes": "WCF G7 (SAS wins 111-103) + 15 MLB. Champion 50%, BETs 4/8, LEANs 4/7."
+    "notes": "15 MLB games (all series G3). 5 BETs (NYM, TEX, LAD, SEA, PIT ML), 10 LEANs, 0 NO BETs."
   }
 }
