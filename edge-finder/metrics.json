@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-05-30",
+  "last_updated": "2026-06-05",
   "rolling_7d": {
     "accuracy": 0.5938,
     "ev_realized": 0.1931,
@@ -66,13 +66,14 @@
     }
   ],
   "today_summary": {
-    "date": "2026-05-31",
-    "games_analyzed": 15,
-    "bets_recommended": 5,
-    "leans": 10,
+    "date": "2026-06-05",
+    "games_analyzed": 16,
+    "bets_recommended": 7,
+    "leans": 8,
     "sports": [
-      "baseball_mlb"
+      "baseball_mlb",
+      "basketball_nba"
     ],
-    "notes": "15 MLB games (all series G3). 5 BETs (NYM, TEX, LAD, SEA, PIT ML), 10 LEANs, 0 NO BETs."
+    "notes": "NBA Finals G2 (NYK@SAS) + 15 MLB games. 7 BETs, 8 LEANs, 1 NO BETs."
   }
 }
