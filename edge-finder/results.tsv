@@ -569,3 +569,33 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-06-05	baseball_mlb	Los Angeles Dodgers @ Los Angeles Angels	home-swing-v1	away	-0.23	0.4776	away	-1	1	0.1931	0.2323	ml_home	loss
 2026-06-05	baseball_mlb	Los Angeles Dodgers @ Los Angeles Angels	regression-v1	away	-1.29	0.3664	away	-1	1	-0.0143	-0.0547	spread_home	win
 2026-06-05	baseball_mlb	Los Angeles Dodgers @ Los Angeles Angels	pace-adj-v1	away	-1.67	0.328	away	-1	1	-0.0888	-0.1538	ml_away	win
+2026-06-06	icehockey_nhl	Carolina Hurricanes @ Vegas Golden Knights	season-avg-v1	away	-0.69	0.3728	home	1	0	0.6055	0.1974	spread_away	win
+2026-06-06	icehockey_nhl	Carolina Hurricanes @ Vegas Golden Knights	recency-v1	away	-0.68	0.3762	home	1	0	0.6045	0.1909	spread_away	win
+2026-06-06	icehockey_nhl	Carolina Hurricanes @ Vegas Golden Knights	injury-rest-v1	away	-0.68	0.3767	home	1	0	0.6023	0.1900	spread_away	win
+2026-06-06	icehockey_nhl	Carolina Hurricanes @ Vegas Golden Knights	home-swing-v1	home	0.77	0.6351	home	1	1	0.2124	0.2124	ml_home	win
+2026-06-06	icehockey_nhl	Carolina Hurricanes @ Vegas Golden Knights	regression-v1	away	-0.47	0.4122	home	1	0	0.5535	0.1222	spread_away	win
+2026-06-06	icehockey_nhl	Carolina Hurricanes @ Vegas Golden Knights	pace-adj-v1	away	-0.67	0.3769	home	1	0	0.5998	0.1896	spread_away	win
+2026-06-06	baseball_mlb	Cleveland Guardians @ Texas Rangers	season-avg-v1	away	-0.37	0.4579	away	-6	1	0.1782	-0.0277	spread_home	loss
+2026-06-06	baseball_mlb	Cleveland Guardians @ Texas Rangers	recency-v1	away	-0.40	0.4557	away	-6	1	0.1742	-0.0236	spread_home	loss
+2026-06-06	baseball_mlb	Cleveland Guardians @ Texas Rangers	injury-rest-v1	away	-0.77	0.4148	away	-6	1	0.0963	0.0496	spread_home	loss
+2026-06-06	baseball_mlb	Cleveland Guardians @ Texas Rangers	home-swing-v1	home	0.98	0.6051	away	-6	0	0.4150	0.2587	spread_home	loss
+2026-06-06	baseball_mlb	Cleveland Guardians @ Texas Rangers	regression-v1	away	-0.29	0.4707	away	-6	1	0.1939	-0.0507	spread_home	loss
+2026-06-06	baseball_mlb	Cleveland Guardians @ Texas Rangers	pace-adj-v1	away	-0.40	0.4555	away	-6	1	0.1635	-0.0233	spread_home	loss
+2026-06-06	baseball_mlb	Milwaukee Brewers @ Colorado Rockies	season-avg-v1	away	-1.87	0.3109	away	-6	1	0.0340	-0.0459	spread_away	win
+2026-06-06	baseball_mlb	Milwaukee Brewers @ Colorado Rockies	recency-v1	away	-1.90	0.3093	away	-6	1	0.0405	-0.0436	spread_away	win
+2026-06-06	baseball_mlb	Milwaukee Brewers @ Colorado Rockies	injury-rest-v1	away	-2.26	0.2757	away	-6	1	0.1153	0.0029	spread_away	win
+2026-06-06	baseball_mlb	Milwaukee Brewers @ Colorado Rockies	home-swing-v1	away	-0.46	0.4533	away	-6	1	0.4280	-0.2431	ml_home	loss
+2026-06-06	baseball_mlb	Milwaukee Brewers @ Colorado Rockies	regression-v1	away	-1.39	0.357	away	-6	1	0.1245	-0.1097	ml_home	loss
+2026-06-06	baseball_mlb	Milwaukee Brewers @ Colorado Rockies	pace-adj-v1	away	-1.84	0.314	away	-6	1	0.0245	-0.0502	spread_away	win
+2026-06-06	baseball_mlb	Los Angeles Angels @ Los Angeles Dodgers	season-avg-v1	home	2.91	0.7892	home	7	1	0.0652	-0.0003	spread_home	win
+2026-06-06	baseball_mlb	Los Angeles Angels @ Los Angeles Dodgers	recency-v1	home	2.97	0.7935	home	7	1	0.0728	0.0050	spread_home	win
+2026-06-06	baseball_mlb	Los Angeles Angels @ Los Angeles Dodgers	injury-rest-v1	home	3.51	0.8419	home	7	1	0.1898	0.0664	spread_home	win
+2026-06-06	baseball_mlb	Los Angeles Angels @ Los Angeles Dodgers	home-swing-v1	home	4.37	0.8808	home	7	1	0.3397	0.1156	spread_home	win
+2026-06-06	baseball_mlb	Los Angeles Angels @ Los Angeles Dodgers	regression-v1	home	2.41	0.7448	home	7	1	-0.0046	-0.0566	ml_away	loss
+2026-06-06	baseball_mlb	Los Angeles Angels @ Los Angeles Dodgers	pace-adj-v1	home	2.89	0.7894	home	7	1	0.0566	-0.0001	spread_home	win
+2026-06-06	baseball_mlb	New York Mets @ San Diego Padres	season-avg-v1	home	0.36	0.5375	home	1	1	0.3185	0.1072	spread_home	win
+2026-06-06	baseball_mlb	New York Mets @ San Diego Padres	recency-v1	home	0.18	0.5212	home	1	1	0.2824	0.0738	spread_home	win
+2026-06-06	baseball_mlb	New York Mets @ San Diego Padres	injury-rest-v1	away	-0.06	0.4937	home	1	0	0.2384	-0.0854	spread_home	win
+2026-06-06	baseball_mlb	New York Mets @ San Diego Padres	home-swing-v1	home	1.81	0.6849	home	1	1	0.5390	0.4109	spread_home	win
+2026-06-06	baseball_mlb	New York Mets @ San Diego Padres	regression-v1	home	0.34	0.5378	home	1	1	0.3093	0.1080	spread_home	win
+2026-06-06	baseball_mlb	New York Mets @ San Diego Padres	pace-adj-v1	home	0.39	0.5422	home	1	1	0.3150	0.1168	spread_home	win
