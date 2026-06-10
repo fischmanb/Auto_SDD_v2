@@ -1,59 +1,59 @@
 {
-  "last_updated": "2026-06-09",
+  "last_updated": "2026-06-10",
   "rolling_7d": {
-    "accuracy": 0.6038,
+    "accuracy": 0.5652,
     "ev_realized": 0.1621,
-    "total_games": 53,
-    "total_correct": 32
+    "total_games": 69,
+    "total_correct": 39
   },
   "rolling_30d": {
-    "accuracy": 0.61,
+    "accuracy": 0.5862,
     "ev_realized": 0.0991,
-    "total_games": 100,
-    "total_correct": 61
+    "total_games": 116,
+    "total_correct": 68
   },
   "all_time": {
-    "accuracy": 0.61,
+    "accuracy": 0.5862,
     "ev_realized": 0.0639,
-    "total_games": 100,
-    "total_correct": 61,
-    "total_bets_recommended": 70,
-    "total_bets_won": 41
+    "total_games": 116,
+    "total_correct": 68,
+    "total_bets_recommended": 80,
+    "total_bets_won": 47
   },
   "variant_performance": {
     "season-avg-v1": {
-      "lifetime_games": 100,
-      "lifetime_correct": 61,
+      "lifetime_games": 116,
+      "lifetime_correct": 67,
       "weight": 1.0,
       "role": "champion"
     },
     "recency-v1": {
-      "lifetime_games": 100,
-      "lifetime_correct": 61,
+      "lifetime_games": 116,
+      "lifetime_correct": 67,
       "weight": 0.5,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 100,
-      "lifetime_correct": 60,
+      "lifetime_games": 116,
+      "lifetime_correct": 65,
       "weight": 0.4,
       "role": "challenger"
     },
     "home-swing-v1": {
-      "lifetime_games": 100,
-      "lifetime_correct": 56,
+      "lifetime_games": 116,
+      "lifetime_correct": 64,
       "weight": 0.4,
       "role": "challenger"
     },
     "regression-v1": {
-      "lifetime_games": 100,
-      "lifetime_correct": 62,
+      "lifetime_games": 116,
+      "lifetime_correct": 70,
       "weight": 0.5,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 100,
-      "lifetime_correct": 61,
+      "lifetime_games": 116,
+      "lifetime_correct": 66,
       "weight": 0.5,
       "role": "challenger"
     }
@@ -66,14 +66,14 @@
     }
   ],
   "today_summary": {
-    "date": "2026-06-09",
-    "games_analyzed": 16,
-    "bets_recommended": 10,
-    "leans": 6,
+    "date": "2026-06-10",
+    "games_analyzed": 15,
+    "bets_recommended": 12,
+    "leans": 3,
     "sports": [
       "baseball_mlb",
-      "icehockey_nhl"
+      "basketball_nba"
     ],
-    "notes": "NHL SCF G4 (CAR@VGK) + 15 MLB games. 10 BETs, 6 LEANs, 0 NO BETs. Eval: Jun 6 was 4/5 correct (BOS@NYY ppd)."
+    "notes": "NBA Finals G4 (SAS@NYK) + 14 MLB games. 12 BETs, 3 LEANs, 0 NO BETs. Eval: Jun 9 was 7/16 blended correct, 6/10 BETs won."
   }
 }
