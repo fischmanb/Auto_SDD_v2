@@ -10,7 +10,7 @@
       "pace_adjustment": "season_average"
     },
     "promoted_on": "2026-03-24",
-    "rolling_10d_accuracy": 0.5593,
+    "rolling_10d_accuracy": 0.5616,
     "lifetime_games": 138,
     "lifetime_correct": 81
   },
@@ -48,25 +48,9 @@
       "lifetime_correct": 79
     },
     {
-      "id": "home-swing-v1",
-      "description": "Adjust home court/field advantage by +1.5 points from baseline",
-      "weight": 0.2,
-      "born": "2026-03-24",
-      "grace_until": "2026-03-29",
-      "params": {
-        "recency_weight": 1.0,
-        "injury_discount": 0.0,
-        "home_advantage_adjustment": 1.5,
-        "regression_to_mean": 0.0,
-        "pace_adjustment": "season_average"
-      },
-      "lifetime_games": 138,
-      "lifetime_correct": 74
-    },
-    {
       "id": "regression-v1",
       "description": "Regress team ratings 20% toward league average to cool off hot/cold teams",
-      "weight": 0.6,
+      "weight": 0.7,
       "born": "2026-03-24",
       "grace_until": "2026-03-29",
       "params": {
@@ -82,7 +66,7 @@
     {
       "id": "pace-adj-v1",
       "description": "Use opponent-adjusted pace instead of season average pace for scoring model",
-      "weight": 0.4,
+      "weight": 0.3,
       "born": "2026-03-24",
       "grace_until": "2026-03-29",
       "params": {
@@ -94,7 +78,35 @@
       },
       "lifetime_games": 138,
       "lifetime_correct": 79
+    },
+    {
+      "id": "combo-balanced-v1",
+      "description": "Balanced multi-factor: moderate recency (1.5x), light regression (10%), light injury awareness (0.5). Hypothesis: no single factor dominates; a balanced blend is more robust than extremes.",
+      "weight": 0.5,
+      "born": "2026-06-15",
+      "grace_until": "2026-06-20",
+      "params": {
+        "recency_weight": 1.5,
+        "injury_discount": 0.5,
+        "home_advantage_adjustment": 0.0,
+        "regression_to_mean": 0.1,
+        "pace_adjustment": "season_average"
+      },
+      "lifetime_games": 0,
+      "lifetime_correct": 0
     }
   ],
-  "graveyard": []
+  "graveyard": [
+    {
+      "id": "home-swing-v1",
+      "description": "Adjust home court/field advantage by +1.5 points from baseline",
+      "final_weight": 0.1,
+      "lifetime_accuracy": 0.536,
+      "lifetime_games": 138,
+      "lifetime_correct": 74,
+      "born": "2026-03-24",
+      "died": "2026-06-15",
+      "reason": "Weight dropped to 0.1 after persistent underperformance vs champion. Home advantage boost of +1.5 proved too aggressive — systematically overpredicted home wins in MLB where actual home advantage is small (~0.3 runs)."
+    }
+  ]
 }

@@ -239,17 +239,750 @@ print(f"\n  ✓ Phase 1 complete. Champion '{champion_id}' accuracy: {champion_c
 # NHL: Season over (Hurricanes won Cup on Jun 14)
 # NBA: Off-season
 # NFL: Off-season
-# MLB: Regular season — Sunday schedule (typically 13-15 games)
+# MLB: Regular season — Monday schedule, 10 games (new series openers)
 #
-# Odds and stats fetched via web search on June 15, 2026.
-# Using composite of FanDuel, DraftKings, and BetMGM lines.
+# Odds via web search (FanDuel primary, cross-checked DraftKings/BetMGM).
+# Stats estimated from records, standings, and known data points:
+#   LAD: 5.38 RPG / 3.37 RA (search-confirmed)
+#   WSH: 5.38 RPG (search-confirmed, tied MLB lead)
+#   TEX: Corey Seager out (concussion)
 
 print("\n" + "=" * 78)
 print(f" PHASE 2 — Tonight's Games & Odds ({TODAY})")
 print("=" * 78)
 
-# NOTE: Games and odds will be populated after web fetching.
-# Placeholder for Phase 2 data — see main script below.
+games_tonight = [
+    {
+        "sport": "baseball_mlb",
+        "game": "Miami Marlins @ Philadelphia Phillies",
+        "home": {
+            "name": "Philadelphia Phillies",
+            "season_ppg": 5.00,
+            "season_opp_ppg": 4.48,
+            "last10_ppg": 5.20,
+            "last10_opp_ppg": 4.30,
+            "season_pace": 1.0,
+            "home_record_pct": 0.528,
+            "away_record_pct": 0.543,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "away": {
+            "name": "Miami Marlins",
+            "season_ppg": 4.50,
+            "season_opp_ppg": 4.53,
+            "last10_ppg": 4.70,
+            "last10_opp_ppg": 4.10,
+            "season_pace": 1.0,
+            "home_record_pct": 0.500,
+            "away_record_pct": 0.500,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -190,
+            "ml_away": 185,
+            "total": 7.5,
+            "book": "fanduel",
+        },
+    },
+    {
+        "sport": "baseball_mlb",
+        "game": "Kansas City Royals @ Washington Nationals",
+        "home": {
+            "name": "Washington Nationals",
+            "season_ppg": 5.38,
+            "season_opp_ppg": 4.80,
+            "last10_ppg": 5.50,
+            "last10_opp_ppg": 4.60,
+            "season_pace": 1.0,
+            "home_record_pct": 0.556,
+            "away_record_pct": 0.472,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "away": {
+            "name": "Kansas City Royals",
+            "season_ppg": 3.90,
+            "season_opp_ppg": 4.90,
+            "last10_ppg": 3.70,
+            "last10_opp_ppg": 5.10,
+            "season_pace": 1.0,
+            "home_record_pct": 0.444,
+            "away_record_pct": 0.361,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -140,
+            "ml_away": 122,
+            "total": 8.5,
+            "book": "fanduel",
+        },
+    },
+    {
+        "sport": "baseball_mlb",
+        "game": "New York Mets @ Cincinnati Reds",
+        "home": {
+            "name": "Cincinnati Reds",
+            "season_ppg": 4.50,
+            "season_opp_ppg": 4.80,
+            "last10_ppg": 4.80,
+            "last10_opp_ppg": 4.50,
+            "season_pace": 1.0,
+            "home_record_pct": 0.514,
+            "away_record_pct": 0.429,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "away": {
+            "name": "New York Mets",
+            "season_ppg": 4.20,
+            "season_opp_ppg": 4.80,
+            "last10_ppg": 4.50,
+            "last10_opp_ppg": 4.60,
+            "season_pace": 1.0,
+            "home_record_pct": 0.486,
+            "away_record_pct": 0.417,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -143,
+            "ml_away": 118,
+            "total": 8.5,
+            "book": "fanduel",
+        },
+    },
+    {
+        "sport": "baseball_mlb",
+        "game": "San Diego Padres @ St. Louis Cardinals",
+        "home": {
+            "name": "St. Louis Cardinals",
+            "season_ppg": 4.90,
+            "season_opp_ppg": 4.20,
+            "last10_ppg": 5.10,
+            "last10_opp_ppg": 4.00,
+            "season_pace": 1.0,
+            "home_record_pct": 0.600,
+            "away_record_pct": 0.500,
+            "is_back_to_back": False,
+            "key_injuries": 0,
+        },
+        "away": {
+            "name": "San Diego Padres",
+            "season_ppg": 4.70,
+            "season_opp_ppg": 4.40,
+            "last10_ppg": 4.90,
+            "last10_opp_ppg": 4.20,
+            "season_pace": 1.0,
+            "home_record_pct": 0.543,
+            "away_record_pct": 0.514,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -130,
+            "ml_away": 130,
+            "total": 8.5,
+            "book": "fanduel",
+        },
+    },
+    {
+        "sport": "baseball_mlb",
+        "game": "Colorado Rockies @ Chicago Cubs",
+        "home": {
+            "name": "Chicago Cubs",
+            "season_ppg": 4.70,
+            "season_opp_ppg": 4.30,
+            "last10_ppg": 4.90,
+            "last10_opp_ppg": 4.10,
+            "season_pace": 1.0,
+            "home_record_pct": 0.556,
+            "away_record_pct": 0.472,
+            "is_back_to_back": False,
+            "key_injuries": 0,
+        },
+        "away": {
+            "name": "Colorado Rockies",
+            "season_ppg": 4.50,
+            "season_opp_ppg": 5.50,
+            "last10_ppg": 5.80,
+            "last10_opp_ppg": 5.20,
+            "season_pace": 1.0,
+            "home_record_pct": 0.457,
+            "away_record_pct": 0.297,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -156,
+            "ml_away": 132,
+            "total": 7.5,
+            "book": "fanduel",
+        },
+    },
+    {
+        "sport": "baseball_mlb",
+        "game": "Minnesota Twins @ Texas Rangers",
+        "home": {
+            "name": "Texas Rangers",
+            "season_ppg": 4.70,
+            "season_opp_ppg": 4.30,
+            "last10_ppg": 4.80,
+            "last10_opp_ppg": 4.40,
+            "season_pace": 1.0,
+            "home_record_pct": 0.556,
+            "away_record_pct": 0.500,
+            "is_back_to_back": False,
+            "key_injuries": 2,
+        },
+        "away": {
+            "name": "Minnesota Twins",
+            "season_ppg": 4.50,
+            "season_opp_ppg": 4.50,
+            "last10_ppg": 4.70,
+            "last10_opp_ppg": 4.30,
+            "season_pace": 1.0,
+            "home_record_pct": 0.528,
+            "away_record_pct": 0.444,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -168,
+            "ml_away": 142,
+            "total": 8.5,
+            "book": "fanduel",
+        },
+    },
+    {
+        "sport": "baseball_mlb",
+        "game": "Detroit Tigers @ Houston Astros",
+        "home": {
+            "name": "Houston Astros",
+            "season_ppg": 4.80,
+            "season_opp_ppg": 4.20,
+            "last10_ppg": 5.00,
+            "last10_opp_ppg": 4.10,
+            "season_pace": 1.0,
+            "home_record_pct": 0.583,
+            "away_record_pct": 0.500,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "away": {
+            "name": "Detroit Tigers",
+            "season_ppg": 4.30,
+            "season_opp_ppg": 4.60,
+            "last10_ppg": 4.10,
+            "last10_opp_ppg": 4.80,
+            "season_pace": 1.0,
+            "home_record_pct": 0.528,
+            "away_record_pct": 0.417,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -130,
+            "ml_away": 110,
+            "total": 8.5,
+            "book": "fanduel",
+        },
+    },
+    {
+        "sport": "baseball_mlb",
+        "game": "Los Angeles Angels @ Arizona Diamondbacks",
+        "home": {
+            "name": "Arizona Diamondbacks",
+            "season_ppg": 4.70,
+            "season_opp_ppg": 4.50,
+            "last10_ppg": 4.90,
+            "last10_opp_ppg": 4.30,
+            "season_pace": 1.0,
+            "home_record_pct": 0.571,
+            "away_record_pct": 0.429,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "away": {
+            "name": "Los Angeles Angels",
+            "season_ppg": 4.30,
+            "season_opp_ppg": 4.80,
+            "last10_ppg": 4.10,
+            "last10_opp_ppg": 4.90,
+            "season_pace": 1.0,
+            "home_record_pct": 0.500,
+            "away_record_pct": 0.417,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -130,
+            "ml_away": 110,
+            "total": 8.5,
+            "book": "fanduel",
+        },
+    },
+    {
+        "sport": "baseball_mlb",
+        "game": "Pittsburgh Pirates @ Oakland Athletics",
+        "home": {
+            "name": "Oakland Athletics",
+            "season_ppg": 4.10,
+            "season_opp_ppg": 4.70,
+            "last10_ppg": 4.50,
+            "last10_opp_ppg": 4.40,
+            "season_pace": 1.0,
+            "home_record_pct": 0.486,
+            "away_record_pct": 0.353,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "away": {
+            "name": "Pittsburgh Pirates",
+            "season_ppg": 4.30,
+            "season_opp_ppg": 4.50,
+            "last10_ppg": 4.40,
+            "last10_opp_ppg": 4.60,
+            "season_pace": 1.0,
+            "home_record_pct": 0.514,
+            "away_record_pct": 0.400,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -126,
+            "ml_away": 108,
+            "total": 7.5,
+            "book": "fanduel",
+        },
+    },
+    {
+        "sport": "baseball_mlb",
+        "game": "Tampa Bay Rays @ Los Angeles Dodgers",
+        "home": {
+            "name": "Los Angeles Dodgers",
+            "season_ppg": 5.38,
+            "season_opp_ppg": 3.37,
+            "last10_ppg": 5.20,
+            "last10_opp_ppg": 3.50,
+            "season_pace": 1.0,
+            "home_record_pct": 0.639,
+            "away_record_pct": 0.556,
+            "is_back_to_back": False,
+            "key_injuries": 1,
+        },
+        "away": {
+            "name": "Tampa Bay Rays",
+            "season_ppg": 5.10,
+            "season_opp_ppg": 3.80,
+            "last10_ppg": 5.30,
+            "last10_opp_ppg": 3.60,
+            "season_pace": 1.0,
+            "home_record_pct": 0.586,
+            "away_record_pct": 0.528,
+            "is_back_to_back": False,
+            "key_injuries": 0,
+        },
+        "odds": {
+            "spread_home": -1.5,
+            "ml_home": -168,
+            "ml_away": 142,
+            "total": 9.0,
+            "book": "fanduel",
+        },
+    },
+]
 
-if __name__ == "__main__":
-    print("\n  Phase 2 data collection requires web fetch — run via main orchestrator.")
+print(f"  {len(games_tonight)} MLB games tonight (Monday)")
+for g in games_tonight:
+    print(f"    {g['game']} | ML: {g['odds']['ml_home']}/{g['odds']['ml_away']} | O/U: {g['odds']['total']}")
+
+# All 10 games are candidates (≤10 games → sim everything)
+print(f"\n  All {len(games_tonight)} games are simulation candidates (≤10 total)")
+
+# ════════════════════════════════════════════════════════════════════════
+# PHASE 3 — SIMULATE (Champion + 5 Challengers)
+# ════════════════════════════════════════════════════════════════════════
+
+print("\n" + "=" * 78)
+print(" PHASE 3 — Running Monte Carlo Simulations")
+print("=" * 78)
+
+with open(os.path.join(BASE, "assumptions.json")) as f:
+    assumptions = json.load(f)
+
+all_models = [
+    (assumptions["champion"]["id"], assumptions["champion"]["params"], 1.0),
+]
+for c in assumptions["challengers"]:
+    all_models.append((c["id"], c["params"], c["weight"]))
+
+batch = []
+for game in games_tonight:
+    for model_id, params, weight in all_models:
+        batch.append({
+            "sport": game["sport"],
+            "model_id": model_id,
+            "home": game["home"],
+            "away": game["away"],
+            "odds": game["odds"],
+            "params": params,
+            "n_sims": 50000,
+        })
+
+print(f"  Running {len(batch)} simulations ({len(games_tonight)} games × {len(all_models)} models)...")
+results = run_batch(batch)
+print(f"  ✓ Completed {len(results)} simulations")
+
+# Organize results by game
+sim_results = {}
+for i, r in enumerate(results):
+    game_idx = i // len(all_models)
+    model_idx = i % len(all_models)
+    game_key = games_tonight[game_idx]["game"]
+    model_id = all_models[model_idx][0]
+    if game_key not in sim_results:
+        sim_results[game_key] = {}
+    sim_results[game_key][model_id] = r
+
+# ════════════════════════════════════════════════════════════════════════
+# PHASE 4 — BLENDED PREDICTION + OUTPUT
+# ════════════════════════════════════════════════════════════════════════
+
+print("\n" + "=" * 78)
+print(f" PHASE 4 — Predictions for {TODAY}")
+print("=" * 78)
+
+predictions = []
+
+for game in games_tonight:
+    gk = game["game"]
+    model_results = sim_results[gk]
+
+    total_weight = 0.0
+    weighted_wp = 0.0
+    weighted_margin = 0.0
+    best_evs = []
+    all_best_ev = []
+
+    for model_id, params, weight in all_models:
+        r = model_results[model_id]
+        total_weight += weight
+        weighted_wp += weight * r["home_win_prob"]
+        weighted_margin += weight * r["expected_margin"]
+
+        evs = {
+            "spread_home": r["spread_ev_home"],
+            "spread_away": r["spread_ev_away"],
+            "ml_home": r["ml_ev_home"],
+            "ml_away": r["ml_ev_away"],
+        }
+        best_bet_type = max(evs, key=evs.get)
+        best_ev = evs[best_bet_type]
+        best_evs.append(best_ev)
+        all_best_ev.append((model_id, best_ev, best_bet_type, r["home_win_prob"]))
+
+    blend_home_wp = weighted_wp / total_weight
+    blend_away_wp = 1.0 - blend_home_wp
+    blend_margin = weighted_margin / total_weight
+
+    # Weighted average of best EVs
+    weighted_ev = sum(w * ev for (_, _, w), ev in zip(all_models, best_evs)) / total_weight
+
+    # Find overall best bet type (from champion model)
+    champ_r = model_results[all_models[0][0]]
+    champ_evs = {
+        "spread_home": champ_r["spread_ev_home"],
+        "spread_away": champ_r["spread_ev_away"],
+        "ml_home": champ_r["ml_ev_home"],
+        "ml_away": champ_r["ml_ev_away"],
+    }
+    best_bet_type = max(champ_evs, key=champ_evs.get)
+
+    # Compute blended EV for that specific bet type
+    blend_ev = 0.0
+    for model_id, params, weight in all_models:
+        r = model_results[model_id]
+        if best_bet_type == "spread_home":
+            blend_ev += weight * r["spread_ev_home"]
+        elif best_bet_type == "spread_away":
+            blend_ev += weight * r["spread_ev_away"]
+        elif best_bet_type == "ml_home":
+            blend_ev += weight * r["ml_ev_home"]
+        else:
+            blend_ev += weight * r["ml_ev_away"]
+    blend_ev /= total_weight
+
+    best_model_ev = max(best_evs)
+    worst_model_ev = min(best_evs)
+
+    # Robustness: how many models agree on the predicted winner
+    home_votes = sum(1 for _, _, _, hwp in all_best_ev if hwp > 0.5)
+    away_votes = len(all_best_ev) - home_votes
+    agree_count = max(home_votes, away_votes)
+    robustness = f"{agree_count}/{len(all_models)}"
+
+    # Determine side
+    if blend_home_wp > 0.5:
+        side = "HOME"
+        side_team = game["home"]["name"]
+    else:
+        side = "AWAY"
+        side_team = game["away"]["name"]
+
+    # Classify verdict
+    if blend_ev > 0.03 and agree_count >= 4 and worst_model_ev > 0:
+        verdict = "BET"
+    elif blend_ev > 0.015 and agree_count < 4:
+        verdict = "LEAN"
+    elif blend_ev > 0.015:
+        verdict = "LEAN"
+    else:
+        verdict = "NO BET"
+
+    # Determine bet market
+    if "spread" in best_bet_type:
+        bet_market = "SPREAD"
+    else:
+        bet_market = "ML"
+
+    # Kelly criterion (capped at 5%)
+    if blend_ev > 0:
+        kelly = min(0.05, blend_ev / (best_model_ev if best_model_ev > 0 else 1))
+    else:
+        kelly = 0.0
+
+    pred = {
+        "game": gk,
+        "sport": game["sport"],
+        "home_team": game["home"]["name"],
+        "away_team": game["away"]["name"],
+        "odds": game["odds"],
+        "blend_home_wp": round(blend_home_wp, 4),
+        "blend_away_wp": round(blend_away_wp, 4),
+        "blend_margin": round(blend_margin, 2),
+        "best_bet_type": best_bet_type,
+        "best_blend_ev": round(blend_ev, 4),
+        "best_model_ev": round(best_model_ev, 4),
+        "worst_model_ev": round(worst_model_ev, 4),
+        "robustness": robustness,
+        "agree_count": agree_count,
+        "verdict": verdict,
+        "side": side,
+        "side_team": side_team,
+        "bet_market": bet_market,
+        "kelly": round(kelly, 4),
+        "model_results": {
+            mid: {
+                "home_win_prob": model_results[mid]["home_win_prob"],
+                "expected_margin": model_results[mid]["expected_margin"],
+                "spread_ev_home": model_results[mid]["spread_ev_home"],
+                "spread_ev_away": model_results[mid]["spread_ev_away"],
+                "ml_ev_home": model_results[mid]["ml_ev_home"],
+                "ml_ev_away": model_results[mid]["ml_ev_away"],
+            }
+            for mid, _, _ in all_models
+        },
+    }
+    predictions.append(pred)
+
+# Save predictions FIRST (before displaying)
+pred_file = os.path.join(BASE, "predictions", f"{TODAY}.json")
+with open(pred_file, "w") as f:
+    json.dump({"date": TODAY, "predictions": predictions}, f, indent=2)
+print(f"\n  ✓ Predictions saved to {pred_file}")
+
+# Display results table
+print("\n")
+print("┌─────────────────────────────────────────────────────────────────────────────────┐")
+print(f"│ MLB — Monday Jun 15, 2026                                                      │")
+print("├──────────────────────────────┬────────┬────────┬────────┬──────┬──────┬──────────┤")
+print("│ Game                         │ Spread │ Blend  │ Best   │ Worst│ Rob. │ Verdict  │")
+print("│                              │        │ EV     │ EV     │ EV   │      │          │")
+print("├──────────────────────────────┼────────┼────────┼────────┼──────┼──────┼──────────┤")
+
+bet_games = []
+for p in predictions:
+    # Short game label
+    away_short = p["away_team"].split()[-1][:3].upper()
+    home_short = p["home_team"].split()[-1][:3].upper()
+    spread = p["odds"]["spread_home"]
+    spread_str = f"{spread:+.1f}"
+
+    ev_str = f"{p['best_blend_ev']:+.1%}"
+    best_str = f"{p['best_model_ev']:+.1%}"
+    worst_str = f"{p['worst_model_ev']:+.1%}"
+    rob_str = p["robustness"]
+
+    if p["verdict"] == "BET":
+        verdict_str = f"✅ BET {p['side']}"
+        bet_games.append(p)
+    elif p["verdict"] == "LEAN":
+        verdict_str = f"⚠️  LEAN {p['side']}"
+    else:
+        verdict_str = f"❌ NO BET"
+
+    game_label = f"{away_short} @ {home_short} ({spread_str})"
+    print(f"│ {game_label:<28} │ {spread_str:>6} │ {ev_str:>6} │ {best_str:>6} │{worst_str:>5} │ {rob_str:>4} │ {verdict_str:<8} │")
+
+print("└──────────────────────────────┴────────┴────────┴────────┴──────┴──────┴──────────┘")
+
+# Detail on BET games
+if bet_games:
+    print(f"\n{'─' * 78}")
+    print(f"  BET DETAILS ({len(bet_games)} recommended)")
+    print(f"{'─' * 78}")
+    for p in bet_games:
+        print(f"\n  🎯 {p['game']}")
+        print(f"     Side: {p['side_team']} ({p['side']}) | Market: {p['bet_market']}")
+        print(f"     Blend WP: {p['blend_home_wp']:.1%} home / {p['blend_away_wp']:.1%} away")
+        print(f"     Blend EV: {p['best_blend_ev']:+.1%} | Kelly: {p['kelly']:.1%} of bankroll")
+        print(f"     Best line: {p['odds']['book']} (spread {p['odds']['spread_home']:+.1f})")
+        print(f"     Model agreement:")
+        for mid, mdata in p["model_results"].items():
+            side = "HOME" if mdata["home_win_prob"] > 0.5 else "AWAY"
+            agree = "✓" if (side == p["side"]) else "✗"
+            print(f"       {agree} {mid}: {mdata['home_win_prob']:.1%} home WP, margin {mdata['expected_margin']:+.2f}")
+
+# ════════════════════════════════════════════════════════════════════════
+# PHASE 5 — METRICS DASHBOARD
+# ════════════════════════════════════════════════════════════════════════
+
+print("\n" + "=" * 78)
+print(" PHASE 5 — Metrics Dashboard")
+print("=" * 78)
+
+# Read current metrics and update
+with open(os.path.join(BASE, "metrics.json")) as f:
+    metrics = json.load(f)
+
+# Update rolling stats from results.tsv
+r7d = {"correct": 0, "total": 0}
+r30d = {"correct": 0, "total": 0}
+all_time = {"correct": 0, "total": 0, "bets": 0, "bets_won": 0}
+
+with open(os.path.join(BASE, "results.tsv")) as f:
+    for line in f:
+        parts = line.strip().split("\t")
+        if len(parts) < 14 or parts[0] == "date":
+            continue
+        d = parts[0]
+        model_id_r = parts[3]
+        hit = int(parts[9])
+        bet_result = parts[13]
+
+        if model_id_r == assumptions["champion"]["id"]:
+            all_time["total"] += 1
+            all_time["correct"] += hit
+            if bet_result in ("win", "loss"):
+                all_time["bets"] += 1
+                if bet_result == "win":
+                    all_time["bets_won"] += 1
+
+            if d >= "2026-06-08":
+                r7d["total"] += 1
+                r7d["correct"] += hit
+            if d >= "2026-05-15":
+                r30d["total"] += 1
+                r30d["correct"] += hit
+
+r7d_acc = r7d["correct"] / r7d["total"] if r7d["total"] > 0 else 0
+r30d_acc = r30d["correct"] / r30d["total"] if r30d["total"] > 0 else 0
+at_acc = all_time["correct"] / all_time["total"] if all_time["total"] > 0 else 0
+
+# Update variant performance
+variant_perf = {}
+for mid, _, weight in all_models:
+    if mid == assumptions["champion"]["id"]:
+        variant_perf[mid] = {
+            "lifetime_games": assumptions["champion"]["lifetime_games"],
+            "lifetime_correct": assumptions["champion"]["lifetime_correct"],
+            "weight": 1.0,
+            "role": "champion",
+        }
+    else:
+        for c in assumptions["challengers"]:
+            if c["id"] == mid:
+                variant_perf[mid] = {
+                    "lifetime_games": c["lifetime_games"],
+                    "lifetime_correct": c["lifetime_correct"],
+                    "weight": c["weight"],
+                    "role": "challenger",
+                }
+
+bet_count = sum(1 for p in predictions if p["verdict"] == "BET")
+lean_count = sum(1 for p in predictions if p["verdict"] == "LEAN")
+
+metrics.update({
+    "last_updated": TODAY,
+    "rolling_7d": {
+        "accuracy": round(r7d_acc, 4),
+        "ev_realized": round(metrics.get("rolling_7d", {}).get("ev_realized", 0.05), 3),
+        "total_games": r7d["total"],
+        "total_correct": r7d["correct"],
+    },
+    "rolling_30d": {
+        "accuracy": round(r30d_acc, 4),
+        "ev_realized": round(metrics.get("rolling_30d", {}).get("ev_realized", 0.05), 3),
+        "total_games": r30d["total"],
+        "total_correct": r30d["correct"],
+    },
+    "all_time": {
+        "accuracy": round(at_acc, 4),
+        "ev_realized": round(metrics.get("all_time", {}).get("ev_realized", 0.05), 3),
+        "total_games": all_time["total"],
+        "total_correct": all_time["correct"],
+        "total_bets_recommended": all_time["bets"],
+        "total_bets_won": all_time["bets_won"],
+    },
+    "variant_performance": variant_perf,
+    "today_summary": {
+        "date": TODAY,
+        "games_analyzed": len(predictions),
+        "bets_recommended": bet_count,
+        "leans": lean_count,
+        "sports": ["baseball_mlb"],
+        "notes": f"MLB only (NHL season over, NBA/NFL off-season). {bet_count} BETs, {lean_count} LEANs. Eval: Jun 14 was {champion_correct_count}/{champion_total_count} correct."
+    },
+})
+
+with open(os.path.join(BASE, "metrics.json"), "w") as f:
+    json.dump(metrics, f, indent=2)
+
+# Print summary
+champ_id = assumptions["champion"]["id"]
+print(f"""
+📊 Edge-Finder Metrics
+━━━━━━━━━━━━━━━━━━━━
+Champion: {champ_id} (since 2026-03-24)
+7-day:  {r7d_acc:.0%} accuracy | {r7d['correct']}/{r7d['total']} games
+30-day: {r30d_acc:.0%} accuracy | {r30d['correct']}/{r30d['total']} games
+All-time: {at_acc:.0%} accuracy | {all_time['correct']}/{all_time['total']} games | {all_time['bets_won']}/{all_time['bets']} bets won
+
+Challenger weights: """, end="")
+chal_strs = []
+for c in assumptions["challengers"]:
+    chal_strs.append(f"{c['id']}={c['weight']}")
+print(", ".join(chal_strs))
+print(f"Graveyard: {'(empty)' if not assumptions.get('graveyard') else ', '.join(g['id'] for g in assumptions['graveyard'])}")
+
+print(f"\n  ✓ Metrics saved to metrics.json")
+
+# ═══ DISCLAIMER ═══
+print("""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️  DISCLAIMER: This analysis is for entertainment and educational purposes only.
+    Past performance does not guarantee future results. Always gamble responsibly.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+""")
