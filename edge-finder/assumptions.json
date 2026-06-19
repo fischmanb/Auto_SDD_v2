@@ -10,9 +10,9 @@
       "pace_adjustment": "season_average"
     },
     "promoted_on": "2026-06-16",
-    "rolling_10d_accuracy": 0.8,
-    "lifetime_games": 22,
-    "lifetime_correct": 18
+    "rolling_10d_accuracy": 0.7333,
+    "lifetime_games": 30,
+    "lifetime_correct": 22
   },
   "challengers": [
     {
@@ -28,8 +28,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 160,
-      "lifetime_correct": 98
+      "lifetime_games": 168,
+      "lifetime_correct": 102
     },
     {
       "id": "recency-v1",
@@ -44,8 +44,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 160,
-      "lifetime_correct": 98
+      "lifetime_games": 168,
+      "lifetime_correct": 102
     },
     {
       "id": "injury-rest-v1",
@@ -60,8 +60,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 160,
-      "lifetime_correct": 97
+      "lifetime_games": 168,
+      "lifetime_correct": 101
     },
     {
       "id": "regression-v1",
@@ -76,8 +76,8 @@
         "regression_to_mean": 0.2,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 160,
-      "lifetime_correct": 100
+      "lifetime_games": 168,
+      "lifetime_correct": 104
     },
     {
       "id": "pace-adj-v1",
@@ -92,8 +92,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "opponent_adjusted"
       },
-      "lifetime_games": 160,
-      "lifetime_correct": 96
+      "lifetime_games": 168,
+      "lifetime_correct": 100
     }
   ],
   "graveyard": [

@@ -1,59 +1,59 @@
 {
-  "last_updated": "2026-06-18",
+  "last_updated": "2026-06-19",
   "rolling_7d": {
-    "accuracy": 0.8182,
+    "accuracy": 0.7333,
     "ev_realized": 0.048,
-    "total_games": 22,
-    "total_correct": 18
+    "total_games": 30,
+    "total_correct": 22
   },
   "rolling_30d": {
-    "accuracy": 0.8182,
+    "accuracy": 0.7333,
     "ev_realized": 0.082,
-    "total_games": 22,
-    "total_correct": 18
+    "total_games": 30,
+    "total_correct": 22
   },
   "all_time": {
-    "accuracy": 0.8182,
+    "accuracy": 0.7333,
     "ev_realized": 0.055,
-    "total_games": 22,
-    "total_correct": 18,
-    "total_bets_recommended": 22,
-    "total_bets_won": 13
+    "total_games": 30,
+    "total_correct": 22,
+    "total_bets_recommended": 30,
+    "total_bets_won": 17
   },
   "variant_performance": {
     "combo-balanced-v1": {
-      "lifetime_games": 22,
-      "lifetime_correct": 18,
+      "lifetime_games": 30,
+      "lifetime_correct": 22,
       "weight": 1.0,
       "role": "champion"
     },
     "season-avg-v1": {
-      "lifetime_games": 160,
-      "lifetime_correct": 98,
+      "lifetime_games": 168,
+      "lifetime_correct": 102,
       "weight": 0.6,
       "role": "challenger"
     },
     "recency-v1": {
-      "lifetime_games": 160,
-      "lifetime_correct": 98,
+      "lifetime_games": 168,
+      "lifetime_correct": 102,
       "weight": 0.4,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 160,
-      "lifetime_correct": 97,
+      "lifetime_games": 168,
+      "lifetime_correct": 101,
       "weight": 0.4,
       "role": "challenger"
     },
     "regression-v1": {
-      "lifetime_games": 160,
-      "lifetime_correct": 100,
+      "lifetime_games": 168,
+      "lifetime_correct": 104,
       "weight": 0.6,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 160,
-      "lifetime_correct": 96,
+      "lifetime_games": 168,
+      "lifetime_correct": 100,
       "weight": 0.2,
       "role": "challenger"
     }
@@ -71,13 +71,13 @@
     }
   ],
   "today_summary": {
-    "date": "2026-06-18",
-    "games_analyzed": 9,
-    "bets_recommended": 9,
+    "date": "2026-06-19",
+    "games_analyzed": 13,
+    "bets_recommended": 13,
     "leans": 0,
     "sports": [
       "baseball_mlb"
     ],
-    "notes": "MLB only (NHL over, NBA/NFL off-season). 9 BETs, 0 LEANs. Eval Jun 16: 10/12 correct."
+    "notes": "MLB only. 13 BETs, 0 LEANs. Eval Jun 18: 4/8 correct."
   }
 }
