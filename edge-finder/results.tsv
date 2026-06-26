@@ -1331,3 +1331,51 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-06-23	baseball_mlb	Baltimore Orioles @ Los Angeles Angels	injury-rest-v1	away	-1.66	0.3225	home	4	0	-0.0930	-0.2744	ml_away	loss
 2026-06-23	baseball_mlb	Baltimore Orioles @ Los Angeles Angels	regression-v1	away	-1.01	0.3944	home	4	0	0.0459	-0.1126	spread_home	win
 2026-06-23	baseball_mlb	Baltimore Orioles @ Los Angeles Angels	pace-adj-v1	away	-1.34	0.3600	home	4	0	-0.0218	-0.1900	ml_away	loss
+2026-06-25	baseball_mlb	Kansas City Royals @ Tampa Bay Rays	combo-balanced-v1	home	0.64	0.5681	home	11	1	-0.2091	-0.0261	spread_away	loss
+2026-06-25	baseball_mlb	Kansas City Royals @ Tampa Bay Rays	season-avg-v1	home	0.79	0.5814	home	11	1	-0.1825	-0.0033	spread_away	loss
+2026-06-25	baseball_mlb	Kansas City Royals @ Tampa Bay Rays	recency-v1	home	0.68	0.5741	home	11	1	-0.2066	-0.0159	spread_away	loss
+2026-06-25	baseball_mlb	Kansas City Royals @ Tampa Bay Rays	injury-rest-v1	home	0.76	0.5837	home	11	1	-0.1905	0.0007	spread_away	loss
+2026-06-25	baseball_mlb	Kansas City Royals @ Tampa Bay Rays	regression-v1	home	0.66	0.5706	home	11	1	-0.2089	-0.0218	spread_away	loss
+2026-06-25	baseball_mlb	Kansas City Royals @ Tampa Bay Rays	pace-adj-v1	home	0.76	0.5835	home	11	1	-0.1875	0.0002	spread_away	loss
+2026-06-25	baseball_mlb	Seattle Mariners @ Pittsburgh Pirates	combo-balanced-v1	away	-0.17	0.4832	home	4	0	0.2199	0.0438	spread_home	win
+2026-06-25	baseball_mlb	Seattle Mariners @ Pittsburgh Pirates	season-avg-v1	home	0.06	0.5072	home	4	1	0.2662	0.0956	spread_home	win
+2026-06-25	baseball_mlb	Seattle Mariners @ Pittsburgh Pirates	recency-v1	away	-0.03	0.4961	home	4	0	0.2436	0.0716	spread_home	win
+2026-06-25	baseball_mlb	Seattle Mariners @ Pittsburgh Pirates	injury-rest-v1	away	-0.31	0.4641	home	4	0	0.1962	0.0024	spread_home	win
+2026-06-25	baseball_mlb	Seattle Mariners @ Pittsburgh Pirates	regression-v1	home	0.09	0.5105	home	4	1	0.2683	0.1026	spread_home	win
+2026-06-25	baseball_mlb	Seattle Mariners @ Pittsburgh Pirates	pace-adj-v1	home	0.09	0.5093	home	4	1	0.2723	0.1001	spread_home	win
+2026-06-25	baseball_mlb	Sacramento Athletics @ San Francisco Giants	combo-balanced-v1	home	1.93	0.7013	away	-3	0	0.0545	0.2408	ml_home	loss
+2026-06-25	baseball_mlb	Sacramento Athletics @ San Francisco Giants	season-avg-v1	home	1.82	0.6897	away	-3	0	0.0273	0.2202	ml_home	loss
+2026-06-25	baseball_mlb	Sacramento Athletics @ San Francisco Giants	recency-v1	home	1.96	0.6996	away	-3	0	0.0578	0.2377	ml_home	loss
+2026-06-25	baseball_mlb	Sacramento Athletics @ San Francisco Giants	injury-rest-v1	home	2.14	0.7277	away	-3	0	0.1017	0.2875	ml_home	loss
+2026-06-25	baseball_mlb	Sacramento Athletics @ San Francisco Giants	regression-v1	home	1.56	0.6634	away	-3	0	-0.0205	0.1736	ml_home	loss
+2026-06-25	baseball_mlb	Sacramento Athletics @ San Francisco Giants	pace-adj-v1	home	1.84	0.6904	away	-3	0	0.0340	0.2214	ml_home	loss
+2026-06-25	baseball_mlb	Houston Astros @ Detroit Tigers	combo-balanced-v1	home	0.10	0.5104	away	-1	0	-0.3226	-0.0419	spread_away	win
+2026-06-25	baseball_mlb	Houston Astros @ Detroit Tigers	season-avg-v1	home	0.08	0.5095	away	-1	0	-0.3225	-0.0436	spread_away	win
+2026-06-25	baseball_mlb	Houston Astros @ Detroit Tigers	recency-v1	home	0.05	0.5050	away	-1	0	-0.3320	-0.0519	spread_away	win
+2026-06-25	baseball_mlb	Houston Astros @ Detroit Tigers	injury-rest-v1	home	0.06	0.5074	away	-1	0	-0.3339	-0.0476	spread_away	win
+2026-06-25	baseball_mlb	Houston Astros @ Detroit Tigers	regression-v1	home	0.08	0.5083	away	-1	0	-0.3247	-0.0458	spread_away	win
+2026-06-25	baseball_mlb	Houston Astros @ Detroit Tigers	pace-adj-v1	home	0.06	0.5057	away	-1	0	-0.3274	-0.0508	spread_away	win
+2026-06-25	baseball_mlb	Philadelphia Phillies @ Washington Nationals	combo-balanced-v1	away	-1.53	0.3419	away	-5	1	-0.0603	-0.1349	ml_away	win
+2026-06-25	baseball_mlb	Philadelphia Phillies @ Washington Nationals	season-avg-v1	away	-1.41	0.3533	away	-5	1	-0.0347	-0.1063	ml_away	win
+2026-06-25	baseball_mlb	Philadelphia Phillies @ Washington Nationals	recency-v1	away	-1.54	0.3406	away	-5	1	-0.0626	-0.1383	ml_away	win
+2026-06-25	baseball_mlb	Philadelphia Phillies @ Washington Nationals	injury-rest-v1	away	-1.81	0.3169	away	-5	1	-0.1184	-0.1981	ml_away	win
+2026-06-25	baseball_mlb	Philadelphia Phillies @ Washington Nationals	regression-v1	away	-1.07	0.3875	away	-5	1	0.0332	-0.0196	spread_home	loss
+2026-06-25	baseball_mlb	Philadelphia Phillies @ Washington Nationals	pace-adj-v1	away	-1.41	0.3565	away	-5	1	-0.0361	-0.0980	ml_away	win
+2026-06-25	baseball_mlb	Texas Rangers @ Toronto Blue Jays	combo-balanced-v1	away	-0.38	0.4591	away	-1	1	0.1758	-0.0772	spread_home	win
+2026-06-25	baseball_mlb	Texas Rangers @ Toronto Blue Jays	season-avg-v1	away	-0.12	0.4843	away	-1	1	0.2269	-0.0265	spread_home	win
+2026-06-25	baseball_mlb	Texas Rangers @ Toronto Blue Jays	recency-v1	away	-0.27	0.4696	away	-1	1	0.1944	-0.0562	spread_home	win
+2026-06-25	baseball_mlb	Texas Rangers @ Toronto Blue Jays	injury-rest-v1	away	-0.53	0.4395	away	-1	1	0.1490	-0.1166	spread_home	win
+2026-06-25	baseball_mlb	Texas Rangers @ Toronto Blue Jays	regression-v1	away	-0.08	0.4907	away	-1	1	0.2239	-0.0137	spread_home	win
+2026-06-25	baseball_mlb	Texas Rangers @ Toronto Blue Jays	pace-adj-v1	away	-0.17	0.4840	away	-1	1	0.2160	-0.0271	spread_home	win
+2026-06-25	baseball_mlb	Chicago Cubs @ New York Mets	combo-balanced-v1	away	-1.34	0.3605	away	-1	1	-0.0205	-0.3057	ml_away	win
+2026-06-25	baseball_mlb	Chicago Cubs @ New York Mets	season-avg-v1	away	-1.01	0.3904	away	-1	1	0.0418	-0.2481	ml_away	win
+2026-06-25	baseball_mlb	Chicago Cubs @ New York Mets	recency-v1	away	-1.48	0.3456	away	-1	1	-0.0529	-0.3343	ml_away	win
+2026-06-25	baseball_mlb	Chicago Cubs @ New York Mets	injury-rest-v1	away	-1.39	0.3520	away	-1	1	-0.0348	-0.3220	ml_away	win
+2026-06-25	baseball_mlb	Chicago Cubs @ New York Mets	regression-v1	away	-0.79	0.4178	away	-1	1	0.0846	-0.1953	ml_away	win
+2026-06-25	baseball_mlb	Chicago Cubs @ New York Mets	pace-adj-v1	away	-1.02	0.3933	away	-1	1	0.0460	-0.2426	ml_away	win
+2026-06-25	baseball_mlb	New York Yankees @ Boston Red Sox	combo-balanced-v1	away	-0.70	0.4234	home	3	0	0.1052	-0.0261	spread_home	win
+2026-06-25	baseball_mlb	New York Yankees @ Boston Red Sox	season-avg-v1	away	-0.48	0.4497	home	3	0	0.1479	0.0344	spread_home	win
+2026-06-25	baseball_mlb	New York Yankees @ Boston Red Sox	recency-v1	away	-0.66	0.4297	home	3	0	0.1117	-0.0117	spread_home	win
+2026-06-25	baseball_mlb	New York Yankees @ Boston Red Sox	injury-rest-v1	away	-0.88	0.4042	home	3	0	0.0730	-0.0703	spread_home	win
+2026-06-25	baseball_mlb	New York Yankees @ Boston Red Sox	regression-v1	away	-0.35	0.4611	home	3	0	0.1771	0.0604	spread_home	win
+2026-06-25	baseball_mlb	New York Yankees @ Boston Red Sox	pace-adj-v1	away	-0.51	0.4464	home	3	0	0.1473	0.0266	spread_home	win
