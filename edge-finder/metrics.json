@@ -1,59 +1,59 @@
 {
-  "last_updated": "2026-06-26",
+  "last_updated": "2026-06-27",
   "rolling_7d": {
-    "accuracy": 0.5,
-    "ev_realized": 0.0909,
-    "total_games": 8,
-    "total_correct": 4
+    "accuracy": 0.6,
+    "ev_realized": 0.2727,
+    "total_games": 15,
+    "total_correct": 9
   },
   "rolling_30d": {
-    "accuracy": 0.5217,
-    "ev_realized": 0.1583,
-    "total_games": 92,
-    "total_correct": 48
+    "accuracy": 0.5327,
+    "ev_realized": 0.1748,
+    "total_games": 107,
+    "total_correct": 57
   },
   "all_time": {
-    "accuracy": 0.5217,
-    "ev_realized": 0.1583,
-    "total_games": 92,
-    "total_correct": 48,
-    "total_bets_recommended": 89,
-    "total_bets_won": 54
+    "accuracy": 0.5327,
+    "ev_realized": 0.1748,
+    "total_games": 107,
+    "total_correct": 57,
+    "total_bets_recommended": 104,
+    "total_bets_won": 64
   },
   "variant_performance": {
     "combo-balanced-v1": {
-      "lifetime_games": 92,
-      "lifetime_correct": 48,
+      "lifetime_games": 107,
+      "lifetime_correct": 57,
       "weight": 0.7,
       "role": "champion"
     },
     "season-avg-v1": {
-      "lifetime_games": 230,
-      "lifetime_correct": 131,
+      "lifetime_games": 245,
+      "lifetime_correct": 140,
       "weight": 0.9,
       "role": "challenger"
     },
     "recency-v1": {
-      "lifetime_games": 230,
-      "lifetime_correct": 128,
+      "lifetime_games": 245,
+      "lifetime_correct": 137,
       "weight": 0.4,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 230,
-      "lifetime_correct": 128,
+      "lifetime_games": 245,
+      "lifetime_correct": 137,
       "weight": 0.5,
       "role": "challenger"
     },
     "regression-v1": {
-      "lifetime_games": 230,
-      "lifetime_correct": 132,
+      "lifetime_games": 245,
+      "lifetime_correct": 141,
       "weight": 1.0,
       "role": "champion"
     },
     "pace-adj-v1": {
-      "lifetime_games": 230,
-      "lifetime_correct": 128,
+      "lifetime_games": 245,
+      "lifetime_correct": 137,
       "weight": 0.4,
       "role": "challenger"
     }
@@ -76,13 +76,13 @@
     }
   ],
   "today_summary": {
-    "date": "2026-06-26",
+    "date": "2026-06-27",
     "games_analyzed": 15,
-    "bets_recommended": 15,
+    "bets_recommended": 14,
     "leans": 0,
     "sports": [
       "baseball_mlb"
     ],
-    "notes": "MLB only (15 games). 15 BETs, 0 LEANs. Eval Jun 25: 4/8 correct."
+    "notes": "MLB only (15 games). 14 BETs, 0 LEANs. Eval Jun 26: 9/15 correct."
   }
 }
