@@ -1637,3 +1637,39 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-06-29	baseball_mlb	Los Angeles Dodgers @ Sacramento Athletics	injury-rest-v1	away	-1.70	0.3177	away	-5	1	-0.1013	-0.3456	ml_away	win
 2026-06-29	baseball_mlb	Los Angeles Dodgers @ Sacramento Athletics	pace-adj-v1	away	-1.76	0.3144	away	-5	1	-0.1122	-0.3523	ml_away	win
 2026-06-29	baseball_mlb	Los Angeles Dodgers @ Sacramento Athletics	combo-balanced-v1	away	-1.64	0.3243	away	-5	1	-0.0826	-0.3319	ml_away	win
+2026-07-02	baseball_mlb	Chicago White Sox @ Cleveland Guardians	regression-v1	away	-0.09	0.4915	home	1	0	0.2324	-0.0171	spread_home	win
+2026-07-02	baseball_mlb	Chicago White Sox @ Cleveland Guardians	season-avg-v1	away	-0.14	0.4834	home	1	0	0.2238	-0.0331	spread_home	win
+2026-07-02	baseball_mlb	Chicago White Sox @ Cleveland Guardians	recency-v1	away	-0.16	0.4834	home	1	0	0.2179	-0.0332	spread_home	win
+2026-07-02	baseball_mlb	Chicago White Sox @ Cleveland Guardians	injury-rest-v1	away	-0.50	0.4457	home	1	0	0.1557	-0.1086	spread_home	win
+2026-07-02	baseball_mlb	Chicago White Sox @ Cleveland Guardians	pace-adj-v1	away	-0.10	0.4903	home	1	0	0.2340	-0.0193	spread_home	win
+2026-07-02	baseball_mlb	Chicago White Sox @ Cleveland Guardians	combo-balanced-v1	away	-0.29	0.4677	home	1	0	0.1991	-0.0647	spread_home	win
+2026-07-02	baseball_mlb	St. Louis Cardinals @ Atlanta Braves	regression-v1	home	0.69	0.5764	away	-6	0	-0.2048	0.0734	spread_away	win
+2026-07-02	baseball_mlb	St. Louis Cardinals @ Atlanta Braves	season-avg-v1	home	0.76	0.5852	away	-6	0	-0.1852	0.0898	spread_away	win
+2026-07-02	baseball_mlb	St. Louis Cardinals @ Atlanta Braves	recency-v1	home	0.85	0.5928	away	-6	0	-0.1679	0.1039	ml_home	loss
+2026-07-02	baseball_mlb	St. Louis Cardinals @ Atlanta Braves	injury-rest-v1	home	0.79	0.5846	away	-6	0	-0.1810	0.0886	spread_away	win
+2026-07-02	baseball_mlb	St. Louis Cardinals @ Atlanta Braves	pace-adj-v1	home	0.78	0.5852	away	-6	0	-0.1812	0.0898	spread_away	win
+2026-07-02	baseball_mlb	St. Louis Cardinals @ Atlanta Braves	combo-balanced-v1	home	0.78	0.5847	away	-6	0	-0.1851	0.0888	spread_away	win
+2026-07-02	baseball_mlb	Tampa Bay Rays @ Kansas City Royals	regression-v1	away	-1.25	0.3664	away	-3	1	-0.0028	-0.2672	ml_away	win
+2026-07-02	baseball_mlb	Tampa Bay Rays @ Kansas City Royals	season-avg-v1	away	-1.56	0.3321	away	-3	1	-0.0649	-0.3358	ml_away	win
+2026-07-02	baseball_mlb	Tampa Bay Rays @ Kansas City Royals	recency-v1	away	-1.67	0.3250	away	-3	1	-0.0885	-0.3500	ml_away	win
+2026-07-02	baseball_mlb	Tampa Bay Rays @ Kansas City Royals	injury-rest-v1	away	-1.93	0.2941	away	-3	1	-0.1478	-0.4117	ml_away	win
+2026-07-02	baseball_mlb	Tampa Bay Rays @ Kansas City Royals	pace-adj-v1	away	-1.55	0.3343	away	-3	1	-0.0654	-0.3314	ml_away	win
+2026-07-02	baseball_mlb	Tampa Bay Rays @ Kansas City Royals	combo-balanced-v1	away	-1.67	0.3233	away	-3	1	-0.0922	-0.3534	ml_away	win
+2026-07-02	baseball_mlb	Detroit Tigers @ Texas Rangers	regression-v1	home	1.07	0.6160	home	6	1	-0.1279	0.1127	ml_home	win
+2026-07-02	baseball_mlb	Detroit Tigers @ Texas Rangers	season-avg-v1	home	1.26	0.6336	home	6	1	-0.0902	0.1446	ml_home	win
+2026-07-02	baseball_mlb	Detroit Tigers @ Texas Rangers	recency-v1	home	1.39	0.6484	home	6	1	-0.0595	0.1713	ml_home	win
+2026-07-02	baseball_mlb	Detroit Tigers @ Texas Rangers	injury-rest-v1	home	1.26	0.6405	home	6	1	-0.0876	0.1571	ml_home	win
+2026-07-02	baseball_mlb	Detroit Tigers @ Texas Rangers	pace-adj-v1	home	1.30	0.6395	home	6	1	-0.0795	0.1553	ml_home	win
+2026-07-02	baseball_mlb	Detroit Tigers @ Texas Rangers	combo-balanced-v1	home	1.20	0.6307	home	6	1	-0.1016	0.1394	ml_home	win
+2026-07-02	baseball_mlb	Los Angeles Angels @ Seattle Mariners	regression-v1	home	1.54	0.6605	home	1	1	-0.0276	-0.0250	ml_home	win
+2026-07-02	baseball_mlb	Los Angeles Angels @ Seattle Mariners	season-avg-v1	home	1.78	0.6905	home	1	1	0.0235	0.0193	spread_home	loss
+2026-07-02	baseball_mlb	Los Angeles Angels @ Seattle Mariners	recency-v1	home	1.90	0.7035	home	1	1	0.0510	0.0385	spread_home	loss
+2026-07-02	baseball_mlb	Los Angeles Angels @ Seattle Mariners	injury-rest-v1	home	2.46	0.7620	home	1	1	0.1693	0.1248	spread_home	loss
+2026-07-02	baseball_mlb	Los Angeles Angels @ Seattle Mariners	pace-adj-v1	home	1.78	0.6898	home	1	1	0.0264	0.0183	spread_home	loss
+2026-07-02	baseball_mlb	Los Angeles Angels @ Seattle Mariners	combo-balanced-v1	home	2.07	0.7188	home	1	1	0.0852	0.0611	spread_home	loss
+2026-07-02	baseball_mlb	San Diego Padres @ Los Angeles Dodgers	regression-v1	home	1.42	0.6516	home	5	1	-0.0519	-0.0194	ml_home	win
+2026-07-02	baseball_mlb	San Diego Padres @ Los Angeles Dodgers	season-avg-v1	home	1.65	0.6746	home	5	1	-0.0029	0.0154	ml_home	win
+2026-07-02	baseball_mlb	San Diego Padres @ Los Angeles Dodgers	recency-v1	home	1.72	0.6829	home	5	1	0.0117	0.0279	ml_home	win
+2026-07-02	baseball_mlb	San Diego Padres @ Los Angeles Dodgers	injury-rest-v1	home	1.61	0.6747	home	5	1	-0.0129	0.0155	ml_home	win
+2026-07-02	baseball_mlb	San Diego Padres @ Los Angeles Dodgers	pace-adj-v1	home	1.64	0.6747	home	5	1	-0.0085	0.0154	ml_home	win
+2026-07-02	baseball_mlb	San Diego Padres @ Los Angeles Dodgers	combo-balanced-v1	home	1.54	0.6675	home	5	1	-0.0267	0.0046	ml_home	win
