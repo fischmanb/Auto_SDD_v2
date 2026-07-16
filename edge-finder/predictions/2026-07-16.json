@@ -1,0 +1,100 @@
+{
+  "date": "2026-07-16",
+  "predictions": [
+    {
+      "game": "New York Mets @ Philadelphia Phillies",
+      "sport": "baseball_mlb",
+      "home_team": "Philadelphia Phillies",
+      "away_team": "New York Mets",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -125,
+        "ml_away": 116,
+        "total": 9.5,
+        "book": "fanduel"
+      },
+      "probable_pitchers": {
+        "home": "Aaron Nola (3-6, 5.75 ERA)",
+        "away": "Christian Scott (2-1, 3.17 ERA)"
+      },
+      "injuries": {
+        "home": "Johan Rojas (60-day IL, UCL), Adolis Garcia (60-day IL, lat), Justin Crawford (DTD, knee), Lou Trivino (15-day IL), Tanner Banks (15-day IL)",
+        "away": "Marcus Semien (10-day IL, hip), Mark Vientos (10-day IL, hand), Luis Robert Jr (60-day IL, back), Clay Holmes (60-day IL, fibula), Bo Bichette (DTD, leg), Tylor Megill (60-day IL, elbow)"
+      },
+      "blend_home_wp": 0.6421,
+      "blend_away_wp": 0.3579,
+      "blend_margin": 1.39,
+      "best_bet_type": "ml_home",
+      "best_blend_ev": 0.1558,
+      "best_model_ev": 0.2218,
+      "worst_model_ev": 0.1096,
+      "robustness": "6/6",
+      "agree_count": 6,
+      "verdict": "BET",
+      "side": "HOME",
+      "side_team": "Philadelphia Phillies",
+      "bet_market": "ML",
+      "kelly": 0.05,
+      "model_results": {
+        "regression-v1": {
+          "home_win_prob": 0.6164,
+          "expected_margin": 1.13,
+          "spread_ev_home": -0.1151,
+          "spread_ev_away": 0.0241,
+          "ml_ev_home": 0.1096,
+          "ml_ev_away": -0.1715
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.6365,
+          "expected_margin": 1.35,
+          "spread_ev_home": -0.0712,
+          "spread_ev_away": -0.0198,
+          "ml_ev_home": 0.1457,
+          "ml_ev_away": -0.2148
+        },
+        "recency-v1": {
+          "home_win_prob": 0.6523,
+          "expected_margin": 1.53,
+          "spread_ev_home": -0.0326,
+          "spread_ev_away": -0.0584,
+          "ml_ev_home": 0.1741,
+          "ml_ev_away": -0.249
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.6788,
+          "expected_margin": 1.67,
+          "spread_ev_home": 0.0045,
+          "spread_ev_away": -0.0955,
+          "ml_ev_home": 0.2218,
+          "ml_ev_away": -0.3061
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.6404,
+          "expected_margin": 1.35,
+          "spread_ev_home": -0.0664,
+          "spread_ev_away": -0.0246,
+          "ml_ev_home": 0.1527,
+          "ml_ev_away": -0.2233
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.6588,
+          "expected_margin": 1.56,
+          "spread_ev_home": -0.0309,
+          "spread_ev_away": -0.0601,
+          "ml_ev_home": 0.1858,
+          "ml_ev_away": -0.2629
+        }
+      },
+      "notes": "Second-half opener after All-Star break. Only MLB game tonight. Phillies at home with better record (54-43 vs 40-57). Nola has a high ERA (5.75) but Phillies lineup should overcome. Mets missing Semien and Vientos from lineup. All 6 models strongly favor Phillies ML."
+    }
+  ],
+  "metadata": {
+    "sports_checked": ["baseball_mlb"],
+    "sports_skipped": ["basketball_nba (off-season)", "icehockey_nhl (off-season)", "americanfootball_nfl (off-season)"],
+    "total_games": 1,
+    "total_bets": 1,
+    "total_leans": 0,
+    "data_sources": ["web search (ESPN, MLB.com, StatMuse, FanDuel)"],
+    "note": "ODDS_API_KEY not configured; odds sourced from web search of FanDuel. API key needed for automated odds retrieval."
+  }
+}
