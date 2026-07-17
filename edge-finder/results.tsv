@@ -2093,3 +2093,9 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-07-10	baseball_mlb	Chicago Cubs @ Cincinnati Reds	injury-rest-v1	home	0.28	0.5330	home	4	1	0.3044	0.3044	spread_home	win
 2026-07-10	baseball_mlb	Chicago Cubs @ Cincinnati Reds	pace-adj-v1	away	-0.09	0.4892	home	4	0	0.2313	0.2313	spread_home	win
 2026-07-10	baseball_mlb	Chicago Cubs @ Cincinnati Reds	combo-balanced-v1	home	0.16	0.5164	home	4	1	0.2772	0.2772	spread_home	win
+2026-07-16	baseball_mlb	New York Mets @ Philadelphia Phillies	regression-v1	home	1.13	0.6164	away	-3	0	-0.1151	0.1096	ml_home	loss
+2026-07-16	baseball_mlb	New York Mets @ Philadelphia Phillies	season-avg-v1	home	1.35	0.6365	away	-3	0	-0.0712	0.1457	ml_home	loss
+2026-07-16	baseball_mlb	New York Mets @ Philadelphia Phillies	recency-v1	home	1.53	0.6523	away	-3	0	-0.0326	0.1741	ml_home	loss
+2026-07-16	baseball_mlb	New York Mets @ Philadelphia Phillies	injury-rest-v1	home	1.67	0.6788	away	-3	0	0.0045	0.2218	ml_home	loss
+2026-07-16	baseball_mlb	New York Mets @ Philadelphia Phillies	pace-adj-v1	home	1.35	0.6404	away	-3	0	-0.0664	0.1527	ml_home	loss
+2026-07-16	baseball_mlb	New York Mets @ Philadelphia Phillies	combo-balanced-v1	home	1.56	0.6588	away	-3	0	-0.0309	0.1858	ml_home	loss
