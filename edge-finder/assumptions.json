@@ -12,10 +12,10 @@
       "regression_to_mean": 0.2,
       "pace_adjustment": "season_average"
     },
-    "lifetime_games": 376,
-    "lifetime_correct": 209,
+    "lifetime_games": 389,
+    "lifetime_correct": 215,
     "promoted_on": "2026-06-26",
-    "rolling_10d_accuracy": 0.4
+    "rolling_10d_accuracy": 0.46153846153846156
   },
   "challengers": [
     {
@@ -31,9 +31,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 376,
-      "lifetime_correct": 209,
-      "rolling_10d_accuracy": 0.4
+      "lifetime_games": 389,
+      "lifetime_correct": 215,
+      "rolling_10d_accuracy": 0.46153846153846156
     },
     {
       "id": "recency-v1",
@@ -48,9 +48,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 376,
-      "lifetime_correct": 206,
-      "rolling_10d_accuracy": 0.4
+      "lifetime_games": 389,
+      "lifetime_correct": 212,
+      "rolling_10d_accuracy": 0.46153846153846156
     },
     {
       "id": "injury-rest-v1",
@@ -65,9 +65,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 376,
-      "lifetime_correct": 205,
-      "rolling_10d_accuracy": 0.4
+      "lifetime_games": 389,
+      "lifetime_correct": 211,
+      "rolling_10d_accuracy": 0.46153846153846156
     },
     {
       "id": "pace-adj-v1",
@@ -82,9 +82,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "opponent_adjusted"
       },
-      "lifetime_games": 376,
-      "lifetime_correct": 205,
-      "rolling_10d_accuracy": 0.4
+      "lifetime_games": 389,
+      "lifetime_correct": 211,
+      "rolling_10d_accuracy": 0.46153846153846156
     },
     {
       "id": "combo-balanced-v1",
@@ -97,9 +97,9 @@
         "pace_adjustment": "season_average"
       },
       "promoted_on": "2026-06-16",
-      "rolling_10d_accuracy": 0.4,
-      "lifetime_games": 238,
-      "lifetime_correct": 126,
+      "rolling_10d_accuracy": 0.46153846153846156,
+      "lifetime_games": 251,
+      "lifetime_correct": 132,
       "weight": 0.7
     }
   ],
