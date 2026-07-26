@@ -1,59 +1,59 @@
 {
-  "last_updated": "2026-07-25",
+  "last_updated": "2026-07-26",
   "rolling_7d": {
-    "accuracy": 0.6,
-    "ev_realized": 0.1748,
+    "accuracy": 0.5333,
+    "ev_realized": 0.26,
     "total_games": 15,
-    "total_correct": 9
+    "total_correct": 8
   },
   "rolling_30d": {
-    "accuracy": 0.5575,
+    "accuracy": 0.5567,
     "ev_realized": 0.8144,
-    "total_games": 391,
-    "total_correct": 218
+    "total_games": 406,
+    "total_correct": 226
   },
   "all_time": {
-    "accuracy": 0.5575,
+    "accuracy": 0.5567,
     "ev_realized": 0.8144,
-    "total_games": 391,
-    "total_correct": 218,
-    "total_bets_recommended": 222,
-    "total_bets_won": 211
+    "total_games": 406,
+    "total_correct": 226,
+    "total_bets_recommended": 233,
+    "total_bets_won": 219
   },
   "variant_performance": {
     "regression-v1": {
-      "lifetime_games": 391,
-      "lifetime_correct": 218,
+      "lifetime_games": 406,
+      "lifetime_correct": 226,
       "weight": 1.0,
       "role": "champion"
     },
     "season-avg-v1": {
-      "lifetime_games": 391,
-      "lifetime_correct": 217,
+      "lifetime_games": 406,
+      "lifetime_correct": 225,
       "weight": 0.8,
       "role": "challenger"
     },
     "recency-v1": {
-      "lifetime_games": 391,
-      "lifetime_correct": 214,
+      "lifetime_games": 406,
+      "lifetime_correct": 222,
       "weight": 0.4,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 391,
-      "lifetime_correct": 214,
+      "lifetime_games": 406,
+      "lifetime_correct": 222,
       "weight": 0.4,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 391,
-      "lifetime_correct": 213,
+      "lifetime_games": 406,
+      "lifetime_correct": 221,
       "weight": 0.3,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 253,
-      "lifetime_correct": 135,
+      "lifetime_games": 268,
+      "lifetime_correct": 143,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -76,13 +76,13 @@
     }
   ],
   "today_summary": {
-    "date": "2026-07-25",
+    "date": "2026-07-26",
     "games_analyzed": 15,
-    "bets_recommended": 13,
-    "leans": 1,
+    "bets_recommended": 11,
+    "leans": 4,
     "sports": [
       "baseball_mlb"
     ],
-    "notes": "MLB Saturday slate (15 games). Eval Jul 20: 9/15 correct (60%). Jul 20 bets: 8/13 won. CLE 13-4 rout of MIN, BOS extended historic win streak to 14."
+    "notes": "MLB Sunday slate (15 games, series finales). Eval Jul 25: 8/15 correct (53%). BOS 14-game streak snapped. MIA skid hits 11."
   }
 }
