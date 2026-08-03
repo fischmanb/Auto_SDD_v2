@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-07-29",
+  "last_updated": "2026-08-03",
   "rolling_7d": {
     "accuracy": 0.4545,
     "ev_realized": 0.08,
@@ -76,13 +76,13 @@
     }
   ],
   "today_summary": {
-    "date": "2026-07-29",
-    "games_analyzed": 14,
-    "bets_recommended": 8,
-    "leans": 6,
+    "date": "2026-08-03",
+    "games_analyzed": 8,
+    "bets_recommended": 4,
+    "leans": 4,
     "sports": [
       "baseball_mlb"
     ],
-    "notes": "MLB Wed slate (14 games + ATL@NYM DH G2 excluded). Eval Jul 27: 5/11 correct (45%). MIA snapped 12-game streak. NYM crushed ATL 14-3."
+    "notes": "MLB Mon trade deadline slate (8 games). No Phase 1 eval (gap since Jul 29). Schlittler (2.04 ERA) starts NYY vs STL. Coors Field TB@COL (O/U 11.5)."
   }
 }
