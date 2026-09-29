@@ -1,23 +1,25 @@
 {
-  "last_updated": "2026-07-29",
+  "last_updated": "2026-09-29",
   "rolling_7d": {
-    "accuracy": 0.4545,
-    "ev_realized": 0.08,
-    "total_games": 11,
-    "total_correct": 5
+    "accuracy": null,
+    "ev_realized": null,
+    "total_games": 0,
+    "total_correct": 0,
+    "note": "No eval data — 2-month gap since last run (2026-07-29). Resuming tracking."
   },
   "rolling_30d": {
-    "accuracy": 0.5486,
-    "ev_realized": 0.8144,
-    "total_games": 432,
-    "total_correct": 237
+    "accuracy": null,
+    "ev_realized": null,
+    "total_games": 0,
+    "total_correct": 0,
+    "note": "Reset after 2-month hiatus."
   },
   "all_time": {
     "accuracy": 0.5486,
     "ev_realized": 0.8144,
     "total_games": 432,
     "total_correct": 237,
-    "total_bets_recommended": 245,
+    "total_bets_recommended": 248,
     "total_bets_won": 231
   },
   "variant_performance": {
@@ -76,13 +78,11 @@
     }
   ],
   "today_summary": {
-    "date": "2026-07-29",
-    "games_analyzed": 14,
-    "bets_recommended": 8,
-    "leans": 6,
-    "sports": [
-      "baseball_mlb"
-    ],
-    "notes": "MLB Wed slate (14 games + ATL@NYM DH G2 excluded). Eval Jul 27: 5/11 correct (45%). MIA snapped 12-game streak. NYM crushed ATL 14-3."
+    "date": "2026-09-29",
+    "games_analyzed": 4,
+    "bets_recommended": 3,
+    "leans": 0,
+    "sports": ["baseball_mlb"],
+    "notes": "MLB Wild Card Series Game 1 slate. 4 postseason games. No eval (2-month gap). 3 BETs: CHW ML +110 vs HOU, BOS +1.5 vs NYY, SD ML -130 vs CHC."
   }
 }

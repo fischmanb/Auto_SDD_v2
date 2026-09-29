@@ -1,0 +1,323 @@
+{
+  "date": "2026-09-29",
+  "sport": "baseball_mlb",
+  "context": "MLB Wild Card Series - Game 1 (best-of-3)",
+  "note": "ODDS_API_KEY not configured; odds sourced from web search. 4 Wild Card Game 1s: PHI@ATL (2p), CHW@HOU (5p), BOS@NYY (8p), CHC@SD (10p). All postseason games at higher seed's ballpark.",
+  "games": [
+    {
+      "home": "Atlanta Braves",
+      "away": "Philadelphia Phillies",
+      "time": "2:00 PM ET",
+      "sp_home": "Chris Sale",
+      "sp_away": "Jesus Luzardo",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -196,
+        "ml_away": 164,
+        "total": 6.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.6394,
+        "away_win_prob": 0.3606,
+        "expected_margin": 1.31,
+        "best_ev": -0.0127,
+        "best_bet": "spread_ev_away",
+        "robustness": 6,
+        "verdict": "NO BET"
+      },
+      "model_predictions": {
+        "season-avg-v1": {
+          "home_win_prob": 0.6313,
+          "ml_ev_home": -0.0467,
+          "ml_ev_away": -0.0265,
+          "spread_ev_home": -0.091,
+          "spread_ev_away": 0.0
+        },
+        "regression-v1": {
+          "home_win_prob": 0.6153,
+          "ml_ev_home": -0.0708,
+          "ml_ev_away": 0.0156,
+          "spread_ev_home": -0.1263,
+          "spread_ev_away": 0.0353
+        },
+        "recency-v1": {
+          "home_win_prob": 0.646,
+          "ml_ev_home": -0.0245,
+          "ml_ev_away": -0.0653,
+          "spread_ev_home": -0.0667,
+          "spread_ev_away": -0.0243
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.6736,
+          "ml_ev_home": 0.0173,
+          "ml_ev_away": -0.1384,
+          "spread_ev_home": -0.0193,
+          "spread_ev_away": -0.0717
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.6312,
+          "ml_ev_home": -0.0468,
+          "ml_ev_away": -0.0263,
+          "spread_ev_home": -0.0854,
+          "spread_ev_away": -0.0056
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.6493,
+          "ml_ev_home": -0.0195,
+          "ml_ev_away": -0.0741,
+          "spread_ev_home": -0.061,
+          "spread_ev_away": -0.03
+        }
+      },
+      "team_stats": {
+        "home": {
+          "season_ppg": 4.87,
+          "season_opp_ppg": 3.87,
+          "record": "94-68",
+          "home_pct": 0.642
+        },
+        "away": {
+          "season_ppg": 4.28,
+          "season_opp_ppg": 4.0,
+          "record": "88-74",
+          "away_pct": 0.556
+        }
+      }
+    },
+    {
+      "home": "Houston Astros",
+      "away": "Chicago White Sox",
+      "time": "5:00 PM ET",
+      "sp_home": "Hunter Brown (est.)",
+      "sp_away": "Sean Burke (est.)",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -130,
+        "ml_away": 110,
+        "total": 8.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.494,
+        "away_win_prob": 0.506,
+        "expected_margin": -0.07,
+        "best_ev": 0.0626,
+        "best_ml_ev": 0.0626,
+        "best_bet": "ml_away",
+        "robustness_winner": 3,
+        "robustness_spread": 6,
+        "verdict": "BET",
+        "bet_side": "CHW ML (+110)",
+        "kelly_half": 0.028
+      },
+      "model_predictions": {
+        "season-avg-v1": {
+          "home_win_prob": 0.5032,
+          "ml_ev_home": -0.1097,
+          "ml_ev_away": 0.0432,
+          "spread_ev_away": 0.2314
+        },
+        "regression-v1": {
+          "home_win_prob": 0.5117,
+          "ml_ev_home": -0.0946,
+          "ml_ev_away": 0.0253,
+          "spread_ev_away": 0.2207
+        },
+        "recency-v1": {
+          "home_win_prob": 0.4962,
+          "ml_ev_home": -0.1221,
+          "ml_ev_away": 0.058,
+          "spread_ev_away": 0.2517
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.4615,
+          "ml_ev_home": -0.1836,
+          "ml_ev_away": 0.1309,
+          "spread_ev_away": 0.3141
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.5067,
+          "ml_ev_home": -0.1035,
+          "ml_ev_away": 0.0359,
+          "spread_ev_away": 0.2263
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.4795,
+          "ml_ev_home": -0.1516,
+          "ml_ev_away": 0.093,
+          "spread_ev_away": 0.2776
+        }
+      },
+      "team_stats": {
+        "home": {
+          "season_ppg": 4.8,
+          "season_opp_ppg": 4.8,
+          "record": "81-81",
+          "home_pct": 0.543,
+          "starter_era": 4.81,
+          "bullpen_era": 4.08
+        },
+        "away": {
+          "season_ppg": 4.5,
+          "season_opp_ppg": 4.5,
+          "record": "84-78",
+          "away_pct": 0.494,
+          "starter_era": 4.6,
+          "bullpen_era": 3.7
+        }
+      }
+    },
+    {
+      "home": "New York Yankees",
+      "away": "Boston Red Sox",
+      "time": "8:00 PM ET",
+      "sp_home": "Cam Schlittler (1.95 ERA)",
+      "sp_away": "Payton Tolle",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -142,
+        "ml_away": 120,
+        "total": 7.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.6004,
+        "away_win_prob": 0.3996,
+        "expected_margin": 0.88,
+        "best_ml_ev_home": 0.0233,
+        "best_spread_ev_away": 0.0885,
+        "best_bet": "spread_away",
+        "robustness": 6,
+        "verdict_ml": "LEAN NYY ML",
+        "verdict_spread": "BET BOS +1.5",
+        "kelly_half_ml": 0.017
+      },
+      "model_predictions": {
+        "season-avg-v1": {
+          "home_win_prob": 0.6,
+          "ml_ev_home": 0.0226,
+          "ml_ev_away": -0.1201,
+          "spread_ev_away": 0.0809
+        },
+        "regression-v1": {
+          "home_win_prob": 0.5903,
+          "ml_ev_home": 0.006,
+          "ml_ev_away": -0.0987,
+          "spread_ev_away": 0.0912
+        },
+        "recency-v1": {
+          "home_win_prob": 0.6115,
+          "ml_ev_home": 0.0421,
+          "ml_ev_away": -0.1453,
+          "spread_ev_away": 0.0532
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.5974,
+          "ml_ev_home": 0.0182,
+          "ml_ev_away": -0.1144,
+          "spread_ev_away": 0.1395
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.6023,
+          "ml_ev_home": 0.0265,
+          "ml_ev_away": -0.1251,
+          "spread_ev_away": 0.0744
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.6038,
+          "ml_ev_home": 0.029,
+          "ml_ev_away": -0.1284,
+          "spread_ev_away": 0.0927
+        }
+      },
+      "team_stats": {
+        "home": {
+          "season_ppg": 4.56,
+          "season_opp_ppg": 3.8,
+          "record": "93-68",
+          "home_pct": 0.617,
+          "injuries": "Aaron Judge out"
+        },
+        "away": {
+          "season_ppg": 3.69,
+          "season_opp_ppg": 3.48,
+          "record": "87-75",
+          "away_pct": 0.506,
+          "sept_record": "12-12",
+          "injuries": "Rafaela, Yoshida, Contreras limited"
+        }
+      }
+    },
+    {
+      "home": "San Diego Padres",
+      "away": "Chicago Cubs",
+      "time": "10:00 PM ET",
+      "sp_home": "Michael King (3.21 ERA)",
+      "sp_away": "Matthew Boyd (3.91 ERA)",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -130,
+        "ml_away": 108,
+        "total": 7.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.6529,
+        "away_win_prob": 0.3471,
+        "expected_margin": 1.5,
+        "best_ev": 0.1552,
+        "best_bet": "ml_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "bet_side": "SD ML (-130)",
+        "kelly_full": 0.2017,
+        "kelly_half": 0.1009
+      },
+      "model_predictions": {
+        "season-avg-v1": {
+          "home_win_prob": 0.6539,
+          "ml_ev_home": 0.1569
+        },
+        "regression-v1": {
+          "home_win_prob": 0.6292,
+          "ml_ev_home": 0.1132
+        },
+        "recency-v1": {
+          "home_win_prob": 0.6812,
+          "ml_ev_home": 0.2052
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.6547,
+          "ml_ev_home": 0.1583
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.6511,
+          "ml_ev_home": 0.1519
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.6546,
+          "ml_ev_home": 0.1581
+        }
+      },
+      "team_stats": {
+        "home": {
+          "season_ppg": 4.5,
+          "season_opp_ppg": 3.8,
+          "record": "91-71",
+          "home_pct": 0.63,
+          "sept_form": "35-17 in final 2 months",
+          "bullpen_war": 8.9
+        },
+        "away": {
+          "season_ppg": 5.35,
+          "season_opp_ppg": 4.9,
+          "record": "89-73",
+          "away_pct": 0.531,
+          "road_era": 4.14,
+          "led_mlb_runs": true
+        }
+      }
+    }
+  ]
+}
