@@ -11,9 +11,9 @@
       "regression_to_mean": 0.1,
       "pace_adjustment": "season_average"
     },
-    "lifetime_games": 298,
-    "lifetime_correct": 159,
-    "rolling_10d_accuracy": 1.0,
+    "lifetime_games": 302,
+    "lifetime_correct": 162,
+    "rolling_10d_accuracy": 0.875,
     "promoted_on": "2026-09-30"
   },
   "challengers": [
@@ -30,8 +30,8 @@
         "regression_to_mean": 0.2,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 436,
-      "lifetime_correct": 240,
+      "lifetime_games": 440,
+      "lifetime_correct": 243,
       "promoted_on": "2026-06-26",
       "rolling_10d_accuracy": 0.75
     },
@@ -48,9 +48,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 436,
-      "lifetime_correct": 238,
-      "rolling_10d_accuracy": 1.0
+      "lifetime_games": 440,
+      "lifetime_correct": 241,
+      "rolling_10d_accuracy": 0.875
     },
     {
       "id": "injury-rest-v1",
@@ -65,9 +65,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 436,
-      "lifetime_correct": 238,
-      "rolling_10d_accuracy": 1.0
+      "lifetime_games": 440,
+      "lifetime_correct": 241,
+      "rolling_10d_accuracy": 0.875
     },
     {
       "id": "pace-adj-v1",
@@ -82,8 +82,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "opponent_adjusted"
       },
-      "lifetime_games": 436,
-      "lifetime_correct": 236,
+      "lifetime_games": 440,
+      "lifetime_correct": 239,
       "rolling_10d_accuracy": 0.75
     },
     {
@@ -98,8 +98,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 436,
-      "lifetime_correct": 240,
+      "lifetime_games": 440,
+      "lifetime_correct": 243,
       "rolling_10d_accuracy": 0.75,
       "demoted_on": "2026-09-30"
     }

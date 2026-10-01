@@ -2615,3 +2615,27 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-09-29	baseball_mlb	Chicago Cubs @ San Diego Padres	injury-rest-v1	home	1.55	0.6547	home	8	1	0.0000	0.1583	ml_home	win
 2026-09-29	baseball_mlb	Chicago Cubs @ San Diego Padres	pace-adj-v1	home	1.51	0.6511	home	8	1	0.0000	0.1519	ml_home	win
 2026-09-29	baseball_mlb	Chicago Cubs @ San Diego Padres	combo-balanced-v1	home	1.55	0.6546	home	8	1	0.0000	0.1581	ml_home	win
+2026-09-30	baseball_mlb	Philadelphia Phillies @ Atlanta Braves	combo-balanced-v1	home	0.81	0.5893	away	-1	0	0.3936	0.1453	ml_home	loss
+2026-09-30	baseball_mlb	Philadelphia Phillies @ Atlanta Braves	regression-v1	home	0.62	0.5681	away	-1	0	0.3597	0.1040	ml_home	loss
+2026-09-30	baseball_mlb	Philadelphia Phillies @ Atlanta Braves	recency-v1	home	0.61	0.5673	away	-1	0	0.3677	0.1025	ml_home	loss
+2026-09-30	baseball_mlb	Philadelphia Phillies @ Atlanta Braves	injury-rest-v1	home	1.08	0.6178	away	-1	0	0.4484	0.2006	ml_home	loss
+2026-09-30	baseball_mlb	Philadelphia Phillies @ Atlanta Braves	pace-adj-v1	home	0.69	0.5739	away	-1	0	0.3720	0.1154	ml_home	loss
+2026-09-30	baseball_mlb	Philadelphia Phillies @ Atlanta Braves	season-avg-v1	home	0.72	0.5768	away	-1	0	0.3767	0.1210	ml_home	loss
+2026-09-30	baseball_mlb	Chicago White Sox @ Houston Astros	combo-balanced-v1	away	-0.46	0.4511	away	-4	1	0.3245	0.2185	ml_away	win
+2026-09-30	baseball_mlb	Chicago White Sox @ Houston Astros	regression-v1	away	-0.26	0.4713	away	-4	1	0.2883	0.1736	ml_away	win
+2026-09-30	baseball_mlb	Chicago White Sox @ Houston Astros	recency-v1	away	-0.64	0.4336	away	-4	1	0.3583	0.2575	ml_away	win
+2026-09-30	baseball_mlb	Chicago White Sox @ Houston Astros	injury-rest-v1	away	-0.39	0.4573	away	-4	1	0.3156	0.2048	ml_away	win
+2026-09-30	baseball_mlb	Chicago White Sox @ Houston Astros	pace-adj-v1	away	-0.39	0.4607	away	-4	1	0.3099	0.1972	ml_away	win
+2026-09-30	baseball_mlb	Chicago White Sox @ Houston Astros	season-avg-v1	away	-0.41	0.4550	away	-4	1	0.3142	0.2099	ml_away	win
+2026-09-30	baseball_mlb	Boston Red Sox @ New York Yankees	combo-balanced-v1	home	1.30	0.6473	home	7	1	-0.0095	0.1303	ml_home	win
+2026-09-30	baseball_mlb	Boston Red Sox @ New York Yankees	regression-v1	home	1.02	0.6106	home	7	1	0.0504	0.0663	ml_home	win
+2026-09-30	baseball_mlb	Boston Red Sox @ New York Yankees	recency-v1	home	1.29	0.6444	home	7	1	-0.0093	0.1252	ml_home	win
+2026-09-30	baseball_mlb	Boston Red Sox @ New York Yankees	injury-rest-v1	home	1.41	0.6635	home	7	1	-0.0310	0.1587	ml_home	win
+2026-09-30	baseball_mlb	Boston Red Sox @ New York Yankees	pace-adj-v1	home	1.11	0.6224	home	7	1	0.0300	0.0869	ml_home	win
+2026-09-30	baseball_mlb	Boston Red Sox @ New York Yankees	season-avg-v1	home	1.12	0.6222	home	7	1	0.0283	0.0866	ml_home	win
+2026-09-30	baseball_mlb	Chicago Cubs @ San Diego Padres	combo-balanced-v1	home	0.93	0.5974	home	3	1	0.0587	0.0211	ml_home	win
+2026-09-30	baseball_mlb	Chicago Cubs @ San Diego Padres	regression-v1	home	0.81	0.5835	home	3	1	0.0840	-0.0027	ml_home	win
+2026-09-30	baseball_mlb	Chicago Cubs @ San Diego Padres	recency-v1	home	1.07	0.6163	home	3	1	0.0314	0.0534	ml_home	win
+2026-09-30	baseball_mlb	Chicago Cubs @ San Diego Padres	injury-rest-v1	home	0.95	0.6009	home	3	1	0.0552	0.0271	ml_home	win
+2026-09-30	baseball_mlb	Chicago Cubs @ San Diego Padres	pace-adj-v1	home	0.97	0.6018	home	3	1	0.0536	0.0286	ml_home	win
+2026-09-30	baseball_mlb	Chicago Cubs @ San Diego Padres	season-avg-v1	home	0.95	0.6009	home	3	1	0.0593	0.0271	ml_home	win

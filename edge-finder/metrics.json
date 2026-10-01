@@ -1,61 +1,61 @@
 {
-  "last_updated": "2026-09-30",
+  "last_updated": "2026-10-01",
   "rolling_7d": {
     "accuracy": 0.75,
-    "ev_realized": 0.2897,
-    "total_games": 4,
-    "total_correct": 3,
-    "note": "Reset window. Day 1 after 2-month hiatus (last: 2026-07-29). 4 WC Game 1s evaluated."
+    "ev_realized": 0.3059,
+    "total_games": 8,
+    "total_correct": 6,
+    "note": "2 days of data (Sep 29-30). 8 MLB WC games evaluated. All 6 models tied at 75%."
   },
   "rolling_30d": {
     "accuracy": 0.75,
-    "ev_realized": 0.2897,
-    "total_games": 4,
-    "total_correct": 3,
-    "note": "Reset window. Only 1 day of data since resuming."
+    "ev_realized": 0.3059,
+    "total_games": 8,
+    "total_correct": 6,
+    "note": "Same as 7d. Only 2 days of data since resuming after 2-month hiatus."
   },
   "all_time": {
-    "accuracy": 0.5505,
-    "ev_realized": 0.8081,
-    "total_games": 436,
-    "total_correct": 240,
-    "total_bets_recommended": 251,
-    "total_bets_won": 233
+    "accuracy": 0.5523,
+    "ev_realized": 0.8024,
+    "total_games": 440,
+    "total_correct": 243,
+    "total_bets_recommended": 254,
+    "total_bets_won": 235
   },
   "variant_performance": {
     "combo-balanced-v1": {
-      "lifetime_games": 298,
-      "lifetime_correct": 159,
+      "lifetime_games": 302,
+      "lifetime_correct": 162,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 436,
-      "lifetime_correct": 240,
+      "lifetime_games": 440,
+      "lifetime_correct": 243,
       "weight": 0.7,
       "role": "challenger"
     },
     "recency-v1": {
-      "lifetime_games": 436,
-      "lifetime_correct": 238,
+      "lifetime_games": 440,
+      "lifetime_correct": 241,
       "weight": 0.6,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 436,
-      "lifetime_correct": 238,
+      "lifetime_games": 440,
+      "lifetime_correct": 241,
       "weight": 0.6,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 436,
-      "lifetime_correct": 236,
+      "lifetime_games": 440,
+      "lifetime_correct": 239,
       "weight": 0.4,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 436,
-      "lifetime_correct": 240,
+      "lifetime_games": 440,
+      "lifetime_correct": 243,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -83,13 +83,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-09-30",
-    "games_analyzed": 4,
-    "bets_recommended": 3,
-    "leans": 1,
+    "date": "2026-10-01",
+    "games_analyzed": 10,
+    "bets_recommended": 9,
+    "leans": 0,
     "sports": [
-      "baseball_mlb"
+      "baseball_mlb",
+      "americanfootball_nfl",
+      "icehockey_nhl"
     ],
-    "notes": "MLB WC Game 2. combo-balanced-v1 promoted to champion. 3 BETs: ATL ML -106, CHW ML +122, NYY ML -134. 1 LEAN: SD ML -141. Yesterday 2/3 bets won (+$86.92)."
+    "notes": "MLB WC G3 (PHI@ATL). NFL TNF (PIT@CLE). NHL opening night (8 games). Yesterday 2/3 BETs won (+$96.63). Multi-sport expansion day."
   }
 }
