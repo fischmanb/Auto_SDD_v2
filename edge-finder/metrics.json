@@ -95,10 +95,10 @@
   ],
   "today_summary": {
     "date": "2026-10-02",
-    "games_analyzed": 0,
-    "bets_recommended": 0,
+    "games_analyzed": 5,
+    "bets_recommended": 5,
     "leans": 0,
-    "sports": [],
-    "notes": "Placeholder — will be updated after Phase 4."
+    "sports": ["icehockey_nhl"],
+    "notes": "NHL only (5 games). All 5 puck line underdogs recommended as BET. New champion recency-v1's first predictions. Yesterday: 5/10 bets won, promoted recency-v1."
   }
 }

@@ -1,0 +1,173 @@
+{
+  "date": "2026-10-02",
+  "sports": ["icehockey_nhl"],
+  "context": "NHL 2026-27 season, game 1-2 for most teams. NYR on back-to-back (beat TB 5-1 on Oct 1). DET missing Larkin (C), two defensemen. BOS missing McAvoy (suspended 6 games), Poitras. CAR missing Jarvis. WPG Hellebuyck status uncertain (camp holdout). No MLB (ALDS/NLDS start Oct 3). No NFL until Sunday.",
+  "note": "ODDS_API_KEY not configured; odds sourced from web search. All team stats from 2025-26 season baseline (game 1-2 of new season). Newly promoted champion: recency-v1.",
+  "games": [
+    {
+      "sport": "icehockey_nhl",
+      "home": "Detroit Red Wings",
+      "away": "New York Rangers",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -130,
+        "ml_away": 105,
+        "total": 6.0,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.4897,
+        "away_win_prob": 0.5103,
+        "expected_margin": -0.05,
+        "best_ev": 0.4441,
+        "best_bet": "spread_away",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.15,
+        "best_model_ev": 0.4798,
+        "worst_model_ev": 0.4164,
+        "notes": "NYR on B2B but DET missing Larkin + 2D. Toss-up game, huge puck line value on NYR +1.5."
+      },
+      "model_predictions": {
+        "recency-v1": {"home_win_prob": 0.4862, "ml_ev_home": -0.1398, "ml_ev_away": 0.0533, "spread_ev_home": -0.5354, "spread_ev_away": 0.4444, "expected_margin": -0.07},
+        "regression-v1": {"home_win_prob": 0.5066, "ml_ev_home": -0.1037, "ml_ev_away": 0.0114, "spread_ev_home": -0.5074, "spread_ev_away": 0.4164, "expected_margin": 0.04},
+        "combo-balanced-v1": {"home_win_prob": 0.4809, "ml_ev_home": -0.1492, "ml_ev_away": 0.0642, "spread_ev_home": -0.5503, "spread_ev_away": 0.4593, "expected_margin": -0.10},
+        "injury-rest-v1": {"home_win_prob": 0.4708, "ml_ev_home": -0.1671, "ml_ev_away": 0.0849, "spread_ev_home": -0.5708, "spread_ev_away": 0.4798, "expected_margin": -0.16},
+        "pace-adj-v1": {"home_win_prob": 0.4990, "ml_ev_home": -0.1172, "ml_ev_away": 0.0271, "spread_ev_home": -0.5234, "spread_ev_away": 0.4324, "expected_margin": -0.01},
+        "season-avg-v1": {"home_win_prob": 0.4973, "ml_ev_home": -0.1201, "ml_ev_away": 0.0305, "spread_ev_home": -0.5233, "spread_ev_away": 0.4323, "expected_margin": -0.01}
+      }
+    },
+    {
+      "sport": "icehockey_nhl",
+      "home": "Carolina Hurricanes",
+      "away": "Washington Capitals",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -145,
+        "ml_away": 120,
+        "total": 6.0,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.6057,
+        "away_win_prob": 0.3943,
+        "expected_margin": 0.60,
+        "best_ev": 0.2468,
+        "best_bet": "spread_away",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.136,
+        "best_model_ev": 0.2932,
+        "worst_model_ev": 0.219,
+        "notes": "CAR reigning Cup champs, strong at home. But WSH +1.5 has big value — CAR's expected margin ~0.6 goals, well under 1.5."
+      },
+      "model_predictions": {
+        "recency-v1": {"home_win_prob": 0.6194, "ml_ev_home": 0.0465, "ml_ev_away": -0.1626, "spread_ev_home": -0.31, "spread_ev_away": 0.219, "expected_margin": 0.68},
+        "regression-v1": {"home_win_prob": 0.6023, "ml_ev_home": 0.0177, "ml_ev_away": -0.1251, "spread_ev_home": -0.3426, "spread_ev_away": 0.2516, "expected_margin": 0.57},
+        "combo-balanced-v1": {"home_win_prob": 0.5938, "ml_ev_home": 0.0034, "ml_ev_away": -0.1064, "spread_ev_home": -0.3633, "spread_ev_away": 0.2723, "expected_margin": 0.52},
+        "injury-rest-v1": {"home_win_prob": 0.5814, "ml_ev_home": -0.0177, "ml_ev_away": -0.079, "spread_ev_home": -0.3842, "spread_ev_away": 0.2932, "expected_margin": 0.46},
+        "pace-adj-v1": {"home_win_prob": 0.6174, "ml_ev_home": 0.0432, "ml_ev_away": -0.1582, "spread_ev_home": -0.3176, "spread_ev_away": 0.2266, "expected_margin": 0.67},
+        "season-avg-v1": {"home_win_prob": 0.6157, "ml_ev_home": 0.0403, "ml_ev_away": -0.1545, "spread_ev_home": -0.3192, "spread_ev_away": 0.2282, "expected_margin": 0.67}
+      }
+    },
+    {
+      "sport": "icehockey_nhl",
+      "home": "Winnipeg Jets",
+      "away": "Boston Bruins",
+      "odds": {
+        "spread_home": 1.5,
+        "ml_home": -120,
+        "ml_away": 100,
+        "total": 6.0,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.4411,
+        "away_win_prob": 0.5589,
+        "expected_margin": -0.33,
+        "best_ev": 0.3355,
+        "best_bet": "spread_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.15,
+        "best_model_ev": 0.3564,
+        "worst_model_ev": 0.324,
+        "notes": "BOS stronger team but both depleted. WPG +1.5 has huge value. BOS ML at +100 also has edge (+11.8% EV, 6/6 agree)."
+      },
+      "model_predictions": {
+        "recency-v1": {"home_win_prob": 0.4355, "ml_ev_home": -0.2017, "ml_ev_away": 0.1291, "spread_ev_home": 0.325, "spread_ev_away": -0.416, "expected_margin": -0.36},
+        "regression-v1": {"home_win_prob": 0.4554, "ml_ev_home": -0.165, "ml_ev_away": 0.0891, "spread_ev_home": 0.3564, "spread_ev_away": -0.4474, "expected_margin": -0.25},
+        "combo-balanced-v1": {"home_win_prob": 0.4494, "ml_ev_home": -0.1761, "ml_ev_away": 0.1012, "spread_ev_home": 0.3518, "spread_ev_away": -0.4428, "expected_margin": -0.29},
+        "injury-rest-v1": {"home_win_prob": 0.4329, "ml_ev_home": -0.2063, "ml_ev_away": 0.1342, "spread_ev_home": 0.3256, "spread_ev_away": -0.4166, "expected_margin": -0.36},
+        "pace-adj-v1": {"home_win_prob": 0.4362, "ml_ev_home": -0.2004, "ml_ev_away": 0.1277, "spread_ev_home": 0.324, "spread_ev_away": -0.415, "expected_margin": -0.36},
+        "season-avg-v1": {"home_win_prob": 0.4361, "ml_ev_home": -0.2005, "ml_ev_away": 0.1278, "spread_ev_home": 0.3282, "spread_ev_away": -0.4192, "expected_margin": -0.36}
+      }
+    },
+    {
+      "sport": "icehockey_nhl",
+      "home": "Dallas Stars",
+      "away": "St. Louis Blues",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -190,
+        "ml_away": 154,
+        "total": 6.0,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.6942,
+        "away_win_prob": 0.3058,
+        "expected_margin": 1.12,
+        "best_ev": 0.0752,
+        "best_bet": "spread_away",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.041,
+        "best_model_ev": 0.122,
+        "worst_model_ev": 0.0538,
+        "notes": "DAL dominant at home (50-20-12 last year, elite D). But STL +1.5 still covers — expected margin 1.12, under the 1.5 puck line. Tightest edge of the night."
+      },
+      "model_predictions": {
+        "recency-v1": {"home_win_prob": 0.7055, "ml_ev_home": 0.0769, "ml_ev_away": -0.2521, "spread_ev_home": -0.1468, "spread_ev_away": 0.0558, "expected_margin": 1.18},
+        "regression-v1": {"home_win_prob": 0.672, "ml_ev_home": 0.0256, "ml_ev_away": -0.1668, "spread_ev_home": -0.213, "spread_ev_away": 0.122, "expected_margin": 0.99},
+        "combo-balanced-v1": {"home_win_prob": 0.6857, "ml_ev_home": 0.0466, "ml_ev_away": -0.2017, "spread_ev_home": -0.1848, "spread_ev_away": 0.0938, "expected_margin": 1.07},
+        "injury-rest-v1": {"home_win_prob": 0.6997, "ml_ev_home": 0.068, "ml_ev_away": -0.2373, "spread_ev_home": -0.151, "spread_ev_away": 0.06, "expected_margin": 1.15},
+        "pace-adj-v1": {"home_win_prob": 0.7009, "ml_ev_home": 0.0698, "ml_ev_away": -0.2402, "spread_ev_home": -0.1448, "spread_ev_away": 0.0538, "expected_margin": 1.16},
+        "season-avg-v1": {"home_win_prob": 0.7001, "ml_ev_home": 0.0686, "ml_ev_away": -0.2383, "spread_ev_home": -0.1537, "spread_ev_away": 0.0627, "expected_margin": 1.15}
+      }
+    },
+    {
+      "sport": "icehockey_nhl",
+      "home": "Vegas Golden Knights",
+      "away": "Anaheim Ducks",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -200,
+        "ml_away": 165,
+        "total": 6.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.6051,
+        "away_win_prob": 0.3949,
+        "expected_margin": 0.60,
+        "best_ev": 0.2499,
+        "best_bet": "spread_away",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.137,
+        "best_model_ev": 0.2654,
+        "worst_model_ev": 0.2363,
+        "notes": "VGK favored at home, but ANA improved (43-33-6 last year). ANA +1.5 strong value — expected margin only 0.6 goals."
+      },
+      "model_predictions": {
+        "recency-v1": {"home_win_prob": 0.6094, "ml_ev_home": -0.086, "ml_ev_away": 0.0352, "spread_ev_home": -0.3323, "spread_ev_away": 0.2413, "expected_margin": 0.62},
+        "regression-v1": {"home_win_prob": 0.5979, "ml_ev_home": -0.1032, "ml_ev_away": 0.0656, "spread_ev_home": -0.3564, "spread_ev_away": 0.2654, "expected_margin": 0.55},
+        "combo-balanced-v1": {"home_win_prob": 0.5995, "ml_ev_home": -0.1007, "ml_ev_away": 0.0613, "spread_ev_home": -0.3534, "spread_ev_away": 0.2624, "expected_margin": 0.56},
+        "injury-rest-v1": {"home_win_prob": 0.6091, "ml_ev_home": -0.0864, "ml_ev_away": 0.0359, "spread_ev_home": -0.3349, "spread_ev_away": 0.2439, "expected_margin": 0.61},
+        "pace-adj-v1": {"home_win_prob": 0.6091, "ml_ev_home": -0.0864, "ml_ev_away": 0.0359, "spread_ev_home": -0.3273, "spread_ev_away": 0.2363, "expected_margin": 0.63},
+        "season-avg-v1": {"home_win_prob": 0.6059, "ml_ev_home": -0.0911, "ml_ev_away": 0.0443, "spread_ev_home": -0.3381, "spread_ev_away": 0.2471, "expected_margin": 0.61}
+      }
+    }
+  ]
+}
