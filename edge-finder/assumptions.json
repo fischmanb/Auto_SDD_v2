@@ -1,20 +1,20 @@
 {
   "champion": {
-    "id": "combo-balanced-v1",
-    "description": "Balanced multi-factor: moderate recency (1.5x), light regression (10%), light injury awareness (0.5). Hypothesis: no single factor dominates; a balanced blend is more robust than extremes.",
+    "id": "recency-v1",
+    "description": "Weight last-10-games stats 2x vs season averages to capture hot/cold streaks",
     "weight": 1.0,
-    "born": "2026-06-16",
+    "born": "2026-03-24",
     "params": {
-      "recency_weight": 1.5,
-      "injury_discount": 0.5,
+      "recency_weight": 2.0,
+      "injury_discount": 0.0,
       "home_advantage_adjustment": 0.0,
-      "regression_to_mean": 0.1,
+      "regression_to_mean": 0.0,
       "pace_adjustment": "season_average"
     },
-    "lifetime_games": 302,
-    "lifetime_correct": 162,
-    "rolling_10d_accuracy": 0.875,
-    "promoted_on": "2026-09-30"
+    "lifetime_games": 450,
+    "lifetime_correct": 249,
+    "rolling_10d_accuracy": 0.833,
+    "promoted_on": "2026-10-02"
   },
   "challengers": [
     {
@@ -30,27 +30,27 @@
         "regression_to_mean": 0.2,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 440,
-      "lifetime_correct": 243,
+      "lifetime_games": 450,
+      "lifetime_correct": 251,
       "promoted_on": "2026-06-26",
-      "rolling_10d_accuracy": 0.75
+      "rolling_10d_accuracy": 0.778
     },
     {
-      "id": "recency-v1",
-      "description": "Weight last-10-games stats 2x vs season averages to capture hot/cold streaks",
-      "weight": 0.6,
-      "born": "2026-03-24",
-      "grace_until": "2026-03-29",
+      "id": "combo-balanced-v1",
+      "description": "Balanced multi-factor: moderate recency (1.5x), light regression (10%), light injury awareness (0.5). Hypothesis: no single factor dominates; a balanced blend is more robust than extremes.",
+      "weight": 0.7,
+      "born": "2026-06-16",
       "params": {
-        "recency_weight": 2.0,
-        "injury_discount": 0.0,
+        "recency_weight": 1.5,
+        "injury_discount": 0.5,
         "home_advantage_adjustment": 0.0,
-        "regression_to_mean": 0.0,
+        "regression_to_mean": 0.1,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 440,
-      "lifetime_correct": 241,
-      "rolling_10d_accuracy": 0.875
+      "lifetime_games": 312,
+      "lifetime_correct": 169,
+      "rolling_10d_accuracy": 0.778,
+      "demoted_on": "2026-10-02"
     },
     {
       "id": "injury-rest-v1",
@@ -65,9 +65,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 440,
-      "lifetime_correct": 241,
-      "rolling_10d_accuracy": 0.875
+      "lifetime_games": 450,
+      "lifetime_correct": 248,
+      "rolling_10d_accuracy": 0.778
     },
     {
       "id": "pace-adj-v1",
@@ -82,9 +82,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "opponent_adjusted"
       },
-      "lifetime_games": 440,
-      "lifetime_correct": 239,
-      "rolling_10d_accuracy": 0.75
+      "lifetime_games": 450,
+      "lifetime_correct": 246,
+      "rolling_10d_accuracy": 0.722
     },
     {
       "id": "season-avg-v1",
@@ -98,9 +98,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 440,
-      "lifetime_correct": 243,
-      "rolling_10d_accuracy": 0.75,
+      "lifetime_games": 450,
+      "lifetime_correct": 250,
+      "rolling_10d_accuracy": 0.722,
       "demoted_on": "2026-09-30"
     }
   ],
@@ -114,7 +114,7 @@
       "lifetime_correct": 74,
       "born": "2026-03-24",
       "died": "2026-06-15",
-      "reason": "Weight dropped to 0.1 after persistent underperformance vs champion. Home advantage boost of +1.5 proved too aggressive \u2014 systematically overpredicted home wins in MLB where actual home advantage is small (~0.3 runs)."
+      "reason": "Weight dropped to 0.1 after persistent underperformance vs champion. Home advantage boost of +1.5 proved too aggressive — systematically overpredicted home wins in MLB where actual home advantage is small (~0.3 runs)."
     }
   ]
 }

@@ -1,61 +1,67 @@
 {
-  "last_updated": "2026-10-01",
+  "last_updated": "2026-10-02",
   "rolling_7d": {
-    "accuracy": 0.75,
-    "ev_realized": 0.3059,
-    "total_games": 8,
-    "total_correct": 6,
-    "note": "2 days of data (Sep 29-30). 8 MLB WC games evaluated. All 6 models tied at 75%."
+    "accuracy": 0.778,
+    "ev_realized": -0.0812,
+    "total_games": 18,
+    "total_correct": 14,
+    "note": "3 days of data (Sep 29-Oct 1). 18 games evaluated. Champion (combo-balanced) 77.8%, recency-v1 led at 83.3%. NHL opening night added volatility (5/8 winner picks correct, 2/8 spread bets won)."
   },
   "rolling_30d": {
-    "accuracy": 0.75,
-    "ev_realized": 0.3059,
-    "total_games": 8,
-    "total_correct": 6,
-    "note": "Same as 7d. Only 2 days of data since resuming after 2-month hiatus."
+    "accuracy": 0.778,
+    "ev_realized": -0.0812,
+    "total_games": 18,
+    "total_correct": 14,
+    "note": "Same as 7d. Only 3 days of data since resuming after 2-month hiatus."
   },
   "all_time": {
-    "accuracy": 0.5523,
-    "ev_realized": 0.8024,
-    "total_games": 440,
-    "total_correct": 243,
-    "total_bets_recommended": 254,
-    "total_bets_won": 235
+    "accuracy": 0.5578,
+    "ev_realized": 0.7212,
+    "total_games": 450,
+    "total_correct": 251,
+    "total_bets_recommended": 264,
+    "total_bets_won": 240
   },
   "variant_performance": {
-    "combo-balanced-v1": {
-      "lifetime_games": 302,
-      "lifetime_correct": 162,
+    "recency-v1": {
+      "lifetime_games": 450,
+      "lifetime_correct": 249,
+      "lifetime_accuracy": 0.5533,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 440,
-      "lifetime_correct": 243,
+      "lifetime_games": 450,
+      "lifetime_correct": 251,
+      "lifetime_accuracy": 0.5578,
       "weight": 0.7,
       "role": "challenger"
     },
-    "recency-v1": {
-      "lifetime_games": 440,
-      "lifetime_correct": 241,
-      "weight": 0.6,
-      "role": "challenger"
+    "combo-balanced-v1": {
+      "lifetime_games": 312,
+      "lifetime_correct": 169,
+      "lifetime_accuracy": 0.5417,
+      "weight": 0.7,
+      "role": "challenger (demoted)"
     },
     "injury-rest-v1": {
-      "lifetime_games": 440,
-      "lifetime_correct": 241,
+      "lifetime_games": 450,
+      "lifetime_correct": 248,
+      "lifetime_accuracy": 0.5511,
       "weight": 0.6,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 440,
-      "lifetime_correct": 239,
+      "lifetime_games": 450,
+      "lifetime_correct": 246,
+      "lifetime_accuracy": 0.5467,
       "weight": 0.4,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 440,
-      "lifetime_correct": 243,
+      "lifetime_games": 450,
+      "lifetime_correct": 250,
+      "lifetime_accuracy": 0.5556,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -80,18 +86,19 @@
       "id": "combo-balanced-v1",
       "promoted_on": "2026-09-30",
       "reason": "Rolling 10d accuracy 100% (4/4) exceeded season-avg-v1's 75% (3/4) by 25% after 2-month hiatus. Note: small 4-game sample."
+    },
+    {
+      "id": "recency-v1",
+      "promoted_on": "2026-10-02",
+      "reason": "Rolling 10d accuracy 83.3% (15/18) exceeded combo-balanced-v1's 77.8% (14/18) by 5.5%. Key edge: correctly predicted CLE home win in NFL TNF while champion missed."
     }
   ],
   "today_summary": {
-    "date": "2026-10-01",
-    "games_analyzed": 10,
-    "bets_recommended": 9,
+    "date": "2026-10-02",
+    "games_analyzed": 0,
+    "bets_recommended": 0,
     "leans": 0,
-    "sports": [
-      "baseball_mlb",
-      "americanfootball_nfl",
-      "icehockey_nhl"
-    ],
-    "notes": "MLB WC G3 (PHI@ATL). NFL TNF (PIT@CLE). NHL opening night (8 games). Yesterday 2/3 BETs won (+$96.63). Multi-sport expansion day."
+    "sports": [],
+    "notes": "Placeholder — will be updated after Phase 4."
   }
 }
