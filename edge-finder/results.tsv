@@ -2699,3 +2699,33 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-01	icehockey_nhl	Edmonton Oilers @ Vancouver Canucks	injury-rest-v1	away	-0.50	0.4109	away	-8	1	0.2798	0.1013	spread_home	loss
 2026-10-01	icehockey_nhl	Edmonton Oilers @ Vancouver Canucks	pace-adj-v1	away	-0.25	0.4541	away	-8	1	0.3578	0.2170	spread_home	loss
 2026-10-01	icehockey_nhl	Edmonton Oilers @ Vancouver Canucks	season-avg-v1	away	-0.26	0.4523	away	-8	1	0.3514	0.2121	spread_home	loss
+2026-10-02	icehockey_nhl	New York Rangers @ Detroit Red Wings	recency-v1	away	-0.07	0.4862	away	-2	1	0.4444	-0.1398	spread_away	win
+2026-10-02	icehockey_nhl	New York Rangers @ Detroit Red Wings	regression-v1	home	0.04	0.5066	away	-2	0	0.4164	-0.1037	spread_away	win
+2026-10-02	icehockey_nhl	New York Rangers @ Detroit Red Wings	combo-balanced-v1	away	-0.10	0.4809	away	-2	1	0.4593	-0.1492	spread_away	win
+2026-10-02	icehockey_nhl	New York Rangers @ Detroit Red Wings	injury-rest-v1	away	-0.16	0.4708	away	-2	1	0.4798	-0.1671	spread_away	win
+2026-10-02	icehockey_nhl	New York Rangers @ Detroit Red Wings	pace-adj-v1	away	-0.01	0.4990	away	-2	1	0.4324	-0.1172	spread_away	win
+2026-10-02	icehockey_nhl	New York Rangers @ Detroit Red Wings	season-avg-v1	away	-0.01	0.4973	away	-2	1	0.4323	-0.1201	spread_away	win
+2026-10-02	icehockey_nhl	Washington Capitals @ Carolina Hurricanes	recency-v1	home	0.68	0.6194	away	-3	0	0.2190	0.0465	spread_away	win
+2026-10-02	icehockey_nhl	Washington Capitals @ Carolina Hurricanes	regression-v1	home	0.57	0.6023	away	-3	0	0.2516	0.0177	spread_away	win
+2026-10-02	icehockey_nhl	Washington Capitals @ Carolina Hurricanes	combo-balanced-v1	home	0.52	0.5938	away	-3	0	0.2723	0.0034	spread_away	win
+2026-10-02	icehockey_nhl	Washington Capitals @ Carolina Hurricanes	injury-rest-v1	home	0.46	0.5814	away	-3	0	0.2932	-0.0177	spread_away	win
+2026-10-02	icehockey_nhl	Washington Capitals @ Carolina Hurricanes	pace-adj-v1	home	0.67	0.6174	away	-3	0	0.2266	0.0432	spread_away	win
+2026-10-02	icehockey_nhl	Washington Capitals @ Carolina Hurricanes	season-avg-v1	home	0.67	0.6157	away	-3	0	0.2282	0.0403	spread_away	win
+2026-10-02	icehockey_nhl	Boston Bruins @ Winnipeg Jets	recency-v1	away	-0.36	0.4355	away	-1	1	0.3250	-0.2017	spread_home	win
+2026-10-02	icehockey_nhl	Boston Bruins @ Winnipeg Jets	regression-v1	away	-0.25	0.4554	away	-1	1	0.3564	-0.1650	spread_home	win
+2026-10-02	icehockey_nhl	Boston Bruins @ Winnipeg Jets	combo-balanced-v1	away	-0.29	0.4494	away	-1	1	0.3518	-0.1761	spread_home	win
+2026-10-02	icehockey_nhl	Boston Bruins @ Winnipeg Jets	injury-rest-v1	away	-0.36	0.4329	away	-1	1	0.3256	-0.2063	spread_home	win
+2026-10-02	icehockey_nhl	Boston Bruins @ Winnipeg Jets	pace-adj-v1	away	-0.36	0.4362	away	-1	1	0.3240	-0.2004	spread_home	win
+2026-10-02	icehockey_nhl	Boston Bruins @ Winnipeg Jets	season-avg-v1	away	-0.36	0.4361	away	-1	1	0.3282	-0.2005	spread_home	win
+2026-10-02	icehockey_nhl	St. Louis Blues @ Dallas Stars	recency-v1	home	1.18	0.7055	away	-4	0	0.0769	0.0769	ml_home	loss
+2026-10-02	icehockey_nhl	St. Louis Blues @ Dallas Stars	regression-v1	home	0.99	0.6720	away	-4	0	0.1220	0.0256	spread_away	win
+2026-10-02	icehockey_nhl	St. Louis Blues @ Dallas Stars	combo-balanced-v1	home	1.07	0.6857	away	-4	0	0.0938	0.0466	spread_away	win
+2026-10-02	icehockey_nhl	St. Louis Blues @ Dallas Stars	injury-rest-v1	home	1.15	0.6997	away	-4	0	0.0680	0.0680	ml_home	loss
+2026-10-02	icehockey_nhl	St. Louis Blues @ Dallas Stars	pace-adj-v1	home	1.16	0.7009	away	-4	0	0.0698	0.0698	ml_home	loss
+2026-10-02	icehockey_nhl	St. Louis Blues @ Dallas Stars	season-avg-v1	home	1.15	0.7001	away	-4	0	0.0686	0.0686	ml_home	loss
+2026-10-02	icehockey_nhl	Anaheim Ducks @ Vegas Golden Knights	recency-v1	home	0.62	0.6094	away	-1	0	0.2413	-0.0860	spread_away	win
+2026-10-02	icehockey_nhl	Anaheim Ducks @ Vegas Golden Knights	regression-v1	home	0.55	0.5979	away	-1	0	0.2654	-0.1032	spread_away	win
+2026-10-02	icehockey_nhl	Anaheim Ducks @ Vegas Golden Knights	combo-balanced-v1	home	0.56	0.5995	away	-1	0	0.2624	-0.1007	spread_away	win
+2026-10-02	icehockey_nhl	Anaheim Ducks @ Vegas Golden Knights	injury-rest-v1	home	0.61	0.6091	away	-1	0	0.2439	-0.0864	spread_away	win
+2026-10-02	icehockey_nhl	Anaheim Ducks @ Vegas Golden Knights	pace-adj-v1	home	0.63	0.6091	away	-1	0	0.2363	-0.0864	spread_away	win
+2026-10-02	icehockey_nhl	Anaheim Ducks @ Vegas Golden Knights	season-avg-v1	home	0.61	0.6059	away	-1	0	0.2471	-0.0911	spread_away	win

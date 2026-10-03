@@ -1,69 +1,69 @@
 {
-  "last_updated": "2026-10-02",
+  "last_updated": "2026-10-03",
   "rolling_7d": {
-    "accuracy": 0.778,
+    "accuracy": 0.696,
     "ev_realized": -0.0812,
-    "total_games": 18,
-    "total_correct": 14,
-    "note": "3 days of data (Sep 29-Oct 1). 18 games evaluated. Champion (combo-balanced) 77.8%, recency-v1 led at 83.3%. NHL opening night added volatility (5/8 winner picks correct, 2/8 spread bets won)."
+    "total_games": 23,
+    "total_correct": 16,
+    "note": "4 days of data (Sep 29-Oct 2). 23 games evaluated. Champion (recency-v1) 69.6%. Oct 2: all 5 away teams won, 5/5 puck line bets covered."
   },
   "rolling_30d": {
-    "accuracy": 0.778,
+    "accuracy": 0.696,
     "ev_realized": -0.0812,
-    "total_games": 18,
-    "total_correct": 14,
-    "note": "Same as 7d. Only 3 days of data since resuming after 2-month hiatus."
+    "total_games": 23,
+    "total_correct": 16,
+    "note": "Same as 7d. Only 4 days of data since resuming after hiatus."
   },
   "all_time": {
-    "accuracy": 0.5578,
+    "accuracy": 0.556,
     "ev_realized": 0.7212,
-    "total_games": 450,
-    "total_correct": 251,
-    "total_bets_recommended": 264,
-    "total_bets_won": 240
+    "total_games": 455,
+    "total_correct": 253,
+    "total_bets_recommended": 269,
+    "total_bets_won": 245
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 450,
-      "lifetime_correct": 249,
-      "lifetime_accuracy": 0.5533,
+      "lifetime_games": 455,
+      "lifetime_correct": 251,
+      "lifetime_accuracy": 0.5516,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 450,
-      "lifetime_correct": 251,
-      "lifetime_accuracy": 0.5578,
+      "lifetime_games": 455,
+      "lifetime_correct": 252,
+      "lifetime_accuracy": 0.5538,
       "weight": 0.7,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 312,
-      "lifetime_correct": 169,
-      "lifetime_accuracy": 0.5417,
+      "lifetime_games": 317,
+      "lifetime_correct": 171,
+      "lifetime_accuracy": 0.5394,
       "weight": 0.7,
       "role": "challenger (demoted)"
     },
     "injury-rest-v1": {
-      "lifetime_games": 450,
-      "lifetime_correct": 248,
-      "lifetime_accuracy": 0.5511,
+      "lifetime_games": 455,
+      "lifetime_correct": 250,
+      "lifetime_accuracy": 0.5495,
       "weight": 0.6,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 450,
-      "lifetime_correct": 246,
-      "lifetime_accuracy": 0.5467,
+      "lifetime_games": 455,
+      "lifetime_correct": 248,
+      "lifetime_accuracy": 0.5451,
       "weight": 0.4,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 450,
-      "lifetime_correct": 250,
-      "lifetime_accuracy": 0.5556,
+      "lifetime_games": 455,
+      "lifetime_correct": 252,
+      "lifetime_accuracy": 0.5538,
       "weight": 0.7,
-      "role": "challenger"
+      "role": "challenger (demoted)"
     }
   },
   "champion_history": [
@@ -94,11 +94,14 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-02",
-    "games_analyzed": 5,
-    "bets_recommended": 5,
-    "leans": 0,
-    "sports": ["icehockey_nhl"],
-    "notes": "NHL only (5 games). All 5 puck line underdogs recommended as BET. New champion recency-v1's first predictions. Yesterday: 5/10 bets won, promoted recency-v1."
+    "date": "2026-10-03",
+    "games_analyzed": 16,
+    "bets_recommended": 14,
+    "leans": 1,
+    "sports": [
+      "baseball_mlb",
+      "icehockey_nhl"
+    ],
+    "notes": "13 NHL + 3 MLB playoff games. 14 BET + 1 LEAN. 5 away teams on B2B. Yesterday: 5/5 puck line bets won (all underdogs covered!)."
   }
 }
