@@ -94,14 +94,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-03",
-    "games_analyzed": 16,
-    "bets_recommended": 14,
-    "leans": 1,
+    "date": "2026-10-04",
+    "games_analyzed": 21,
+    "bets_recommended": 19,
+    "leans": 0,
     "sports": [
+      "icehockey_nhl",
       "baseball_mlb",
-      "icehockey_nhl"
+      "americanfootball_nfl"
     ],
-    "notes": "13 NHL + 3 MLB playoff games. 14 BET + 1 LEAN. 5 away teams on B2B. Yesterday: 5/5 puck line bets won (all underdogs covered!)."
+    "notes": "5 NHL + 2 MLB NLDS Game 2 + 14 NFL Week 4. 19 BET, 0 LEAN, 2 NO BET. B2B: Calgary (away @SEA), Vancouver (home vs VGK). Yesterday: 10/14 BET recs won (71.4%), all models 12/16."
   }
 }
