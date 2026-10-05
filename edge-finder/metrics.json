@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-10-04",
+  "last_updated": "2026-10-05",
   "rolling_7d": {
-    "accuracy": 0.718,
+    "accuracy": 0.667,
     "ev_realized": 0.3702,
-    "total_games": 39,
-    "total_correct": 28,
-    "note": "5 days of data (Sep 29-Oct 3). 39 games evaluated. Oct 3: all models 12/16 (75%), 10/14 BET recommendations won."
+    "total_games": 60,
+    "total_correct": 40,
+    "note": "6 days of data (Sep 29-Oct 4). 60 games evaluated. Oct 4: BET recs 6/18 (33%) (1 push). Rough day for NFL spreads."
   },
   "rolling_30d": {
-    "accuracy": 0.718,
+    "accuracy": 0.667,
     "ev_realized": 0.3702,
-    "total_games": 39,
-    "total_correct": 28,
-    "note": "Same as 7d. Only 5 days of data since resuming after hiatus."
+    "total_games": 60,
+    "total_correct": 40,
+    "note": "6 days of data (Sep 29-Oct 4). 60 games evaluated. Oct 4: BET recs 6/18 (33%) (1 push). Rough day for NFL spreads."
   },
   "all_time": {
     "accuracy": 0.563,
     "ev_realized": 0.7212,
-    "total_games": 471,
-    "total_correct": 265,
-    "total_bets_recommended": 283,
-    "total_bets_won": 255
+    "total_games": 492,
+    "total_correct": 277,
+    "total_bets_recommended": 302,
+    "total_bets_won": 261
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 471,
-      "lifetime_correct": 263,
-      "lifetime_accuracy": 0.5584,
+      "lifetime_games": 492,
+      "lifetime_correct": 275,
+      "lifetime_accuracy": 0.5589,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 471,
-      "lifetime_correct": 264,
-      "lifetime_accuracy": 0.5605,
+      "lifetime_games": 492,
+      "lifetime_correct": 276,
+      "lifetime_accuracy": 0.561,
       "weight": 0.7,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 333,
-      "lifetime_correct": 183,
-      "lifetime_accuracy": 0.5495,
+      "lifetime_games": 354,
+      "lifetime_correct": 195,
+      "lifetime_accuracy": 0.5508,
       "weight": 0.7,
       "role": "challenger (demoted)"
     },
     "injury-rest-v1": {
-      "lifetime_games": 471,
-      "lifetime_correct": 262,
-      "lifetime_accuracy": 0.5563,
+      "lifetime_games": 492,
+      "lifetime_correct": 273,
+      "lifetime_accuracy": 0.5549,
       "weight": 0.6,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 471,
-      "lifetime_correct": 260,
-      "lifetime_accuracy": 0.552,
+      "lifetime_games": 492,
+      "lifetime_correct": 272,
+      "lifetime_accuracy": 0.5528,
       "weight": 0.4,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 471,
-      "lifetime_correct": 264,
-      "lifetime_accuracy": 0.5605,
+      "lifetime_games": 492,
+      "lifetime_correct": 276,
+      "lifetime_accuracy": 0.561,
       "weight": 0.7,
       "role": "challenger (demoted)"
     }
@@ -94,15 +94,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-04",
-    "games_analyzed": 21,
-    "bets_recommended": 19,
+    "date": "2026-10-05",
+    "games_analyzed": 7,
+    "bets_recommended": 7,
     "leans": 0,
     "sports": [
-      "icehockey_nhl",
       "baseball_mlb",
-      "americanfootball_nfl"
+      "americanfootball_nfl",
+      "icehockey_nhl"
     ],
-    "notes": "5 NHL + 2 MLB NLDS Game 2 + 14 NFL Week 4. 19 BET, 0 LEAN, 2 NO BET. B2B: Calgary (away @SEA), Vancouver (home vs VGK). Yesterday: 10/14 BET recs won (71.4%), all models 12/16."
+    "notes": "1 NFL MNF + 4 NHL + 2 MLB ALDS. 7 BET, 0 LEAN, 0 NO BET. WPG B2B (away). Yesterday: 6/18 BET recs won (33.3%), 1 push \u2014 rough NFL Sunday."
   }
 }
