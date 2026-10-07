@@ -2993,3 +2993,69 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-05	baseball_mlb	New York Yankees @ Tampa Bay Rays	injury-rest-v1	home	0.26	0.5282	home	3	1	0.305	0.1039	spread_home	win
 2026-10-05	baseball_mlb	New York Yankees @ Tampa Bay Rays	pace-adj-v1	away	-0.13	0.4861	home	3	0	0.2253	0.0159	spread_home	win
 2026-10-05	baseball_mlb	New York Yankees @ Tampa Bay Rays	season-avg-v1	away	-0.12	0.4848	home	3	0	0.2168	0.0133	spread_home	win
+2026-10-06	icehockey_nhl	Minnesota Wild @ Buffalo Sabres	recency-v1	away	-1.27	0.7201	home	1	0	0.3573	0.3573	ml_away	loss
+2026-10-06	icehockey_nhl	Minnesota Wild @ Buffalo Sabres	regression-v1	away	-0.98	0.6709	home	1	0	0.2646	0.2646	ml_away	loss
+2026-10-06	icehockey_nhl	Minnesota Wild @ Buffalo Sabres	combo-balanced-v1	away	-1.23	0.711	home	1	0	0.3402	0.3402	ml_away	loss
+2026-10-06	icehockey_nhl	Minnesota Wild @ Buffalo Sabres	injury-rest-v1	away	-1.47	0.7523	home	1	0	0.4181	0.4181	ml_away	loss
+2026-10-06	icehockey_nhl	Minnesota Wild @ Buffalo Sabres	pace-adj-v1	away	-1.27	0.7169	home	1	0	0.3513	0.3513	ml_away	loss
+2026-10-06	icehockey_nhl	Minnesota Wild @ Buffalo Sabres	season-avg-v1	away	-1.24	0.714	home	1	0	0.3459	0.3459	ml_away	loss
+2026-10-06	icehockey_nhl	Nashville Predators @ Toronto Maple Leafs	recency-v1	home	0.73	0.6308	home	1	1	0.2062	0.0351	spread_away	win
+2026-10-06	icehockey_nhl	Nashville Predators @ Toronto Maple Leafs	regression-v1	home	0.63	0.6125	home	1	1	0.2381	0.0051	spread_away	win
+2026-10-06	icehockey_nhl	Nashville Predators @ Toronto Maple Leafs	combo-balanced-v1	home	0.78	0.6378	home	1	1	0.1866	0.0467	spread_away	win
+2026-10-06	icehockey_nhl	Nashville Predators @ Toronto Maple Leafs	injury-rest-v1	home	0.94	0.6659	home	1	1	0.132	0.0927	spread_away	win
+2026-10-06	icehockey_nhl	Nashville Predators @ Toronto Maple Leafs	pace-adj-v1	home	0.7	0.6251	home	1	1	0.2137	0.0258	spread_away	win
+2026-10-06	icehockey_nhl	Nashville Predators @ Toronto Maple Leafs	season-avg-v1	home	0.71	0.6261	home	1	1	0.2087	0.0275	spread_away	win
+2026-10-06	icehockey_nhl	Utah Mammoth @ New Jersey Devils	recency-v1	away	-0.32	0.5612	away	-2	1	0.5128	0.2009	spread_away	win
+2026-10-06	icehockey_nhl	Utah Mammoth @ New Jersey Devils	regression-v1	away	-0.21	0.5379	away	-2	1	0.4879	0.1512	spread_away	win
+2026-10-06	icehockey_nhl	Utah Mammoth @ New Jersey Devils	combo-balanced-v1	away	-0.4	0.5703	away	-2	1	0.5293	0.2205	spread_away	win
+2026-10-06	icehockey_nhl	Utah Mammoth @ New Jersey Devils	injury-rest-v1	away	-0.55	0.6019	away	-2	1	0.5747	0.288	spread_away	win
+2026-10-06	icehockey_nhl	Utah Mammoth @ New Jersey Devils	pace-adj-v1	away	-0.31	0.5534	away	-2	1	0.5104	0.1842	spread_away	win
+2026-10-06	icehockey_nhl	Utah Mammoth @ New Jersey Devils	season-avg-v1	away	-0.31	0.5566	away	-2	1	0.5141	0.1911	spread_away	win
+2026-10-06	icehockey_nhl	Carolina Hurricanes @ Montreal Canadiens	recency-v1	away	-0.68	0.6219	away	-2	1	0.216	0.1316	spread_home	loss
+2026-10-06	icehockey_nhl	Carolina Hurricanes @ Montreal Canadiens	regression-v1	away	-0.51	0.592	away	-2	1	0.276	0.0772	spread_home	loss
+2026-10-06	icehockey_nhl	Carolina Hurricanes @ Montreal Canadiens	combo-balanced-v1	away	-0.71	0.6257	away	-2	1	0.2147	0.1385	spread_home	loss
+2026-10-06	icehockey_nhl	Carolina Hurricanes @ Montreal Canadiens	injury-rest-v1	away	-0.9	0.6594	away	-2	1	0.1998	0.1998	ml_away	win
+2026-10-06	icehockey_nhl	Carolina Hurricanes @ Montreal Canadiens	pace-adj-v1	away	-0.68	0.6231	away	-2	1	0.2248	0.1338	spread_home	loss
+2026-10-06	icehockey_nhl	Carolina Hurricanes @ Montreal Canadiens	season-avg-v1	away	-0.67	0.6219	away	-2	1	0.2249	0.1317	spread_home	loss
+2026-10-06	icehockey_nhl	Ottawa Senators @ Detroit Red Wings	recency-v1	away	-1.51	0.7569	home	2	0	0.4327	0.4327	ml_away	loss
+2026-10-06	icehockey_nhl	Ottawa Senators @ Detroit Red Wings	regression-v1	away	-1.11	0.6926	home	2	0	0.3111	0.3111	ml_away	loss
+2026-10-06	icehockey_nhl	Ottawa Senators @ Detroit Red Wings	combo-balanced-v1	away	-1.26	0.7188	home	2	0	0.3605	0.3605	ml_away	loss
+2026-10-06	icehockey_nhl	Ottawa Senators @ Detroit Red Wings	injury-rest-v1	away	-1.27	0.7247	home	2	0	0.3718	0.3718	ml_away	loss
+2026-10-06	icehockey_nhl	Ottawa Senators @ Detroit Red Wings	pace-adj-v1	away	-1.39	0.739	home	2	0	0.3987	0.3987	ml_away	loss
+2026-10-06	icehockey_nhl	Ottawa Senators @ Detroit Red Wings	season-avg-v1	away	-1.39	0.7359	home	2	0	0.3929	0.3929	ml_away	loss
+2026-10-06	icehockey_nhl	New York Islanders @ New York Rangers	recency-v1	home	1.18	0.708	home	3	1	0.1963	0.1963	ml_home	win
+2026-10-06	icehockey_nhl	New York Islanders @ New York Rangers	regression-v1	home	1.02	0.6814	home	3	1	0.1514	0.1514	ml_home	win
+2026-10-06	icehockey_nhl	New York Islanders @ New York Rangers	combo-balanced-v1	home	1.2	0.7102	home	3	1	0.2	0.2	ml_home	win
+2026-10-06	icehockey_nhl	New York Islanders @ New York Rangers	injury-rest-v1	home	1.39	0.7423	home	3	1	0.2543	0.2543	ml_home	win
+2026-10-06	icehockey_nhl	New York Islanders @ New York Rangers	pace-adj-v1	home	1.18	0.7069	home	3	1	0.1944	0.1944	ml_home	win
+2026-10-06	icehockey_nhl	New York Islanders @ New York Rangers	season-avg-v1	home	1.18	0.7081	home	3	1	0.1965	0.1965	ml_home	win
+2026-10-06	icehockey_nhl	St. Louis Blues @ Chicago Blackhawks	recency-v1	away	-0.5	0.5916	home	2	0	0.2794	0.0363	spread_home	win
+2026-10-06	icehockey_nhl	St. Louis Blues @ Chicago Blackhawks	regression-v1	away	-0.34	0.5603	home	2	0	0.3368	-0.0184	spread_home	win
+2026-10-06	icehockey_nhl	St. Louis Blues @ Chicago Blackhawks	combo-balanced-v1	away	-0.54	0.5981	home	2	0	0.2695	0.0478	spread_home	win
+2026-10-06	icehockey_nhl	St. Louis Blues @ Chicago Blackhawks	injury-rest-v1	away	-0.72	0.6302	home	2	0	0.2106	0.104	spread_home	win
+2026-10-06	icehockey_nhl	St. Louis Blues @ Chicago Blackhawks	pace-adj-v1	away	-0.5	0.5912	home	2	0	0.2804	0.0356	spread_home	win
+2026-10-06	icehockey_nhl	St. Louis Blues @ Chicago Blackhawks	season-avg-v1	away	-0.49	0.5899	home	2	0	0.2869	0.0335	spread_home	win
+2026-10-06	icehockey_nhl	Vegas Golden Knights @ Seattle Kraken	recency-v1	home	0.23	0.5425	away	-4	0	0.4904	0.3292	spread_home	loss
+2026-10-06	icehockey_nhl	Vegas Golden Knights @ Seattle Kraken	regression-v1	home	0.25	0.5446	away	-4	0	0.4904	0.3343	spread_home	loss
+2026-10-06	icehockey_nhl	Vegas Golden Knights @ Seattle Kraken	combo-balanced-v1	home	0.22	0.5403	away	-4	0	0.485	0.3237	spread_home	loss
+2026-10-06	icehockey_nhl	Vegas Golden Knights @ Seattle Kraken	injury-rest-v1	home	0.24	0.5427	away	-4	0	0.4955	0.3297	spread_home	loss
+2026-10-06	icehockey_nhl	Vegas Golden Knights @ Seattle Kraken	pace-adj-v1	home	0.24	0.5412	away	-4	0	0.4944	0.3258	spread_home	loss
+2026-10-06	icehockey_nhl	Vegas Golden Knights @ Seattle Kraken	season-avg-v1	home	0.24	0.5455	away	-4	0	0.4927	0.3364	spread_home	loss
+2026-10-06	icehockey_nhl	Florida Panthers @ Los Angeles Kings	recency-v1	home	0.04	0.5097	away	-1	0	0.4389	0.0194	spread_home	win
+2026-10-06	icehockey_nhl	Florida Panthers @ Los Angeles Kings	regression-v1	home	0.07	0.5143	away	-1	0	0.4542	0.0286	spread_home	win
+2026-10-06	icehockey_nhl	Florida Panthers @ Los Angeles Kings	combo-balanced-v1	home	0.08	0.5142	away	-1	0	0.4514	0.0284	spread_home	win
+2026-10-06	icehockey_nhl	Florida Panthers @ Los Angeles Kings	injury-rest-v1	home	0.06	0.5105	away	-1	0	0.4478	0.021	spread_home	win
+2026-10-06	icehockey_nhl	Florida Panthers @ Los Angeles Kings	pace-adj-v1	home	0.05	0.5108	away	-1	0	0.444	0.0215	spread_home	win
+2026-10-06	icehockey_nhl	Florida Panthers @ Los Angeles Kings	season-avg-v1	home	0.04	0.5079	away	-1	0	0.442	0.0158	spread_home	win
+2026-10-06	baseball_mlb	Los Angeles Dodgers @ Atlanta Braves	recency-v1	away	-0.21	0.5223	away	-2	1	0.2027	-0.003	spread_home	loss
+2026-10-06	baseball_mlb	Los Angeles Dodgers @ Atlanta Braves	regression-v1	away	-0.09	0.5094	away	-2	1	0.2336	-0.0275	spread_home	loss
+2026-10-06	baseball_mlb	Los Angeles Dodgers @ Atlanta Braves	combo-balanced-v1	away	-0.1	0.512	away	-2	1	0.2302	-0.0225	spread_home	loss
+2026-10-06	baseball_mlb	Los Angeles Dodgers @ Atlanta Braves	injury-rest-v1	away	-0.17	0.5169	away	-2	1	0.219	-0.0132	spread_home	loss
+2026-10-06	baseball_mlb	Los Angeles Dodgers @ Atlanta Braves	pace-adj-v1	away	-0.17	0.5173	away	-2	1	0.2163	-0.0124	spread_home	loss
+2026-10-06	baseball_mlb	Los Angeles Dodgers @ Atlanta Braves	season-avg-v1	away	-0.18	0.5196	away	-2	1	0.214	-0.0081	spread_home	loss
+2026-10-06	baseball_mlb	Milwaukee Brewers @ San Diego Padres	recency-v1	home	0.06	0.505	home	1	1	0.2388	-0.1182	spread_away	win
+2026-10-06	baseball_mlb	Milwaukee Brewers @ San Diego Padres	regression-v1	home	0.08	0.5096	home	1	1	0.2364	-0.1101	spread_away	win
+2026-10-06	baseball_mlb	Milwaukee Brewers @ San Diego Padres	combo-balanced-v1	home	0.08	0.5106	home	1	1	0.2331	-0.1083	spread_away	win
+2026-10-06	baseball_mlb	Milwaukee Brewers @ San Diego Padres	injury-rest-v1	home	0.07	0.5067	home	1	1	0.2442	-0.1151	spread_away	win
+2026-10-06	baseball_mlb	Milwaukee Brewers @ San Diego Padres	pace-adj-v1	home	0.07	0.5087	home	1	1	0.2404	-0.1117	spread_away	win
+2026-10-06	baseball_mlb	Milwaukee Brewers @ San Diego Padres	season-avg-v1	home	0.04	0.5058	home	1	1	0.2465	-0.1167	spread_away	win
