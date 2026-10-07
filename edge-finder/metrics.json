@@ -94,14 +94,14 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-06",
-    "games_analyzed": 11,
-    "bets_recommended": 11,
+    "date": "2026-10-07",
+    "games_analyzed": 5,
+    "bets_recommended": 5,
     "leans": 0,
     "sports": [
-      "icehockey_nhl",
-      "baseball_mlb"
+      "baseball_mlb",
+      "icehockey_nhl"
     ],
-    "notes": "9 NHL + 2 MLB NLDS. 11 BET, 0 LEAN, 0 NO BET. OTT B2B (away @DET). Yesterday: 3/7 BET recs won (42.9%) - NFL upset (ATL 45-24 over NO), NHL upsets (WPG@PIT, DAL model miss)."
+    "notes": "3 NHL + 2 MLB NLDS G4. 5 BET, 0 LEAN, 0 NO BET."
   }
 }
