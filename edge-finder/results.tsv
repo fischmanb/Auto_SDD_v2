@@ -3155,3 +3155,27 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-08	americanfootball_nfl	Tampa Bay Buccaneers @ Dallas Cowboys	injury-rest-v1	home	16.92	0.8897	away	-8	0	0.3973	0.0874	spread_home	loss
 2026-10-08	americanfootball_nfl	Tampa Bay Buccaneers @ Dallas Cowboys	pace-adj-v1	home	11.22	0.7863	away	-8	0	0.1031	-0.0385	spread_home	loss
 2026-10-08	americanfootball_nfl	Tampa Bay Buccaneers @ Dallas Cowboys	season-avg-v1	home	11.08	0.7830	away	-8	0	0.0900	-0.0236	spread_home	loss
+2026-10-09	icehockey_nhl	Seattle Kraken @ Detroit Red Wings	recency-v1	home	0.77	0.6388	away	-3	0	-0.2828	0.1302	spread_away	win
+2026-10-09	icehockey_nhl	Seattle Kraken @ Detroit Red Wings	regression-v1	home	0.57	0.6001	away	-3	0	-0.3464	0.0618	spread_away	win
+2026-10-09	icehockey_nhl	Seattle Kraken @ Detroit Red Wings	combo-balanced-v1	home	0.67	0.6218	away	-3	0	-0.3166	0.1001	spread_away	win
+2026-10-09	icehockey_nhl	Seattle Kraken @ Detroit Red Wings	injury-rest-v1	home	0.65	0.6181	away	-3	0	-0.3249	0.0935	spread_away	win
+2026-10-09	icehockey_nhl	Seattle Kraken @ Detroit Red Wings	pace-adj-v1	home	0.65	0.6185	away	-3	0	-0.3279	0.0943	spread_away	win
+2026-10-09	icehockey_nhl	Seattle Kraken @ Detroit Red Wings	season-avg-v1	home	0.64	0.6153	away	-3	0	-0.3241	0.0887	spread_away	win
+2026-10-09	icehockey_nhl	Pittsburgh Penguins @ Columbus Blue Jackets	recency-v1	home	0.25	0.5437	home	1	1	-0.4453	-0.0106	spread_away	win
+2026-10-09	icehockey_nhl	Pittsburgh Penguins @ Columbus Blue Jackets	regression-v1	home	0.15	0.5269	home	1	1	-0.4726	-0.0412	spread_away	win
+2026-10-09	icehockey_nhl	Pittsburgh Penguins @ Columbus Blue Jackets	combo-balanced-v1	home	0.21	0.5375	home	1	1	-0.4615	-0.0220	spread_away	win
+2026-10-09	icehockey_nhl	Pittsburgh Penguins @ Columbus Blue Jackets	injury-rest-v1	home	0.10	0.5153	home	1	1	-0.4906	-0.0623	spread_away	win
+2026-10-09	icehockey_nhl	Pittsburgh Penguins @ Columbus Blue Jackets	pace-adj-v1	home	0.12	0.5246	home	1	1	-0.4817	-0.0453	spread_away	win
+2026-10-09	icehockey_nhl	Pittsburgh Penguins @ Columbus Blue Jackets	season-avg-v1	home	0.11	0.5174	home	1	1	-0.4931	-0.0584	spread_away	win
+2026-10-09	icehockey_nhl	New York Rangers @ Washington Capitals	recency-v1	home	0.36	0.5654	home	2	1	-0.4153	-0.0364	spread_away	loss
+2026-10-09	icehockey_nhl	New York Rangers @ Washington Capitals	regression-v1	home	0.39	0.5703	home	2	1	-0.4033	-0.0281	spread_away	loss
+2026-10-09	icehockey_nhl	New York Rangers @ Washington Capitals	combo-balanced-v1	home	0.36	0.5649	home	2	1	-0.4151	-0.0373	spread_away	loss
+2026-10-09	icehockey_nhl	New York Rangers @ Washington Capitals	injury-rest-v1	home	0.40	0.5727	home	2	1	-0.4044	-0.0240	spread_away	loss
+2026-10-09	icehockey_nhl	New York Rangers @ Washington Capitals	pace-adj-v1	home	0.39	0.5698	home	2	1	-0.4076	-0.0289	spread_away	loss
+2026-10-09	icehockey_nhl	New York Rangers @ Washington Capitals	season-avg-v1	home	0.40	0.5726	home	2	1	-0.4048	-0.0242	spread_away	loss
+2026-10-09	icehockey_nhl	Anaheim Ducks @ Winnipeg Jets	recency-v1	home	1.80	0.7956	away	-4	0	0.0691	0.4321	ml_home	loss
+2026-10-09	icehockey_nhl	Anaheim Ducks @ Winnipeg Jets	regression-v1	home	1.25	0.7130	away	-4	0	-0.1206	0.2834	ml_home	loss
+2026-10-09	icehockey_nhl	Anaheim Ducks @ Winnipeg Jets	combo-balanced-v1	home	1.64	0.7726	away	-4	0	0.0160	0.3906	ml_home	loss
+2026-10-09	icehockey_nhl	Anaheim Ducks @ Winnipeg Jets	injury-rest-v1	home	1.70	0.7846	away	-4	0	0.0346	0.4123	ml_home	loss
+2026-10-09	icehockey_nhl	Anaheim Ducks @ Winnipeg Jets	pace-adj-v1	home	1.49	0.7503	away	-4	0	-0.0334	0.3506	ml_home	loss
+2026-10-09	icehockey_nhl	Anaheim Ducks @ Winnipeg Jets	season-avg-v1	home	1.47	0.7503	away	-4	0	-0.0434	0.3505	ml_home	loss
