@@ -3179,3 +3179,87 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-09	icehockey_nhl	Anaheim Ducks @ Winnipeg Jets	injury-rest-v1	home	1.70	0.7846	away	-4	0	0.0346	0.4123	ml_home	loss
 2026-10-09	icehockey_nhl	Anaheim Ducks @ Winnipeg Jets	pace-adj-v1	home	1.49	0.7503	away	-4	0	-0.0334	0.3506	ml_home	loss
 2026-10-09	icehockey_nhl	Anaheim Ducks @ Winnipeg Jets	season-avg-v1	home	1.47	0.7503	away	-4	0	-0.0434	0.3505	ml_home	loss
+2026-10-10	icehockey_nhl	Utah Hockey Club @ Buffalo Sabres	recency-v1	Utah Hockey Club	-0.36	0.5645	Utah Hockey Club	-3	1	0.3206	-0.1072	spread_home	loss
+2026-10-10	icehockey_nhl	Utah Hockey Club @ Buffalo Sabres	regression-v1	Utah Hockey Club	-0.19	0.5359	Utah Hockey Club	-3	1	0.3748	-0.0485	spread_home	loss
+2026-10-10	icehockey_nhl	Utah Hockey Club @ Buffalo Sabres	combo-balanced-v1	Utah Hockey Club	-0.29	0.5545	Utah Hockey Club	-3	1	0.3444	-0.0868	spread_home	loss
+2026-10-10	icehockey_nhl	Utah Hockey Club @ Buffalo Sabres	injury-rest-v1	Utah Hockey Club	-0.3	0.5565	Utah Hockey Club	-3	1	0.3536	-0.0909	spread_home	loss
+2026-10-10	icehockey_nhl	Utah Hockey Club @ Buffalo Sabres	pace-adj-v1	Utah Hockey Club	-0.31	0.5589	Utah Hockey Club	-3	1	0.3389	-0.0958	spread_home	loss
+2026-10-10	icehockey_nhl	Utah Hockey Club @ Buffalo Sabres	season-avg-v1	Utah Hockey Club	-0.28	0.5529	Utah Hockey Club	-3	1	0.3474	-0.0834	spread_home	loss
+2026-10-10	icehockey_nhl	Anaheim Ducks @ Calgary Flames	recency-v1	Calgary Flames	0.3	0.5509	Anaheim Ducks	-2	0	0.3508	-0.1107	spread_away	win
+2026-10-10	icehockey_nhl	Anaheim Ducks @ Calgary Flames	regression-v1	Calgary Flames	0.31	0.5553	Anaheim Ducks	-2	0	0.3391	-0.1193	spread_away	win
+2026-10-10	icehockey_nhl	Anaheim Ducks @ Calgary Flames	combo-balanced-v1	Calgary Flames	0.45	0.5815	Anaheim Ducks	-2	0	0.2974	-0.1712	spread_away	win
+2026-10-10	icehockey_nhl	Anaheim Ducks @ Calgary Flames	injury-rest-v1	Calgary Flames	0.61	0.6138	Anaheim Ducks	-2	0	0.2489	-0.2353	spread_away	win
+2026-10-10	icehockey_nhl	Anaheim Ducks @ Calgary Flames	pace-adj-v1	Calgary Flames	0.34	0.5623	Anaheim Ducks	-2	0	0.3328	-0.1331	spread_away	win
+2026-10-10	icehockey_nhl	Anaheim Ducks @ Calgary Flames	season-avg-v1	Calgary Flames	0.31	0.5599	Anaheim Ducks	-2	0	0.341	-0.1284	spread_away	win
+2026-10-10	icehockey_nhl	Tampa Bay Lightning @ New York Islanders	recency-v1	Tampa Bay Lightning	-0.36	0.565	Tampa Bay Lightning	-2	1	0.3294	0.0657	spread_home	loss
+2026-10-10	icehockey_nhl	Tampa Bay Lightning @ New York Islanders	regression-v1	Tampa Bay Lightning	-0.24	0.5445	Tampa Bay Lightning	-2	1	0.3592	0.1159	spread_home	loss
+2026-10-10	icehockey_nhl	Tampa Bay Lightning @ New York Islanders	combo-balanced-v1	Tampa Bay Lightning	-0.42	0.5779000000000001	Tampa Bay Lightning	-2	1	0.3076	0.0341	spread_home	loss
+2026-10-10	icehockey_nhl	Tampa Bay Lightning @ New York Islanders	injury-rest-v1	Tampa Bay Lightning	-0.59	0.6072	Tampa Bay Lightning	-2	1	0.2534	-0.0376	spread_home	loss
+2026-10-10	icehockey_nhl	Tampa Bay Lightning @ New York Islanders	pace-adj-v1	Tampa Bay Lightning	-0.37	0.5662	Tampa Bay Lightning	-2	1	0.3172	0.0628	spread_home	loss
+2026-10-10	icehockey_nhl	Tampa Bay Lightning @ New York Islanders	season-avg-v1	Tampa Bay Lightning	-0.36	0.565	Tampa Bay Lightning	-2	1	0.326	0.0658	spread_home	loss
+2026-10-10	icehockey_nhl	Columbus Blue Jackets @ St. Louis Blues	recency-v1	St. Louis Blues	0.48	0.5858	St. Louis Blues	2	1	0.2846	-0.1301	spread_away	loss
+2026-10-10	icehockey_nhl	Columbus Blue Jackets @ St. Louis Blues	regression-v1	St. Louis Blues	0.44	0.5786	St. Louis Blues	2	1	0.3018	-0.1151	spread_away	loss
+2026-10-10	icehockey_nhl	Columbus Blue Jackets @ St. Louis Blues	combo-balanced-v1	St. Louis Blues	0.6	0.6104	St. Louis Blues	2	1	0.2536	-0.1819	spread_away	loss
+2026-10-10	icehockey_nhl	Columbus Blue Jackets @ St. Louis Blues	injury-rest-v1	St. Louis Blues	0.76	0.6374	St. Louis Blues	2	1	0.1937	-0.2386	spread_away	loss
+2026-10-10	icehockey_nhl	Columbus Blue Jackets @ St. Louis Blues	pace-adj-v1	St. Louis Blues	0.48	0.5882	St. Louis Blues	2	1	0.2849	-0.1353	spread_away	loss
+2026-10-10	icehockey_nhl	Columbus Blue Jackets @ St. Louis Blues	season-avg-v1	St. Louis Blues	0.47	0.5845	St. Louis Blues	2	1	0.2929	-0.1275	spread_away	loss
+2026-10-10	icehockey_nhl	Philadelphia Flyers @ Boston Bruins	recency-v1	Boston Bruins	1.36	0.7331	Boston Bruins	4	1	-0.08	0.2761	ml_home	win
+2026-10-10	icehockey_nhl	Philadelphia Flyers @ Boston Bruins	regression-v1	Boston Bruins	1.11	0.6937	Boston Bruins	4	1	-0.1722	0.2075	ml_home	win
+2026-10-10	icehockey_nhl	Philadelphia Flyers @ Boston Bruins	combo-balanced-v1	Boston Bruins	1.35	0.734	Boston Bruins	4	1	-0.0839	0.2777	ml_home	win
+2026-10-10	icehockey_nhl	Philadelphia Flyers @ Boston Bruins	injury-rest-v1	Boston Bruins	1.5	0.7615	Boston Bruins	4	1	-0.0279	0.3255	ml_home	win
+2026-10-10	icehockey_nhl	Philadelphia Flyers @ Boston Bruins	pace-adj-v1	Boston Bruins	1.3	0.7255	Boston Bruins	4	1	-0.1019	0.2629	ml_home	win
+2026-10-10	icehockey_nhl	Philadelphia Flyers @ Boston Bruins	season-avg-v1	Boston Bruins	1.3	0.7257	Boston Bruins	4	1	-0.1043	0.2632	ml_home	win
+2026-10-10	icehockey_nhl	Edmonton Oilers @ San Jose Sharks	recency-v1	Edmonton Oilers	-1.62	0.7717	Edmonton Oilers	-2	1	0.0095	0.2793	ml_away	win
+2026-10-10	icehockey_nhl	Edmonton Oilers @ San Jose Sharks	regression-v1	Edmonton Oilers	-1.22	0.712	Edmonton Oilers	-2	1	-0.1305	0.1804	ml_away	win
+2026-10-10	icehockey_nhl	Edmonton Oilers @ San Jose Sharks	combo-balanced-v1	Edmonton Oilers	-1.54	0.7613	Edmonton Oilers	-2	1	-0.0226	0.2621	ml_away	win
+2026-10-10	icehockey_nhl	Edmonton Oilers @ San Jose Sharks	injury-rest-v1	Edmonton Oilers	-1.77	0.791	Edmonton Oilers	-2	1	0.0598	0.3114	ml_away	win
+2026-10-10	icehockey_nhl	Edmonton Oilers @ San Jose Sharks	pace-adj-v1	Edmonton Oilers	-1.56	0.759	Edmonton Oilers	-2	1	-0.0156	0.2584	ml_away	win
+2026-10-10	icehockey_nhl	Edmonton Oilers @ San Jose Sharks	season-avg-v1	Edmonton Oilers	-1.57	0.7622	Edmonton Oilers	-2	1	-0.0125	0.2636	ml_away	win
+2026-10-10	icehockey_nhl	Dallas Stars @ Pittsburgh Penguins	recency-v1	Dallas Stars	-0.74	0.6295	Pittsburgh Penguins	1	0	0.2023	-0.0552	spread_home	win
+2026-10-10	icehockey_nhl	Dallas Stars @ Pittsburgh Penguins	regression-v1	Dallas Stars	-0.51	0.5900000000000001	Pittsburgh Penguins	1	0	0.2763	0.0456	spread_home	win
+2026-10-10	icehockey_nhl	Dallas Stars @ Pittsburgh Penguins	combo-balanced-v1	Dallas Stars	-1.0	0.6791	Pittsburgh Penguins	1	0	0.1107	-0.1818	spread_home	win
+2026-10-10	icehockey_nhl	Dallas Stars @ Pittsburgh Penguins	injury-rest-v1	Dallas Stars	-1.4	0.743	Pittsburgh Penguins	1	0	-0.0667	0.1535	ml_away	loss
+2026-10-10	icehockey_nhl	Dallas Stars @ Pittsburgh Penguins	pace-adj-v1	Dallas Stars	-0.68	0.6222	Pittsburgh Penguins	1	0	0.225	-0.0366	spread_home	win
+2026-10-10	icehockey_nhl	Dallas Stars @ Pittsburgh Penguins	season-avg-v1	Dallas Stars	-0.66	0.6175999999999999	Pittsburgh Penguins	1	0	0.2271	-0.025	spread_home	win
+2026-10-10	icehockey_nhl	Minnesota Wild @ Florida Panthers	recency-v1	Florida Panthers	0.88	0.6547	Minnesota Wild	-3	0	0.1554	-0.2057	spread_away	win
+2026-10-10	icehockey_nhl	Minnesota Wild @ Florida Panthers	regression-v1	Florida Panthers	0.71	0.6267	Minnesota Wild	-3	0	0.2165	-0.1414	spread_away	win
+2026-10-10	icehockey_nhl	Minnesota Wild @ Florida Panthers	combo-balanced-v1	Florida Panthers	0.9	0.663	Minnesota Wild	-3	0	0.1496	-0.2249	spread_away	win
+2026-10-10	icehockey_nhl	Minnesota Wild @ Florida Panthers	injury-rest-v1	Florida Panthers	1.05	0.6855	Minnesota Wild	-3	0	-0.1907	0.1277	ml_home	loss
+2026-10-10	icehockey_nhl	Minnesota Wild @ Florida Panthers	pace-adj-v1	Florida Panthers	0.82	0.6458	Minnesota Wild	-3	0	0.1784	-0.1854	spread_away	win
+2026-10-10	icehockey_nhl	Minnesota Wild @ Florida Panthers	season-avg-v1	Florida Panthers	0.84	0.6496	Minnesota Wild	-3	0	0.1742	-0.1941	spread_away	win
+2026-10-10	icehockey_nhl	Nashville Predators @ Ottawa Senators	recency-v1	Ottawa Senators	0.94	0.6646	Ottawa Senators	1	1	0.1335	-0.2285	spread_away	win
+2026-10-10	icehockey_nhl	Nashville Predators @ Ottawa Senators	regression-v1	Ottawa Senators	0.78	0.6381	Ottawa Senators	1	1	0.1876	-0.1676	spread_away	win
+2026-10-10	icehockey_nhl	Nashville Predators @ Ottawa Senators	combo-balanced-v1	Ottawa Senators	0.98	0.6734	Ottawa Senators	1	1	0.1228	-0.2487	spread_away	win
+2026-10-10	icehockey_nhl	Nashville Predators @ Ottawa Senators	injury-rest-v1	Ottawa Senators	1.12	0.6986	Ottawa Senators	1	1	-0.1665	0.1643	ml_home	win
+2026-10-10	icehockey_nhl	Nashville Predators @ Ottawa Senators	pace-adj-v1	Ottawa Senators	0.89	0.6577	Ottawa Senators	1	1	0.1557	-0.2128	spread_away	win
+2026-10-10	icehockey_nhl	Nashville Predators @ Ottawa Senators	season-avg-v1	Ottawa Senators	0.88	0.6551	Ottawa Senators	1	1	0.1553	-0.2066	spread_away	win
+2026-10-10	icehockey_nhl	Los Angeles Kings @ Vegas Golden Knights	recency-v1	Vegas Golden Knights	1.0	0.6794	Vegas Golden Knights	1	1	0.1162	-0.2369	spread_away	win
+2026-10-10	icehockey_nhl	Los Angeles Kings @ Vegas Golden Knights	regression-v1	Vegas Golden Knights	0.81	0.6449	Vegas Golden Knights	1	1	0.1775	-0.155	spread_away	win
+2026-10-10	icehockey_nhl	Los Angeles Kings @ Vegas Golden Knights	combo-balanced-v1	Vegas Golden Knights	1.04	0.6818	Vegas Golden Knights	1	1	0.1014	-0.2427	spread_away	win
+2026-10-10	icehockey_nhl	Los Angeles Kings @ Vegas Golden Knights	injury-rest-v1	Vegas Golden Knights	1.16	0.7039	Vegas Golden Knights	1	1	-0.1489	0.128	ml_home	win
+2026-10-10	icehockey_nhl	Los Angeles Kings @ Vegas Golden Knights	pace-adj-v1	Vegas Golden Knights	0.95	0.6688	Vegas Golden Knights	1	1	0.1329	-0.2118	spread_away	win
+2026-10-10	icehockey_nhl	Los Angeles Kings @ Vegas Golden Knights	season-avg-v1	Vegas Golden Knights	0.96	0.6692	Vegas Golden Knights	1	1	0.1341	-0.2126	spread_away	win
+2026-10-10	icehockey_nhl	Toronto Maple Leafs @ Colorado Avalanche	recency-v1	Colorado Avalanche	1.06	0.685	Toronto Maple Leafs	-3	0	0.0979	-0.1559	spread_away	win
+2026-10-10	icehockey_nhl	Toronto Maple Leafs @ Colorado Avalanche	regression-v1	Colorado Avalanche	0.83	0.6486	Toronto Maple Leafs	-3	0	0.1717	-0.0582	spread_away	win
+2026-10-10	icehockey_nhl	Toronto Maple Leafs @ Colorado Avalanche	combo-balanced-v1	Colorado Avalanche	1.23	0.7145	Toronto Maple Leafs	-3	0	-0.129	0.0717	ml_home	loss
+2026-10-10	icehockey_nhl	Toronto Maple Leafs @ Colorado Avalanche	injury-rest-v1	Colorado Avalanche	1.5	0.7568	Toronto Maple Leafs	-3	0	-0.029	0.1352	ml_home	loss
+2026-10-10	icehockey_nhl	Toronto Maple Leafs @ Colorado Avalanche	pace-adj-v1	Colorado Avalanche	0.98	0.6697	Toronto Maple Leafs	-3	0	0.1217	-0.1148	spread_away	win
+2026-10-10	icehockey_nhl	Toronto Maple Leafs @ Colorado Avalanche	season-avg-v1	Colorado Avalanche	0.99	0.6741	Toronto Maple Leafs	-3	0	0.12	-0.1266	spread_away	win
+2026-10-10	icehockey_nhl	Detroit Red Wings @ Montreal Canadiens	recency-v1	Montreal Canadiens	1.07	0.6909	Montreal Canadiens	1	1	0.0937	-0.1962	spread_away	win
+2026-10-10	icehockey_nhl	Detroit Red Wings @ Montreal Canadiens	regression-v1	Montreal Canadiens	0.86	0.652	Montreal Canadiens	1	1	0.1651	-0.0952	spread_away	win
+2026-10-10	icehockey_nhl	Detroit Red Wings @ Montreal Canadiens	combo-balanced-v1	Montreal Canadiens	1.23	0.7155	Montreal Canadiens	1	1	-0.1271	0.0921	ml_home	win
+2026-10-10	icehockey_nhl	Detroit Red Wings @ Montreal Canadiens	injury-rest-v1	Montreal Canadiens	1.52	0.7606	Montreal Canadiens	1	1	-0.0187	0.1609	ml_home	win
+2026-10-10	icehockey_nhl	Detroit Red Wings @ Montreal Canadiens	pace-adj-v1	Montreal Canadiens	1.01	0.6782	Montreal Canadiens	1	1	0.1162	-0.1633	spread_away	win
+2026-10-10	icehockey_nhl	Detroit Red Wings @ Montreal Canadiens	season-avg-v1	Montreal Canadiens	1.01	0.6785	Montreal Canadiens	1	1	0.1137	-0.164	spread_away	win
+2026-10-10	icehockey_nhl	Carolina Hurricanes @ Chicago Blackhawks	recency-v1	Carolina Hurricanes	-1.55	0.7622	Carolina Hurricanes	-3	1	-0.0122	0.0611	ml_away	win
+2026-10-10	icehockey_nhl	Carolina Hurricanes @ Chicago Blackhawks	regression-v1	Carolina Hurricanes	-1.15	0.6993	Carolina Hurricanes	-3	1	0.0663	-0.0678	spread_home	loss
+2026-10-10	icehockey_nhl	Carolina Hurricanes @ Chicago Blackhawks	combo-balanced-v1	Carolina Hurricanes	-1.48	0.7513	Carolina Hurricanes	-3	1	-0.0387	0.046	ml_away	win
+2026-10-10	icehockey_nhl	Carolina Hurricanes @ Chicago Blackhawks	injury-rest-v1	Carolina Hurricanes	-1.7	0.7858	Carolina Hurricanes	-3	1	0.0362	0.0939	ml_away	win
+2026-10-10	icehockey_nhl	Carolina Hurricanes @ Chicago Blackhawks	pace-adj-v1	Carolina Hurricanes	-1.48	0.7499	Carolina Hurricanes	-3	1	-0.0389	0.044	ml_away	win
+2026-10-10	icehockey_nhl	Carolina Hurricanes @ Chicago Blackhawks	season-avg-v1	Carolina Hurricanes	-1.49	0.7522	Carolina Hurricanes	-3	1	-0.0374	0.0471	ml_away	win
+2026-10-10	icehockey_nhl	Vancouver Canucks @ New Jersey Devils	recency-v1	New Jersey Devils	1.57	0.7645	New Jersey Devils	3	1	-0.0066	0.0327	ml_home	win
+2026-10-10	icehockey_nhl	Vancouver Canucks @ New Jersey Devils	regression-v1	New Jersey Devils	1.28	0.7197	New Jersey Devils	3	1	0.0225	-0.0751	spread_away	loss
+2026-10-10	icehockey_nhl	Vancouver Canucks @ New Jersey Devils	combo-balanced-v1	New Jersey Devils	1.54	0.76	New Jersey Devils	3	1	-0.0167	0.0266	ml_home	win
+2026-10-10	icehockey_nhl	Vancouver Canucks @ New Jersey Devils	injury-rest-v1	New Jersey Devils	1.73	0.7893	New Jersey Devils	3	1	0.0509	0.0662	ml_home	win
+2026-10-10	icehockey_nhl	Vancouver Canucks @ New Jersey Devils	pace-adj-v1	New Jersey Devils	1.52	0.7567	New Jersey Devils	3	1	-0.0245	0.0222	ml_home	win
+2026-10-10	icehockey_nhl	Vancouver Canucks @ New Jersey Devils	season-avg-v1	New Jersey Devils	1.51	0.7571	New Jersey Devils	3	1	-0.0257	0.0227	ml_home	win
