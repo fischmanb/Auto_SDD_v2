@@ -3263,3 +3263,105 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-10	icehockey_nhl	Vancouver Canucks @ New Jersey Devils	injury-rest-v1	New Jersey Devils	1.73	0.7893	New Jersey Devils	3	1	0.0509	0.0662	ml_home	win
 2026-10-10	icehockey_nhl	Vancouver Canucks @ New Jersey Devils	pace-adj-v1	New Jersey Devils	1.52	0.7567	New Jersey Devils	3	1	-0.0245	0.0222	ml_home	win
 2026-10-10	icehockey_nhl	Vancouver Canucks @ New Jersey Devils	season-avg-v1	New Jersey Devils	1.51	0.7571	New Jersey Devils	3	1	-0.0257	0.0227	ml_home	win
+2026-10-11	icehockey_nhl	Seattle Kraken @ Washington Capitals	recency-v1	Seattle Kraken	-0.54	0.4048	Seattle Kraken	-2	1	-0.6514	-0.4024	ml_away	win
+2026-10-11	icehockey_nhl	Seattle Kraken @ Washington Capitals	regression-v1	Seattle Kraken	-0.42	0.4281	Seattle Kraken	-2	1	-0.627	-0.3681	ml_away	win
+2026-10-11	icehockey_nhl	Seattle Kraken @ Washington Capitals	combo-balanced-v1	Seattle Kraken	-0.49	0.4131	Seattle Kraken	-2	1	-0.6422	-0.3902	ml_away	win
+2026-10-11	icehockey_nhl	Seattle Kraken @ Washington Capitals	injury-rest-v1	Seattle Kraken	-0.54	0.4012	Seattle Kraken	-2	1	-0.6548	-0.4077	ml_away	win
+2026-10-11	icehockey_nhl	Seattle Kraken @ Washington Capitals	pace-adj-v1	Seattle Kraken	-0.53	0.4045	Seattle Kraken	-2	1	-0.6518	-0.4029	ml_away	win
+2026-10-11	icehockey_nhl	Seattle Kraken @ Washington Capitals	season-avg-v1	Seattle Kraken	-0.54	0.4039	Seattle Kraken	-2	1	-0.6542	-0.4038	ml_away	win
+2026-10-11	icehockey_nhl	Vancouver Canucks @ New York Rangers	recency-v1	New York Rangers	0.02	0.504	New York Rangers	4	1	-0.5131	-0.3086	ml_away	loss
+2026-10-11	icehockey_nhl	Vancouver Canucks @ New York Rangers	regression-v1	New York Rangers	0.05	0.5103	New York Rangers	4	1	-0.501	-0.3	ml_away	loss
+2026-10-11	icehockey_nhl	Vancouver Canucks @ New York Rangers	combo-balanced-v1	New York Rangers	0.06	0.5116	New York Rangers	4	1	-0.5049	-0.2982	ml_away	loss
+2026-10-11	icehockey_nhl	Vancouver Canucks @ New York Rangers	injury-rest-v1	New York Rangers	0.09	0.5171	New York Rangers	4	1	-0.5056	-0.2906	ml_away	loss
+2026-10-11	icehockey_nhl	Vancouver Canucks @ New York Rangers	pace-adj-v1	New York Rangers	0.05	0.511	New York Rangers	4	1	-0.5093	-0.299	ml_away	loss
+2026-10-11	icehockey_nhl	Vancouver Canucks @ New York Rangers	season-avg-v1	New York Rangers	0.03	0.5033	New York Rangers	4	1	-0.5134	-0.3097	ml_away	loss
+2026-10-11	icehockey_nhl	Carolina Hurricanes @ Philadelphia Flyers	recency-v1	Carolina Hurricanes	-2.85	0.0929	Carolina Hurricanes	-3	1	-0.5084	-0.7678	ml_away	win
+2026-10-11	icehockey_nhl	Carolina Hurricanes @ Philadelphia Flyers	regression-v1	Carolina Hurricanes	-2.29	0.1435	Carolina Hurricanes	-3	1	-0.3309	-0.6413	ml_away	win
+2026-10-11	icehockey_nhl	Carolina Hurricanes @ Philadelphia Flyers	combo-balanced-v1	Carolina Hurricanes	-2.52	0.1197	Carolina Hurricanes	-3	1	-0.411	-0.7008	ml_away	win
+2026-10-11	icehockey_nhl	Carolina Hurricanes @ Philadelphia Flyers	injury-rest-v1	Carolina Hurricanes	-2.74	0.0967	Carolina Hurricanes	-3	1	-0.4828	-0.7584	ml_away	win
+2026-10-11	icehockey_nhl	Carolina Hurricanes @ Philadelphia Flyers	pace-adj-v1	Carolina Hurricanes	-2.85	0.0939	Carolina Hurricanes	-3	1	-0.5081	-0.7653	ml_away	win
+2026-10-11	icehockey_nhl	Carolina Hurricanes @ Philadelphia Flyers	season-avg-v1	Carolina Hurricanes	-2.86	0.0919	Carolina Hurricanes	-3	1	-0.5102	-0.7702	ml_away	win
+2026-10-11	americanfootball_nfl	Philadelphia Eagles @ Jacksonville Jaguars	recency-v1	Jacksonville Jaguars	5.57	0.6567	Jacksonville Jaguars	2	1	-0.033	-0.0514	ml_away	loss
+2026-10-11	americanfootball_nfl	Philadelphia Eagles @ Jacksonville Jaguars	regression-v1	Jacksonville Jaguars	4.98	0.6416	Jacksonville Jaguars	2	1	-0.0646	-0.0732	ml_away	loss
+2026-10-11	americanfootball_nfl	Philadelphia Eagles @ Jacksonville Jaguars	combo-balanced-v1	Jacksonville Jaguars	5.34	0.6482	Jacksonville Jaguars	2	1	-0.0535	-0.0637	ml_away	loss
+2026-10-11	americanfootball_nfl	Philadelphia Eagles @ Jacksonville Jaguars	injury-rest-v1	Jacksonville Jaguars	5.63	0.6591	Jacksonville Jaguars	2	1	-0.0287	-0.048	ml_away	loss
+2026-10-11	americanfootball_nfl	Philadelphia Eagles @ Jacksonville Jaguars	pace-adj-v1	Jacksonville Jaguars	5.67	0.6581	Jacksonville Jaguars	2	1	-0.0331	-0.0495	ml_away	loss
+2026-10-11	americanfootball_nfl	Philadelphia Eagles @ Jacksonville Jaguars	season-avg-v1	Jacksonville Jaguars	5.64	0.6564	Jacksonville Jaguars	2	1	-0.0339	-0.0518	ml_away	loss
+2026-10-11	americanfootball_nfl	Cleveland Browns @ New York Jets	recency-v1	New York Jets	6.36	0.6784	New York Jets	5	1	0.1649	0.1629	spread_home	win
+2026-10-11	americanfootball_nfl	Cleveland Browns @ New York Jets	regression-v1	New York Jets	5.76	0.6609	New York Jets	5	1	0.1344	0.1329	spread_home	win
+2026-10-11	americanfootball_nfl	Cleveland Browns @ New York Jets	combo-balanced-v1	New York Jets	6.66	0.6874	New York Jets	5	1	0.1852	0.1784	spread_home	win
+2026-10-11	americanfootball_nfl	Cleveland Browns @ New York Jets	injury-rest-v1	New York Jets	7.68	0.7145	New York Jets	5	1	0.2431	0.2249	spread_home	win
+2026-10-11	americanfootball_nfl	Cleveland Browns @ New York Jets	pace-adj-v1	New York Jets	6.39	0.6769	New York Jets	5	1	0.1698	0.1603	spread_home	win
+2026-10-11	americanfootball_nfl	Cleveland Browns @ New York Jets	season-avg-v1	New York Jets	6.37	0.6781	New York Jets	5	1	0.1687	0.1625	spread_home	win
+2026-10-11	americanfootball_nfl	Cincinnati Bengals @ Miami Dolphins	recency-v1	Cincinnati Bengals	-16.42	0.1148	Cincinnati Bengals	-7	1	-0.535	-0.5754	spread_away	push
+2026-10-11	americanfootball_nfl	Cincinnati Bengals @ Miami Dolphins	regression-v1	Cincinnati Bengals	-12.87	0.1759	Cincinnati Bengals	-7	1	-0.364	-0.3492	spread_away	push
+2026-10-11	americanfootball_nfl	Cincinnati Bengals @ Miami Dolphins	combo-balanced-v1	Cincinnati Bengals	-15.23	0.1309	Cincinnati Bengals	-7	1	-0.4904	-0.5158	spread_away	push
+2026-10-11	americanfootball_nfl	Cincinnati Bengals @ Miami Dolphins	injury-rest-v1	Cincinnati Bengals	-17.42	0.0979	Cincinnati Bengals	-7	1	-0.5933	-0.6376	spread_away	push
+2026-10-11	americanfootball_nfl	Cincinnati Bengals @ Miami Dolphins	pace-adj-v1	Cincinnati Bengals	-16.36	0.117	Cincinnati Bengals	-7	1	-0.5397	-0.5671	spread_away	push
+2026-10-11	americanfootball_nfl	Cincinnati Bengals @ Miami Dolphins	season-avg-v1	Cincinnati Bengals	-16.39	0.1169	Cincinnati Bengals	-7	1	-0.5391	-0.5674	spread_away	push
+2026-10-11	americanfootball_nfl	Las Vegas Raiders @ New England Patriots	recency-v1	New England Patriots	7.93	0.7156	New England Patriots	28	1	0.1999	0.0922	spread_home	win
+2026-10-11	americanfootball_nfl	Las Vegas Raiders @ New England Patriots	regression-v1	New England Patriots	6.95	0.6937	New England Patriots	28	1	0.1432	0.0587	spread_home	win
+2026-10-11	americanfootball_nfl	Las Vegas Raiders @ New England Patriots	combo-balanced-v1	New England Patriots	8.02	0.7186	New England Patriots	28	1	0.2048	0.0968	spread_home	win
+2026-10-11	americanfootball_nfl	Las Vegas Raiders @ New England Patriots	injury-rest-v1	New England Patriots	9.22	0.7514	New England Patriots	28	1	0.2691	0.1468	spread_home	win
+2026-10-11	americanfootball_nfl	Las Vegas Raiders @ New England Patriots	pace-adj-v1	New England Patriots	7.93	0.718	New England Patriots	28	1	0.1963	0.0959	spread_home	win
+2026-10-11	americanfootball_nfl	Las Vegas Raiders @ New England Patriots	season-avg-v1	New England Patriots	7.87	0.7167	New England Patriots	28	1	0.1926	0.094	spread_home	win
+2026-10-11	americanfootball_nfl	Minnesota Vikings @ New Orleans Saints	recency-v1	Minnesota Vikings	-10.4	0.2233	Minnesota Vikings	-10	1	-0.5087	-0.5423	spread_away	win
+2026-10-11	americanfootball_nfl	Minnesota Vikings @ New Orleans Saints	regression-v1	Minnesota Vikings	-8.25	0.2731	Minnesota Vikings	-10	1	-0.4094	-0.4401	spread_away	win
+2026-10-11	americanfootball_nfl	Minnesota Vikings @ New Orleans Saints	combo-balanced-v1	Minnesota Vikings	-10.82	0.2134	Minnesota Vikings	-10	1	-0.5317	-0.5626	spread_away	win
+2026-10-11	americanfootball_nfl	Minnesota Vikings @ New Orleans Saints	injury-rest-v1	Minnesota Vikings	-13.15	0.1629	Minnesota Vikings	-10	1	-0.636	-0.6661	spread_away	win
+2026-10-11	americanfootball_nfl	Minnesota Vikings @ New Orleans Saints	pace-adj-v1	Minnesota Vikings	-10.48	0.22	Minnesota Vikings	-10	1	-0.516	-0.5489	spread_away	win
+2026-10-11	americanfootball_nfl	Minnesota Vikings @ New Orleans Saints	season-avg-v1	Minnesota Vikings	-10.46	0.2214	Minnesota Vikings	-10	1	-0.5133	-0.5461	spread_away	win
+2026-10-11	americanfootball_nfl	Houston Texans @ Tennessee Titans	recency-v1	Houston Texans	-10.74	0.2212	Houston Texans	-23	1	-0.2505	-0.1595	spread_away	win
+2026-10-11	americanfootball_nfl	Houston Texans @ Tennessee Titans	regression-v1	Houston Texans	-8.23	0.2754	Houston Texans	-23	1	-0.1193	0.0464	spread_away	win
+2026-10-11	americanfootball_nfl	Houston Texans @ Tennessee Titans	combo-balanced-v1	Houston Texans	-10.09	0.2304	Houston Texans	-23	1	-0.224	-0.1244	spread_away	win
+2026-10-11	americanfootball_nfl	Houston Texans @ Tennessee Titans	injury-rest-v1	Houston Texans	-11.88	0.192	Houston Texans	-23	1	-0.3214	-0.2706	spread_away	win
+2026-10-11	americanfootball_nfl	Houston Texans @ Tennessee Titans	pace-adj-v1	Houston Texans	-10.63	0.2242	Houston Texans	-23	1	-0.2415	-0.1479	spread_away	win
+2026-10-11	americanfootball_nfl	Houston Texans @ Tennessee Titans	season-avg-v1	Houston Texans	-10.61	0.2206	Houston Texans	-23	1	-0.2485	-0.1617	spread_away	win
+2026-10-11	americanfootball_nfl	New York Giants @ Washington Commanders	recency-v1	Washington Commanders	10.73	0.7801	TIE	0	0	0.3338	0.2018	spread_home	loss
+2026-10-11	americanfootball_nfl	New York Giants @ Washington Commanders	regression-v1	Washington Commanders	9.26	0.7476	TIE	0	0	0.2657	0.1516	spread_home	loss
+2026-10-11	americanfootball_nfl	New York Giants @ Washington Commanders	combo-balanced-v1	Washington Commanders	10.55	0.7773	TIE	0	0	0.3297	0.1975	spread_home	loss
+2026-10-11	americanfootball_nfl	New York Giants @ Washington Commanders	injury-rest-v1	Washington Commanders	12.06	0.8115	TIE	0	0	0.4014	0.2502	spread_home	loss
+2026-10-11	americanfootball_nfl	New York Giants @ Washington Commanders	pace-adj-v1	Washington Commanders	10.81	0.7843	TIE	0	0	0.3346	0.2082	spread_home	loss
+2026-10-11	americanfootball_nfl	New York Giants @ Washington Commanders	season-avg-v1	Washington Commanders	10.71	0.7788	TIE	0	0	0.3355	0.1998	spread_home	loss
+2026-10-11	americanfootball_nfl	Indianapolis Colts @ Pittsburgh Steelers	recency-v1	Pittsburgh Steelers	4.66	0.6324	Pittsburgh Steelers	12	1	0.0761	0.0685	spread_home	win
+2026-10-11	americanfootball_nfl	Indianapolis Colts @ Pittsburgh Steelers	regression-v1	Pittsburgh Steelers	4.33	0.6239	Pittsburgh Steelers	12	1	0.0596	0.0541	spread_home	win
+2026-10-11	americanfootball_nfl	Indianapolis Colts @ Pittsburgh Steelers	combo-balanced-v1	Pittsburgh Steelers	4.43	0.6268	Pittsburgh Steelers	12	1	0.0652	0.0591	spread_home	win
+2026-10-11	americanfootball_nfl	Indianapolis Colts @ Pittsburgh Steelers	injury-rest-v1	Pittsburgh Steelers	4.61	0.6342	Pittsburgh Steelers	12	1	0.0774	0.0715	spread_home	win
+2026-10-11	americanfootball_nfl	Indianapolis Colts @ Pittsburgh Steelers	pace-adj-v1	Pittsburgh Steelers	4.7	0.6314	Pittsburgh Steelers	12	1	0.0787	0.0669	spread_home	win
+2026-10-11	americanfootball_nfl	Indianapolis Colts @ Pittsburgh Steelers	season-avg-v1	Pittsburgh Steelers	4.82	0.6358	Pittsburgh Steelers	12	1	0.0854	0.0742	spread_home	win
+2026-10-11	americanfootball_nfl	Chicago Bears @ Green Bay Packers	recency-v1	Chicago Bears	-0.55	0.4827	Green Bay Packers	24	0	0.0016	-0.0104	spread_home	win
+2026-10-11	americanfootball_nfl	Chicago Bears @ Green Bay Packers	regression-v1	Green Bay Packers	0.05	0.5043	Green Bay Packers	24	1	0.0412	0.0337	spread_home	win
+2026-10-11	americanfootball_nfl	Chicago Bears @ Green Bay Packers	combo-balanced-v1	Chicago Bears	-0.92	0.4734	Green Bay Packers	24	0	-0.0165	-0.0295	spread_home	win
+2026-10-11	americanfootball_nfl	Chicago Bears @ Green Bay Packers	injury-rest-v1	Chicago Bears	-2.06	0.4408	Green Bay Packers	24	0	-0.0759	-0.0964	spread_home	win
+2026-10-11	americanfootball_nfl	Chicago Bears @ Green Bay Packers	pace-adj-v1	Chicago Bears	-0.5	0.4863	Green Bay Packers	24	0	0.0093	-0.0031	spread_home	win
+2026-10-11	americanfootball_nfl	Chicago Bears @ Green Bay Packers	season-avg-v1	Chicago Bears	-0.51	0.4865	Green Bay Packers	24	0	0.0065	-0.0026	spread_home	win
+2026-10-11	americanfootball_nfl	Denver Broncos @ Los Angeles Chargers	recency-v1	Denver Broncos	-8.81	0.2606	Denver Broncos	-6	1	-0.3344	-0.3355	spread_away	win
+2026-10-11	americanfootball_nfl	Denver Broncos @ Los Angeles Chargers	regression-v1	Denver Broncos	-6.87	0.31	Denver Broncos	-6	1	-0.2342	-0.2094	spread_away	win
+2026-10-11	americanfootball_nfl	Denver Broncos @ Los Angeles Chargers	combo-balanced-v1	Denver Broncos	-8.42	0.2712	Denver Broncos	-6	1	-0.3142	-0.3084	spread_away	win
+2026-10-11	americanfootball_nfl	Denver Broncos @ Los Angeles Chargers	injury-rest-v1	Denver Broncos	-10.12	0.227	Denver Broncos	-6	1	-0.4049	-0.4213	spread_away	win
+2026-10-11	americanfootball_nfl	Denver Broncos @ Los Angeles Chargers	pace-adj-v1	Denver Broncos	-8.8	0.2631	Denver Broncos	-6	1	-0.3333	-0.329	spread_away	win
+2026-10-11	americanfootball_nfl	Denver Broncos @ Los Angeles Chargers	season-avg-v1	Denver Broncos	-8.67	0.2645	Denver Broncos	-6	1	-0.3291	-0.3256	spread_away	win
+2026-10-11	americanfootball_nfl	Detroit Lions @ Arizona Cardinals	recency-v1	Arizona Cardinals	4.42	0.6213	Detroit Lions	-24	0	0.4281	0.833	ml_home	loss
+2026-10-11	americanfootball_nfl	Detroit Lions @ Arizona Cardinals	regression-v1	Arizona Cardinals	3.99	0.6116	Detroit Lions	-24	0	0.4099	0.8042	ml_home	loss
+2026-10-11	americanfootball_nfl	Detroit Lions @ Arizona Cardinals	combo-balanced-v1	Arizona Cardinals	4.26	0.6188	Detroit Lions	-24	0	0.4219	0.8255	ml_home	loss
+2026-10-11	americanfootball_nfl	Detroit Lions @ Arizona Cardinals	injury-rest-v1	Arizona Cardinals	4.35	0.6232	Detroit Lions	-24	0	0.4246	0.8385	ml_home	loss
+2026-10-11	americanfootball_nfl	Detroit Lions @ Arizona Cardinals	pace-adj-v1	Arizona Cardinals	4.35	0.6218	Detroit Lions	-24	0	0.4238	0.8344	ml_home	loss
+2026-10-11	americanfootball_nfl	Detroit Lions @ Arizona Cardinals	season-avg-v1	Arizona Cardinals	4.5	0.6255	Detroit Lions	-24	0	0.4293	0.8452	ml_home	loss
+2026-10-11	americanfootball_nfl	San Francisco 49ers @ Seattle Seahawks	recency-v1	San Francisco 49ers	-3.41	0.4028	San Francisco 49ers	-3	1	-0.379	-0.3454	ml_away	win
+2026-10-11	americanfootball_nfl	San Francisco 49ers @ Seattle Seahawks	regression-v1	San Francisco 49ers	-2.58	0.4274	San Francisco 49ers	-3	1	-0.3402	-0.3055	ml_away	win
+2026-10-11	americanfootball_nfl	San Francisco 49ers @ Seattle Seahawks	combo-balanced-v1	San Francisco 49ers	-2.94	0.416	San Francisco 49ers	-3	1	-0.3577	-0.3239	ml_away	win
+2026-10-11	americanfootball_nfl	San Francisco 49ers @ Seattle Seahawks	injury-rest-v1	San Francisco 49ers	-3.37	0.4046	San Francisco 49ers	-3	1	-0.3803	-0.3425	ml_away	win
+2026-10-11	americanfootball_nfl	San Francisco 49ers @ Seattle Seahawks	pace-adj-v1	San Francisco 49ers	-3.58	0.3983	San Francisco 49ers	-3	1	-0.391	-0.3528	ml_away	win
+2026-10-11	americanfootball_nfl	San Francisco 49ers @ Seattle Seahawks	season-avg-v1	San Francisco 49ers	-3.34	0.4057	San Francisco 49ers	-3	1	-0.3778	-0.3407	ml_away	win
+2026-10-11	americanfootball_nfl	Baltimore Ravens @ Atlanta Falcons	recency-v1	Atlanta Falcons	4.48	0.6253	Baltimore Ravens	-7	0	0.0076	-0.0069	spread_home	loss
+2026-10-11	americanfootball_nfl	Baltimore Ravens @ Atlanta Falcons	regression-v1	Atlanta Falcons	4.02	0.6111	Baltimore Ravens	-7	0	-0.0174	-0.0294	spread_home	loss
+2026-10-11	americanfootball_nfl	Baltimore Ravens @ Atlanta Falcons	combo-balanced-v1	Atlanta Falcons	6.31	0.6756	Baltimore Ravens	-7	0	0.1107	0.073	spread_home	loss
+2026-10-11	americanfootball_nfl	Baltimore Ravens @ Atlanta Falcons	injury-rest-v1	Atlanta Falcons	8.64	0.7364	Baltimore Ravens	-7	0	0.2347	0.1696	spread_home	loss
+2026-10-11	americanfootball_nfl	Baltimore Ravens @ Atlanta Falcons	pace-adj-v1	Atlanta Falcons	4.29	0.622	Baltimore Ravens	-7	0	-0.0042	-0.0121	spread_home	loss
+2026-10-11	americanfootball_nfl	Baltimore Ravens @ Atlanta Falcons	season-avg-v1	Atlanta Falcons	4.29	0.6207	Baltimore Ravens	-7	0	0.001	-0.0142	spread_home	loss
+2026-10-11	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	recency-v1	Milwaukee Brewers	0.17	0.5173	Milwaukee Brewers	1	1	-0.3103	-0.0209	spread_away	win
+2026-10-11	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	regression-v1	Milwaukee Brewers	0.17	0.5209	Milwaukee Brewers	1	1	-0.3028	-0.014	spread_away	win
+2026-10-11	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	combo-balanced-v1	Milwaukee Brewers	0.17	0.5195	Milwaukee Brewers	1	1	-0.3107	-0.0166	spread_away	win
+2026-10-11	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	injury-rest-v1	Milwaukee Brewers	0.16	0.518	Milwaukee Brewers	1	1	-0.3134	-0.0195	spread_away	win
+2026-10-11	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	pace-adj-v1	Milwaukee Brewers	0.17	0.5196	Milwaukee Brewers	1	1	-0.3049	-0.0165	spread_away	win
+2026-10-11	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	season-avg-v1	Milwaukee Brewers	0.14	0.517	Milwaukee Brewers	1	1	-0.3086	-0.0214	spread_away	win

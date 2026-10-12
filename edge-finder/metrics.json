@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-10-11",
+  "last_updated": "2026-10-12",
   "rolling_7d": {
-    "accuracy": 0.6161,
-    "ev_realized": 0.2836,
-    "total_games": 112,
-    "total_correct": 69,
-    "note": "Updated with Oct 10 results: 10/14 correct (71.4%). Running total: 69/112."
+    "accuracy": 0.6357,
+    "ev_realized": 0.2817,
+    "total_games": 129,
+    "total_correct": 82,
+    "note": "Updated with Oct 11 results: 13/17 correct (76.5%). Running total: 82/129."
   },
   "rolling_30d": {
-    "accuracy": 0.6161,
-    "ev_realized": 0.2836,
-    "total_games": 112,
-    "total_correct": 69,
-    "note": "30 days of data. 78 games evaluated."
+    "accuracy": 0.6357,
+    "ev_realized": 0.2817,
+    "total_games": 129,
+    "total_correct": 82,
+    "note": "30 days of data. 129 games evaluated."
   },
   "all_time": {
-    "accuracy": 0.566,
+    "accuracy": 0.5722,
     "ev_realized": 0.1299,
-    "total_games": 530,
-    "total_correct": 300,
-    "total_bets_recommended": 2919,
-    "total_bets_won": 1687
+    "total_games": 547,
+    "total_correct": 313,
+    "total_bets_recommended": 2934,
+    "total_bets_won": 1697
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 530,
-      "lifetime_correct": 300,
-      "lifetime_accuracy": 0.566,
+      "lifetime_games": 547,
+      "lifetime_correct": 313,
+      "lifetime_accuracy": 0.5722,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 530,
-      "lifetime_correct": 299,
-      "lifetime_accuracy": 0.5642,
-      "weight": 0.7,
+      "lifetime_games": 547,
+      "lifetime_correct": 313,
+      "lifetime_accuracy": 0.5722,
+      "weight": 0.8,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 392,
-      "lifetime_correct": 220,
-      "lifetime_accuracy": 0.5612,
+      "lifetime_games": 409,
+      "lifetime_correct": 233,
+      "lifetime_accuracy": 0.5697,
       "weight": 0.7,
       "role": "challenger (demoted)"
     },
     "injury-rest-v1": {
-      "lifetime_games": 530,
-      "lifetime_correct": 299,
-      "lifetime_accuracy": 0.5642,
+      "lifetime_games": 547,
+      "lifetime_correct": 312,
+      "lifetime_accuracy": 0.5704,
       "weight": 0.6,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 530,
-      "lifetime_correct": 296,
-      "lifetime_accuracy": 0.5585,
+      "lifetime_games": 547,
+      "lifetime_correct": 309,
+      "lifetime_accuracy": 0.5649,
       "weight": 0.4,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 530,
-      "lifetime_correct": 300,
-      "lifetime_accuracy": 0.566,
+      "lifetime_games": 547,
+      "lifetime_correct": 313,
+      "lifetime_accuracy": 0.5722,
       "weight": 0.7,
       "role": "challenger (demoted)"
     }
@@ -94,16 +94,16 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-11",
-    "games_analyzed": 17,
-    "bets_recommended": 14,
-    "leans": 1,
-    "no_bets": 2,
+    "date": "2026-10-12",
+    "games_analyzed": 5,
+    "bets_recommended": 5,
+    "leans": 0,
+    "no_bets": 0,
     "sports": [
+      "baseball_mlb",
       "americanfootball_nfl",
-      "icehockey_nhl",
-      "baseball_mlb"
+      "icehockey_nhl"
     ],
-    "notes": "3 NHL, 13 NFL, 1 MLB. 14 BET, 1 LEAN, 2 NO BET."
+    "notes": "MNF, 3 NHL, 1 MLB NLCS Game 2. 5 BET, 0 LEAN, 0 NO BET."
   }
 }
