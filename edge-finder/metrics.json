@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-10-12",
+  "last_updated": "2026-10-13",
   "rolling_7d": {
     "accuracy": 0.6357,
     "ev_realized": 0.2817,
@@ -15,55 +15,55 @@
     "note": "30 days of data. 129 games evaluated."
   },
   "all_time": {
-    "accuracy": 0.5722,
+    "accuracy": 0.5743,
     "ev_realized": 0.1299,
-    "total_games": 547,
-    "total_correct": 313,
+    "total_games": 552,
+    "total_correct": 317,
     "total_bets_recommended": 2934,
     "total_bets_won": 1697
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 547,
-      "lifetime_correct": 313,
-      "lifetime_accuracy": 0.5722,
+      "lifetime_games": 552,
+      "lifetime_correct": 317,
+      "lifetime_accuracy": 0.5743,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 547,
-      "lifetime_correct": 313,
-      "lifetime_accuracy": 0.5722,
+      "lifetime_games": 552,
+      "lifetime_correct": 317,
+      "lifetime_accuracy": 0.5743,
       "weight": 0.8,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 409,
-      "lifetime_correct": 233,
-      "lifetime_accuracy": 0.5697,
+      "lifetime_games": 414,
+      "lifetime_correct": 238,
+      "lifetime_accuracy": 0.5749,
       "weight": 0.7,
-      "role": "challenger (demoted)"
+      "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 547,
-      "lifetime_correct": 312,
-      "lifetime_accuracy": 0.5704,
+      "lifetime_games": 552,
+      "lifetime_correct": 316,
+      "lifetime_accuracy": 0.5725,
       "weight": 0.6,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 547,
-      "lifetime_correct": 309,
-      "lifetime_accuracy": 0.5649,
+      "lifetime_games": 552,
+      "lifetime_correct": 313,
+      "lifetime_accuracy": 0.567,
       "weight": 0.4,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 547,
-      "lifetime_correct": 313,
-      "lifetime_accuracy": 0.5722,
+      "lifetime_games": 552,
+      "lifetime_correct": 317,
+      "lifetime_accuracy": 0.5743,
       "weight": 0.7,
-      "role": "challenger (demoted)"
+      "role": "challenger"
     }
   },
   "champion_history": [
@@ -94,16 +94,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-12",
-    "games_analyzed": 5,
-    "bets_recommended": 5,
+    "date": "2026-10-13",
+    "games_analyzed": 10,
+    "bets_recommended": 10,
     "leans": 0,
     "no_bets": 0,
     "sports": [
-      "baseball_mlb",
-      "americanfootball_nfl",
-      "icehockey_nhl"
+      "icehockey_nhl",
+      "baseball_mlb"
     ],
-    "notes": "MNF, 3 NHL, 1 MLB NLCS Game 2. 5 BET, 0 LEAN, 0 NO BET."
+    "notes": "Frozen Frenzy (16 NHL games) + ALCS G2. 10 BET, 0 LEAN, 0 NO BET."
   }
 }

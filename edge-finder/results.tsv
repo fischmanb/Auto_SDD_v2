@@ -3365,3 +3365,33 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-11	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	injury-rest-v1	Milwaukee Brewers	0.16	0.518	Milwaukee Brewers	1	1	-0.3134	-0.0195	spread_away	win
 2026-10-11	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	pace-adj-v1	Milwaukee Brewers	0.17	0.5196	Milwaukee Brewers	1	1	-0.3049	-0.0165	spread_away	win
 2026-10-11	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	season-avg-v1	Milwaukee Brewers	0.14	0.517	Milwaukee Brewers	1	1	-0.3086	-0.0214	spread_away	win
+2026-10-12	americanfootball_nfl	Buffalo Bills @ Los Angeles Rams	recency-v1	Buffalo Bills	-1.76	0.5493	Buffalo Bills	-3	1	0.2301	0.4007	ml_away	win
+2026-10-12	americanfootball_nfl	Buffalo Bills @ Los Angeles Rams	regression-v1	Buffalo Bills	-0.99	0.5300	Buffalo Bills	-3	1	0.1990	0.3516	ml_away	win
+2026-10-12	americanfootball_nfl	Buffalo Bills @ Los Angeles Rams	combo-balanced-v1	Buffalo Bills	-2.08	0.5611	Buffalo Bills	-3	1	0.2503	0.4308	ml_away	win
+2026-10-12	americanfootball_nfl	Buffalo Bills @ Los Angeles Rams	injury-rest-v1	Buffalo Bills	-3.14	0.5869	Buffalo Bills	-3	1	0.2954	0.4965	ml_away	win
+2026-10-12	americanfootball_nfl	Buffalo Bills @ Los Angeles Rams	pace-adj-v1	Buffalo Bills	-1.66	0.5473	Buffalo Bills	-3	1	0.2269	0.3956	ml_away	win
+2026-10-12	americanfootball_nfl	Buffalo Bills @ Los Angeles Rams	season-avg-v1	Buffalo Bills	-1.61	0.5441	Buffalo Bills	-3	1	0.2250	0.3875	ml_away	win
+2026-10-12	icehockey_nhl	Florida Panthers @ Buffalo Sabres	recency-v1	Florida Panthers	-0.24	0.5429	Buffalo Sabres	2	0	0.3573	-0.1274	spread_home	win
+2026-10-12	icehockey_nhl	Florida Panthers @ Buffalo Sabres	regression-v1	Florida Panthers	-0.15	0.5258	Buffalo Sabres	2	0	0.3803	-0.0947	spread_home	win
+2026-10-12	icehockey_nhl	Florida Panthers @ Buffalo Sabres	combo-balanced-v1	Buffalo Sabres	0.04	0.5040	Buffalo Sabres	2	1	0.4362	-0.0378	spread_home	win
+2026-10-12	icehockey_nhl	Florida Panthers @ Buffalo Sabres	injury-rest-v1	Buffalo Sabres	0.24	0.5463	Buffalo Sabres	2	1	0.4904	0.0429	spread_home	win
+2026-10-12	icehockey_nhl	Florida Panthers @ Buffalo Sabres	pace-adj-v1	Florida Panthers	-0.22	0.5415	Buffalo Sabres	2	0	0.3606	-0.1247	spread_home	win
+2026-10-12	icehockey_nhl	Florida Panthers @ Buffalo Sabres	season-avg-v1	Florida Panthers	-0.24	0.5459	Buffalo Sabres	2	0	0.3591	-0.1330	spread_home	win
+2026-10-12	icehockey_nhl	Ottawa Senators @ New Jersey Devils	recency-v1	Ottawa Senators	-3.29	0.9413	Ottawa Senators	-3	1	0.8836	0.9766	ml_away	win
+2026-10-12	icehockey_nhl	Ottawa Senators @ New Jersey Devils	regression-v1	Ottawa Senators	-2.72	0.9008	Ottawa Senators	-3	1	0.8594	0.8917	ml_away	win
+2026-10-12	icehockey_nhl	Ottawa Senators @ New Jersey Devils	combo-balanced-v1	Ottawa Senators	-3.09	0.9299	Ottawa Senators	-3	1	0.8770	0.9529	ml_away	win
+2026-10-12	icehockey_nhl	Ottawa Senators @ New Jersey Devils	injury-rest-v1	Ottawa Senators	-3.45	0.9522	Ottawa Senators	-3	1	0.8908	0.9997	ml_away	win
+2026-10-12	icehockey_nhl	Ottawa Senators @ New Jersey Devils	pace-adj-v1	Ottawa Senators	-3.27	0.9394	Ottawa Senators	-3	1	0.8819	0.9727	ml_away	win
+2026-10-12	icehockey_nhl	Ottawa Senators @ New Jersey Devils	season-avg-v1	Ottawa Senators	-3.27	0.9413	Ottawa Senators	-3	1	0.8849	0.9767	ml_away	win
+2026-10-12	icehockey_nhl	Vegas Golden Knights @ Minnesota Wild	recency-v1	Minnesota Wild	1.06	0.6906	Minnesota Wild	2	1	-0.1854	0.3017	ml_home	win
+2026-10-12	icehockey_nhl	Vegas Golden Knights @ Minnesota Wild	regression-v1	Minnesota Wild	0.90	0.6602	Minnesota Wild	2	1	-0.2432	0.2445	ml_home	win
+2026-10-12	icehockey_nhl	Vegas Golden Knights @ Minnesota Wild	combo-balanced-v1	Minnesota Wild	1.10	0.6912	Minnesota Wild	2	1	-0.1726	0.3028	ml_home	win
+2026-10-12	icehockey_nhl	Vegas Golden Knights @ Minnesota Wild	injury-rest-v1	Minnesota Wild	1.29	0.7267	Minnesota Wild	2	1	-0.1017	0.3699	ml_home	win
+2026-10-12	icehockey_nhl	Vegas Golden Knights @ Minnesota Wild	pace-adj-v1	Minnesota Wild	1.05	0.6894	Minnesota Wild	2	1	-0.1907	0.2995	ml_home	win
+2026-10-12	icehockey_nhl	Vegas Golden Knights @ Minnesota Wild	season-avg-v1	Minnesota Wild	1.06	0.6886	Minnesota Wild	2	1	-0.1867	0.2979	ml_home	win
+2026-10-12	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	recency-v1	Milwaukee Brewers	0.25	0.5267	Milwaukee Brewers	3	1	0.2922	0.1166	spread_home	win
+2026-10-12	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	regression-v1	Milwaukee Brewers	0.21	0.5238	Milwaukee Brewers	3	1	0.2842	0.1105	spread_home	win
+2026-10-12	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	combo-balanced-v1	Milwaukee Brewers	0.03	0.5023	Milwaukee Brewers	3	1	0.2510	0.0650	spread_home	win
+2026-10-12	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	injury-rest-v1	Los Angeles Dodgers	-0.20	0.5230	Milwaukee Brewers	3	0	0.2082	0.0112	spread_home	win
+2026-10-12	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	pace-adj-v1	Milwaukee Brewers	0.21	0.5234	Milwaukee Brewers	3	1	0.2822	0.1096	spread_home	win
+2026-10-12	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	season-avg-v1	Milwaukee Brewers	0.21	0.5234	Milwaukee Brewers	3	1	0.2873	0.1096	spread_home	win
