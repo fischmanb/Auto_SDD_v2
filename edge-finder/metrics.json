@@ -94,15 +94,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-13",
-    "games_analyzed": 10,
-    "bets_recommended": 10,
+    "date": "2026-10-14",
+    "games_analyzed": 3,
+    "bets_recommended": 3,
     "leans": 0,
     "no_bets": 0,
     "sports": [
       "icehockey_nhl",
       "baseball_mlb"
     ],
-    "notes": "Frozen Frenzy (16 NHL games) + ALCS G2. 10 BET, 0 LEAN, 0 NO BET."
+    "notes": "Light slate: 2 NHL (MTL@WSH, DAL@COL B2B) + NLCS G3 (MIL@LAD). 3 BET, 0 LEAN, 0 NO BET. Yesterday eval: 5/10 (50%)."
   }
 }
