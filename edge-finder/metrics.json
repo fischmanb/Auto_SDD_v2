@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-10-13",
+  "last_updated": "2026-10-14",
   "rolling_7d": {
-    "accuracy": 0.6357,
-    "ev_realized": 0.2817,
-    "total_games": 129,
-    "total_correct": 82,
-    "note": "Updated with Oct 11 results: 13/17 correct (76.5%). Running total: 82/129."
+    "accuracy": 0.6557,
+    "ev_realized": 0.3115,
+    "total_games": 61,
+    "total_correct": 40,
+    "note": "Updated with Oct 13 results: 5/10 correct (50%). Running total: 40/61."
   },
   "rolling_30d": {
-    "accuracy": 0.6357,
-    "ev_realized": 0.2817,
-    "total_games": 129,
-    "total_correct": 82,
-    "note": "30 days of data. 129 games evaluated."
+    "accuracy": 0.6319,
+    "ev_realized": 0.2639,
+    "total_games": 144,
+    "total_correct": 91,
+    "note": "30 days of data. 144 games evaluated."
   },
   "all_time": {
-    "accuracy": 0.5743,
-    "ev_realized": 0.1299,
-    "total_games": 552,
-    "total_correct": 317,
+    "accuracy": 0.566,
+    "ev_realized": 0.1319,
+    "total_games": 576,
+    "total_correct": 326,
     "total_bets_recommended": 2934,
     "total_bets_won": 1697
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 552,
-      "lifetime_correct": 317,
-      "lifetime_accuracy": 0.5743,
+      "lifetime_games": 576,
+      "lifetime_correct": 326,
+      "lifetime_accuracy": 0.566,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 552,
-      "lifetime_correct": 317,
-      "lifetime_accuracy": 0.5743,
+      "lifetime_games": 576,
+      "lifetime_correct": 326,
+      "lifetime_accuracy": 0.566,
       "weight": 0.8,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 414,
-      "lifetime_correct": 238,
-      "lifetime_accuracy": 0.5749,
+      "lifetime_games": 438,
+      "lifetime_correct": 247,
+      "lifetime_accuracy": 0.5639,
       "weight": 0.7,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 552,
-      "lifetime_correct": 316,
-      "lifetime_accuracy": 0.5725,
+      "lifetime_games": 576,
+      "lifetime_correct": 325,
+      "lifetime_accuracy": 0.5642,
       "weight": 0.6,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 552,
-      "lifetime_correct": 313,
-      "lifetime_accuracy": 0.567,
+      "lifetime_games": 576,
+      "lifetime_correct": 322,
+      "lifetime_accuracy": 0.559,
       "weight": 0.4,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 552,
-      "lifetime_correct": 317,
-      "lifetime_accuracy": 0.5743,
+      "lifetime_games": 576,
+      "lifetime_correct": 326,
+      "lifetime_accuracy": 0.566,
       "weight": 0.7,
       "role": "challenger"
     }

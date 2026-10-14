@@ -11,9 +11,9 @@
       "regression_to_mean": 0.0,
       "pace_adjustment": "season_average"
     },
-    "lifetime_games": 552,
-    "lifetime_correct": 317,
-    "rolling_10d_accuracy": 0.6216,
+    "lifetime_games": 576,
+    "lifetime_correct": 326,
+    "rolling_10d_accuracy": 0.5952,
     "promoted_on": "2026-10-02"
   },
   "challengers": [
@@ -30,10 +30,10 @@
         "regression_to_mean": 0.2,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 552,
-      "lifetime_correct": 317,
+      "lifetime_games": 576,
+      "lifetime_correct": 326,
       "promoted_on": "2026-06-26",
-      "rolling_10d_accuracy": 0.6306
+      "rolling_10d_accuracy": 0.6071
     },
     {
       "id": "combo-balanced-v1",
@@ -47,9 +47,9 @@
         "regression_to_mean": 0.1,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 414,
-      "lifetime_correct": 238,
-      "rolling_10d_accuracy": 0.6396,
+      "lifetime_games": 438,
+      "lifetime_correct": 247,
+      "rolling_10d_accuracy": 0.619,
       "demoted_on": "2026-10-02"
     },
     {
@@ -65,9 +65,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 552,
-      "lifetime_correct": 316,
-      "rolling_10d_accuracy": 0.6306
+      "lifetime_games": 576,
+      "lifetime_correct": 325,
+      "rolling_10d_accuracy": 0.619
     },
     {
       "id": "pace-adj-v1",
@@ -82,9 +82,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "opponent_adjusted"
       },
-      "lifetime_games": 552,
-      "lifetime_correct": 313,
-      "rolling_10d_accuracy": 0.6216
+      "lifetime_games": 576,
+      "lifetime_correct": 322,
+      "rolling_10d_accuracy": 0.5952
     },
     {
       "id": "season-avg-v1",
@@ -98,9 +98,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 552,
-      "lifetime_correct": 317,
-      "rolling_10d_accuracy": 0.6216,
+      "lifetime_games": 576,
+      "lifetime_correct": 326,
+      "rolling_10d_accuracy": 0.5952,
       "demoted_on": "2026-09-30"
     }
   ],

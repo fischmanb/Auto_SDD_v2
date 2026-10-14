@@ -3395,3 +3395,63 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-12	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	injury-rest-v1	Los Angeles Dodgers	-0.20	0.5230	Milwaukee Brewers	3	0	0.2082	0.0112	spread_home	win
 2026-10-12	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	pace-adj-v1	Milwaukee Brewers	0.21	0.5234	Milwaukee Brewers	3	1	0.2822	0.1096	spread_home	win
 2026-10-12	baseball_mlb	Los Angeles Dodgers @ Milwaukee Brewers	season-avg-v1	Milwaukee Brewers	0.21	0.5234	Milwaukee Brewers	3	1	0.2873	0.1096	spread_home	win
+2026-10-13	icehockey_nhl	New Jersey Devils @ Detroit Red Wings	recency-v1	home	0.87	0.6555	away	-1	0	0.6378	0.2408	spread_home	win
+2026-10-13	icehockey_nhl	New Jersey Devils @ Detroit Red Wings	regression-v1	home	0.75	0.6352	away	-1	0	0.6153	0.2024	spread_home	win
+2026-10-13	icehockey_nhl	New Jersey Devils @ Detroit Red Wings	combo-balanced-v1	home	0.70	0.6243	away	-1	0	0.6017	0.1817	spread_home	win
+2026-10-13	icehockey_nhl	New Jersey Devils @ Detroit Red Wings	injury-rest-v1	home	0.63	0.6124	away	-1	0	0.5862	0.1592	spread_home	win
+2026-10-13	icehockey_nhl	New Jersey Devils @ Detroit Red Wings	pace-adj-v1	home	0.87	0.6580	away	-1	0	0.6375	0.2455	spread_home	win
+2026-10-13	icehockey_nhl	New Jersey Devils @ Detroit Red Wings	season-avg-v1	home	0.87	0.6567	away	-1	0	0.6370	0.2431	spread_home	win
+2026-10-13	icehockey_nhl	Florida Panthers @ Columbus Blue Jackets	recency-v1	home	1.16	0.7036	away	-4	0	-0.1527	0.2366	ml_home	loss
+2026-10-13	icehockey_nhl	Florida Panthers @ Columbus Blue Jackets	regression-v1	home	0.99	0.6754	away	-4	0	-0.2080	0.1870	ml_home	loss
+2026-10-13	icehockey_nhl	Florida Panthers @ Columbus Blue Jackets	combo-balanced-v1	home	1.06	0.6880	away	-4	0	-0.1913	0.2093	ml_home	loss
+2026-10-13	icehockey_nhl	Florida Panthers @ Columbus Blue Jackets	injury-rest-v1	home	1.15	0.7033	away	-4	0	-0.1523	0.2361	ml_home	loss
+2026-10-13	icehockey_nhl	Florida Panthers @ Columbus Blue Jackets	pace-adj-v1	home	1.15	0.7033	away	-4	0	-0.1521	0.2361	ml_home	loss
+2026-10-13	icehockey_nhl	Florida Panthers @ Columbus Blue Jackets	season-avg-v1	home	1.17	0.7038	away	-4	0	-0.1474	0.2370	ml_home	loss
+2026-10-13	icehockey_nhl	Washington Capitals @ Carolina Hurricanes	recency-v1	home	1.15	0.7003	home	2	1	-0.1550	0.1326	ml_home	win
+2026-10-13	icehockey_nhl	Washington Capitals @ Carolina Hurricanes	regression-v1	home	0.96	0.6689	home	2	1	-0.2182	0.0818	ml_home	win
+2026-10-13	icehockey_nhl	Washington Capitals @ Carolina Hurricanes	combo-balanced-v1	home	1.17	0.7017	home	2	1	-0.1499	0.1349	ml_home	win
+2026-10-13	icehockey_nhl	Washington Capitals @ Carolina Hurricanes	injury-rest-v1	home	1.37	0.7366	home	2	1	-0.0754	0.1914	ml_home	win
+2026-10-13	icehockey_nhl	Washington Capitals @ Carolina Hurricanes	pace-adj-v1	home	1.13	0.6979	home	2	1	-0.1608	0.1287	ml_home	win
+2026-10-13	icehockey_nhl	Washington Capitals @ Carolina Hurricanes	season-avg-v1	home	1.14	0.7003	home	2	1	-0.1564	0.1326	ml_home	win
+2026-10-13	icehockey_nhl	Tampa Bay Lightning @ New York Rangers	recency-v1	home	0.06	0.5096	home	3	1	0.4448	0.1976	spread_home	win
+2026-10-13	icehockey_nhl	Tampa Bay Lightning @ New York Rangers	regression-v1	home	0.09	0.5129	home	3	1	0.4502	0.2052	spread_home	win
+2026-10-13	icehockey_nhl	Tampa Bay Lightning @ New York Rangers	combo-balanced-v1	home	0.08	0.5143	home	3	1	0.4490	0.2087	spread_home	win
+2026-10-13	icehockey_nhl	Tampa Bay Lightning @ New York Rangers	injury-rest-v1	home	0.06	0.5104	home	3	1	0.4398	0.1995	spread_home	win
+2026-10-13	icehockey_nhl	Tampa Bay Lightning @ New York Rangers	pace-adj-v1	home	0.05	0.5098	home	3	1	0.4410	0.1980	spread_home	win
+2026-10-13	icehockey_nhl	Tampa Bay Lightning @ New York Rangers	season-avg-v1	home	0.05	0.5084	home	3	1	0.4440	0.1948	spread_home	win
+2026-10-13	icehockey_nhl	St. Louis Blues @ Ottawa Senators	recency-v1	home	1.31	0.7231	away	-5	0	-0.0977	0.3411	ml_home	loss
+2026-10-13	icehockey_nhl	St. Louis Blues @ Ottawa Senators	regression-v1	home	1.12	0.6963	away	-5	0	-0.1692	0.2914	ml_home	loss
+2026-10-13	icehockey_nhl	St. Louis Blues @ Ottawa Senators	combo-balanced-v1	home	1.18	0.7072	away	-5	0	-0.1463	0.3116	ml_home	loss
+2026-10-13	icehockey_nhl	St. Louis Blues @ Ottawa Senators	injury-rest-v1	home	1.21	0.7140	away	-5	0	-0.1283	0.3242	ml_home	loss
+2026-10-13	icehockey_nhl	St. Louis Blues @ Ottawa Senators	pace-adj-v1	home	1.33	0.7282	away	-5	0	-0.0918	0.3506	ml_home	loss
+2026-10-13	icehockey_nhl	St. Louis Blues @ Ottawa Senators	season-avg-v1	home	1.32	0.7279	away	-5	0	-0.0870	0.3501	ml_home	loss
+2026-10-13	icehockey_nhl	Winnipeg Jets @ Minnesota Wild	recency-v1	home	0.58	0.6050	away	-3	0	0.5755	0.1550	spread_home	loss
+2026-10-13	icehockey_nhl	Winnipeg Jets @ Minnesota Wild	regression-v1	home	0.54	0.5982	away	-3	0	0.5647	0.1421	spread_home	loss
+2026-10-13	icehockey_nhl	Winnipeg Jets @ Minnesota Wild	combo-balanced-v1	home	0.39	0.5719	away	-3	0	0.5283	0.0918	spread_home	loss
+2026-10-13	icehockey_nhl	Winnipeg Jets @ Minnesota Wild	injury-rest-v1	home	0.29	0.5526	away	-3	0	0.5051	0.0549	spread_home	loss
+2026-10-13	icehockey_nhl	Winnipeg Jets @ Minnesota Wild	pace-adj-v1	home	0.57	0.6035	away	-3	0	0.5754	0.1521	spread_home	loss
+2026-10-13	icehockey_nhl	Winnipeg Jets @ Minnesota Wild	season-avg-v1	home	0.59	0.6044	away	-3	0	0.5736	0.1539	spread_home	loss
+2026-10-13	icehockey_nhl	Colorado Avalanche @ Dallas Stars	recency-v1	away	-2.23	0.1579	away	-1	1	0.2089	0.4523	ml_away	win
+2026-10-13	icehockey_nhl	Colorado Avalanche @ Dallas Stars	regression-v1	away	-1.82	0.2049	away	-1	1	0.0698	0.3713	ml_away	win
+2026-10-13	icehockey_nhl	Colorado Avalanche @ Dallas Stars	combo-balanced-v1	away	-2.16	0.1652	away	-1	1	0.1900	0.4397	ml_away	win
+2026-10-13	icehockey_nhl	Colorado Avalanche @ Dallas Stars	injury-rest-v1	away	-2.46	0.1283	away	-1	1	0.2882	0.5033	ml_away	win
+2026-10-13	icehockey_nhl	Colorado Avalanche @ Dallas Stars	pace-adj-v1	away	-2.25	0.1550	away	-1	1	0.2182	0.4573	ml_away	win
+2026-10-13	icehockey_nhl	Colorado Avalanche @ Dallas Stars	season-avg-v1	away	-2.24	0.1553	away	-1	1	0.2125	0.4568	ml_away	win
+2026-10-13	icehockey_nhl	Vegas Golden Knights @ Nashville Predators	recency-v1	away	-0.94	0.3344	away	-3	1	-0.2321	0.1587	spread_home	loss
+2026-10-13	icehockey_nhl	Vegas Golden Knights @ Nashville Predators	regression-v1	away	-0.69	0.3763	away	-3	1	-0.3099	0.0857	spread_home	loss
+2026-10-13	icehockey_nhl	Vegas Golden Knights @ Nashville Predators	combo-balanced-v1	away	-0.78	0.3641	away	-3	1	-0.2791	0.1069	spread_home	loss
+2026-10-13	icehockey_nhl	Vegas Golden Knights @ Nashville Predators	injury-rest-v1	away	-0.85	0.3499	away	-3	1	-0.2598	0.1316	spread_home	loss
+2026-10-13	icehockey_nhl	Vegas Golden Knights @ Nashville Predators	pace-adj-v1	away	-0.91	0.3394	away	-3	1	-0.2327	0.1500	spread_home	loss
+2026-10-13	icehockey_nhl	Vegas Golden Knights @ Nashville Predators	season-avg-v1	away	-0.94	0.3371	away	-3	1	-0.2287	0.1540	spread_home	loss
+2026-10-13	icehockey_nhl	Edmonton Oilers @ Los Angeles Kings	recency-v1	away	-2.06	0.1770	away	-3	1	0.1468	0.4327	ml_away	win
+2026-10-13	icehockey_nhl	Edmonton Oilers @ Los Angeles Kings	regression-v1	away	-1.63	0.2332	away	-3	1	-0.0006	0.3347	ml_away	win
+2026-10-13	icehockey_nhl	Edmonton Oilers @ Los Angeles Kings	combo-balanced-v1	away	-1.85	0.2067	away	-3	1	0.0781	0.3809	ml_away	win
+2026-10-13	icehockey_nhl	Edmonton Oilers @ Los Angeles Kings	injury-rest-v1	away	-2.06	0.1777	away	-3	1	0.1488	0.4314	ml_away	win
+2026-10-13	icehockey_nhl	Edmonton Oilers @ Los Angeles Kings	pace-adj-v1	away	-2.05	0.1799	away	-3	1	0.1420	0.4275	ml_away	win
+2026-10-13	icehockey_nhl	Edmonton Oilers @ Los Angeles Kings	season-avg-v1	away	-2.06	0.1805	away	-3	1	0.1476	0.4266	ml_away	win
+2026-10-13	baseball_mlb	Cleveland Guardians @ Tampa Bay Rays	recency-v1	away	-0.61	0.4325	home	2	0	0.3659	0.2202	spread_away	loss
+2026-10-13	baseball_mlb	Cleveland Guardians @ Tampa Bay Rays	regression-v1	away	-0.37	0.4608	home	2	0	0.3206	0.1594	spread_away	loss
+2026-10-13	baseball_mlb	Cleveland Guardians @ Tampa Bay Rays	combo-balanced-v1	away	-0.65	0.4278	home	2	0	0.3810	0.2302	spread_away	loss
+2026-10-13	baseball_mlb	Cleveland Guardians @ Tampa Bay Rays	injury-rest-v1	away	-0.82	0.4044	home	2	0	0.4274	0.2805	spread_away	loss
+2026-10-13	baseball_mlb	Cleveland Guardians @ Tampa Bay Rays	pace-adj-v1	away	-0.45	0.4527	home	2	0	0.3422	0.1768	spread_away	loss
+2026-10-13	baseball_mlb	Cleveland Guardians @ Tampa Bay Rays	season-avg-v1	away	-0.45	0.4490	home	2	0	0.3369	0.1846	spread_away	loss
