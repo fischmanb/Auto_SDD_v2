@@ -11,8 +11,8 @@
       "regression_to_mean": 0.0,
       "pace_adjustment": "season_average"
     },
-    "lifetime_games": 576,
-    "lifetime_correct": 326,
+    "lifetime_games": 579,
+    "lifetime_correct": 327,
     "rolling_10d_accuracy": 0.5952,
     "promoted_on": "2026-10-02"
   },
@@ -30,8 +30,8 @@
         "regression_to_mean": 0.2,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 576,
-      "lifetime_correct": 326,
+      "lifetime_games": 579,
+      "lifetime_correct": 327,
       "promoted_on": "2026-06-26",
       "rolling_10d_accuracy": 0.6071
     },
@@ -47,8 +47,8 @@
         "regression_to_mean": 0.1,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 438,
-      "lifetime_correct": 247,
+      "lifetime_games": 441,
+      "lifetime_correct": 248,
       "rolling_10d_accuracy": 0.619,
       "demoted_on": "2026-10-02"
     },
@@ -65,8 +65,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 576,
-      "lifetime_correct": 325,
+      "lifetime_games": 579,
+      "lifetime_correct": 326,
       "rolling_10d_accuracy": 0.619
     },
     {
@@ -82,8 +82,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "opponent_adjusted"
       },
-      "lifetime_games": 576,
-      "lifetime_correct": 322,
+      "lifetime_games": 579,
+      "lifetime_correct": 323,
       "rolling_10d_accuracy": 0.5952
     },
     {
@@ -98,8 +98,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 576,
-      "lifetime_correct": 326,
+      "lifetime_games": 579,
+      "lifetime_correct": 327,
       "rolling_10d_accuracy": 0.5952,
       "demoted_on": "2026-09-30"
     }
