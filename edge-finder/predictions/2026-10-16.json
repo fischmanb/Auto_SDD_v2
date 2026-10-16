@@ -1,0 +1,235 @@
+{
+  "date": "2026-10-16",
+  "sports": [
+    "icehockey_nhl",
+    "baseball_mlb"
+  ],
+  "context": "Light slate: 2 NHL games + ALCS G4. Champion: recency-v1. No API keys; odds from web search. Early NHL season stats volatile (~7 games played).",
+  "note": "ODDS_API_KEY not configured; odds sourced from web search. CLE leads ALCS 2-1 after winning G3 3-2.",
+  "games": [
+    {
+      "sport": "icehockey_nhl",
+      "home": "Colorado Avalanche",
+      "away": "Pittsburgh Penguins",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -220,
+        "ml_away": 180,
+        "total": 6.5,
+        "book": "DraftKings"
+      },
+      "blended": {
+        "home_win_prob": 0.7887,
+        "away_win_prob": 0.2113,
+        "expected_margin": 1.79,
+        "best_ev": 0.1471,
+        "best_bet": "ml_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.162,
+        "best_model_ev": 0.1906,
+        "worst_model_ev": 0.088
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.7973,
+          "ml_ev_home": 0.1597,
+          "ml_ev_away": -0.4323,
+          "spread_ev_home": 0.0871,
+          "spread_ev_away": -0.1781,
+          "expected_margin": 1.86
+        },
+        "regression-v1": {
+          "home_win_prob": 0.748,
+          "ml_ev_home": 0.088,
+          "ml_ev_away": -0.2943,
+          "spread_ev_home": -0.0381,
+          "spread_ev_away": -0.0529,
+          "expected_margin": 1.48
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.7888,
+          "ml_ev_home": 0.1473,
+          "ml_ev_away": -0.4086,
+          "spread_ev_home": 0.0601,
+          "spread_ev_away": -0.1511,
+          "expected_margin": 1.79
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.8185,
+          "ml_ev_home": 0.1906,
+          "ml_ev_away": -0.4919,
+          "spread_ev_home": 0.1338,
+          "spread_ev_away": -0.2248,
+          "expected_margin": 2.01
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.792,
+          "ml_ev_home": 0.152,
+          "ml_ev_away": -0.4176,
+          "spread_ev_home": 0.0706,
+          "spread_ev_away": -0.1616,
+          "expected_margin": 1.81
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.7894,
+          "ml_ev_home": 0.1482,
+          "ml_ev_away": -0.4103,
+          "spread_ev_home": 0.0637,
+          "spread_ev_away": -0.1547,
+          "expected_margin": 1.79
+        }
+      }
+    },
+    {
+      "sport": "icehockey_nhl",
+      "home": "Anaheim Ducks",
+      "away": "Boston Bruins",
+      "odds": {
+        "spread_home": 1.5,
+        "ml_home": -103,
+        "ml_away": -117,
+        "total": 6.0,
+        "book": "FanDuel"
+      },
+      "blended": {
+        "home_win_prob": 0.4987,
+        "away_win_prob": 0.5013,
+        "expected_margin": -0.01,
+        "best_ev": 0.4328,
+        "best_bet": "spread_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.253,
+        "best_model_ev": 0.4655,
+        "worst_model_ev": 0.3352,
+        "ml_note": "Coin-flip on ML (4/6 lean ANA, 2/6 lean BOS). Edge is entirely in puck line structure: ANA +1.5 covers in near-even game."
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.5151,
+          "ml_ev_home": 0.0152,
+          "ml_ev_away": -0.1007,
+          "spread_ev_home": 0.4607,
+          "spread_ev_away": -0.5517,
+          "expected_margin": 0.09
+        },
+        "regression-v1": {
+          "home_win_prob": 0.5209,
+          "ml_ev_home": 0.0265,
+          "ml_ev_away": -0.1113,
+          "spread_ev_home": 0.4558,
+          "spread_ev_away": -0.5468,
+          "expected_margin": 0.11
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.4773,
+          "ml_ev_home": -0.0593,
+          "ml_ev_away": -0.0305,
+          "spread_ev_home": 0.4053,
+          "spread_ev_away": -0.4963,
+          "expected_margin": -0.12
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.4352,
+          "ml_ev_home": -0.1422,
+          "ml_ev_away": 0.0475,
+          "spread_ev_home": 0.3352,
+          "spread_ev_away": -0.4262,
+          "expected_margin": -0.35
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.5179,
+          "ml_ev_home": 0.0208,
+          "ml_ev_away": -0.1059,
+          "spread_ev_home": 0.4655,
+          "spread_ev_away": -0.5565,
+          "expected_margin": 0.11
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.5176,
+          "ml_ev_home": 0.02,
+          "ml_ev_away": -0.1052,
+          "spread_ev_home": 0.4627,
+          "spread_ev_away": -0.5537,
+          "expected_margin": 0.09
+        }
+      }
+    },
+    {
+      "sport": "baseball_mlb",
+      "home": "Cleveland Guardians",
+      "away": "Tampa Bay Rays",
+      "odds": {
+        "spread_home": 1.5,
+        "ml_home": -102,
+        "ml_away": -116,
+        "total": 6.5,
+        "book": "FanDuel"
+      },
+      "blended": {
+        "home_win_prob": 0.4668,
+        "away_win_prob": 0.5332,
+        "expected_margin": -0.29,
+        "best_ev": 0.209,
+        "best_bet": "spread_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.115,
+        "best_model_ev": 0.2174,
+        "worst_model_ev": 0.2048,
+        "ml_note": "All 6 models favor TB on ML but EV is ~0% (break-even after vig). Edge is CLE +1.5 run line in a tight playoff game."
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.4628,
+          "ml_ev_home": -0.0834,
+          "ml_ev_away": 0.0002,
+          "spread_ev_home": 0.2064,
+          "spread_ev_away": -0.2974,
+          "expected_margin": -0.33
+        },
+        "regression-v1": {
+          "home_win_prob": 0.4769,
+          "ml_ev_home": -0.0556,
+          "ml_ev_away": -0.0259,
+          "spread_ev_home": 0.2174,
+          "spread_ev_away": -0.3084,
+          "expected_margin": -0.19
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.4657,
+          "ml_ev_home": -0.0777,
+          "ml_ev_away": -0.0051,
+          "spread_ev_home": 0.2066,
+          "spread_ev_away": -0.2976,
+          "expected_margin": -0.28
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.4662,
+          "ml_ev_home": -0.0767,
+          "ml_ev_away": -0.0061,
+          "spread_ev_home": 0.2074,
+          "spread_ev_away": -0.2984,
+          "expected_margin": -0.3
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.4646,
+          "ml_ev_home": -0.0799,
+          "ml_ev_away": -0.0031,
+          "spread_ev_home": 0.2048,
+          "spread_ev_away": -0.2958,
+          "expected_margin": -0.3
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.4656,
+          "ml_ev_home": -0.0779,
+          "ml_ev_away": -0.0049,
+          "spread_ev_home": 0.211,
+          "spread_ev_away": -0.302,
+          "expected_margin": -0.3
+        }
+      }
+    }
+  ]
+}
