@@ -1,0 +1,1122 @@
+{
+  "date": "2026-10-18",
+  "sports": [
+    "americanfootball_nfl",
+    "icehockey_nhl",
+    "baseball_mlb"
+  ],
+  "context": "NFL Week 6 (12 games) + NHL (2 games) + ALCS G5 (TB@CLE, series 2-2). Champion: recency-v1. No API keys; odds from web search.",
+  "note": "ODDS_API_KEY not configured; odds sourced from web search. NFL Week 6 stats through 5 games. NHL early season (~8 GP). ALCS pivotal Game 5.",
+  "games": [
+    {
+      "sport": "americanfootball_nfl",
+      "home": "Jacksonville Jaguars",
+      "away": "Houston Texans",
+      "odds": {
+        "spread_home": -2.5,
+        "ml_home": -140,
+        "ml_away": 118,
+        "total": 42.0,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.6309,
+        "away_win_prob": 0.3691,
+        "expected_margin": 2.62,
+        "best_ev": 0.0816,
+        "best_bet": "ml_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.041,
+        "best_model_ev": 0.1335,
+        "worst_model_ev": 0.054
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.625,
+          "ml_ev_home": 0.0715,
+          "ml_ev_away": -0.1825,
+          "spread_ev_home": 0.0598,
+          "spread_ev_away": -0.1508,
+          "expected_margin": 4.41
+        },
+        "regression-v1": {
+          "home_win_prob": 0.6148,
+          "ml_ev_home": 0.054,
+          "ml_ev_away": -0.1603,
+          "spread_ev_home": 0.0399,
+          "spread_ev_away": -0.1309,
+          "expected_margin": 4.06
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.6351,
+          "ml_ev_home": 0.0888,
+          "ml_ev_away": -0.2046,
+          "spread_ev_home": 0.0804,
+          "spread_ev_away": -0.1714,
+          "expected_margin": 4.83
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.6592,
+          "ml_ev_home": 0.1301,
+          "ml_ev_away": -0.2571,
+          "spread_ev_home": 0.1335,
+          "spread_ev_away": -0.2245,
+          "expected_margin": 5.71
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.6197,
+          "ml_ev_home": 0.0623,
+          "ml_ev_away": -0.1709,
+          "spread_ev_home": 0.0519,
+          "spread_ev_away": -0.1429,
+          "expected_margin": 4.3
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.6266,
+          "ml_ev_home": 0.0741,
+          "ml_ev_away": -0.1859,
+          "spread_ev_home": 0.0655,
+          "spread_ev_away": -0.1565,
+          "expected_margin": 4.44
+        }
+      }
+    },
+    {
+      "sport": "americanfootball_nfl",
+      "home": "Indianapolis Colts",
+      "away": "Tennessee Titans",
+      "odds": {
+        "spread_home": -6.5,
+        "ml_home": -280,
+        "ml_away": 225,
+        "total": 44.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.8141,
+        "away_win_prob": 0.1859,
+        "expected_margin": 6.28,
+        "best_ev": 0.2768,
+        "best_bet": "spread_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.138,
+        "best_model_ev": 0.3485,
+        "worst_model_ev": 0.1819
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.8179,
+          "ml_ev_home": 0.11,
+          "ml_ev_away": -0.408,
+          "spread_ev_home": 0.2867,
+          "spread_ev_away": -0.3777,
+          "expected_margin": 12.65
+        },
+        "regression-v1": {
+          "home_win_prob": 0.7786,
+          "ml_ev_home": 0.0567,
+          "ml_ev_away": -0.2805,
+          "spread_ev_home": 0.1819,
+          "spread_ev_away": -0.2729,
+          "expected_margin": 10.65
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.8105,
+          "ml_ev_home": 0.1,
+          "ml_ev_away": -0.3842,
+          "spread_ev_home": 0.2706,
+          "spread_ev_away": -0.3616,
+          "expected_margin": 12.29
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.8417,
+          "ml_ev_home": 0.1423,
+          "ml_ev_away": -0.4856,
+          "spread_ev_home": 0.3485,
+          "spread_ev_away": -0.4395,
+          "expected_margin": 13.81
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.822,
+          "ml_ev_home": 0.1156,
+          "ml_ev_away": -0.4216,
+          "spread_ev_home": 0.2927,
+          "spread_ev_away": -0.3837,
+          "expected_margin": 12.69
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.818,
+          "ml_ev_home": 0.1102,
+          "ml_ev_away": -0.4086,
+          "spread_ev_home": 0.2879,
+          "spread_ev_away": -0.3789,
+          "expected_margin": 12.7
+        }
+      }
+    },
+    {
+      "sport": "americanfootball_nfl",
+      "home": "New England Patriots",
+      "away": "New York Jets",
+      "odds": {
+        "spread_home": -7.5,
+        "ml_home": -330,
+        "ml_away": 260,
+        "total": 43.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.8839,
+        "away_win_prob": 0.1161,
+        "expected_margin": 7.68,
+        "best_ev": 0.4289,
+        "best_bet": "spread_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.214,
+        "best_model_ev": 0.498,
+        "worst_model_ev": 0.3064
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.8969,
+          "ml_ev_home": 0.1686,
+          "ml_ev_away": -0.6287,
+          "spread_ev_home": 0.4665,
+          "spread_ev_away": -0.5575,
+          "expected_margin": 17.53
+        },
+        "regression-v1": {
+          "home_win_prob": 0.8427,
+          "ml_ev_home": 0.0981,
+          "ml_ev_away": -0.4339,
+          "spread_ev_home": 0.3064,
+          "spread_ev_away": -0.3974,
+          "expected_margin": 14.15
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.8803,
+          "ml_ev_home": 0.147,
+          "ml_ev_away": -0.5689,
+          "spread_ev_home": 0.4201,
+          "spread_ev_away": -0.5111,
+          "expected_margin": 16.48
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.9064,
+          "ml_ev_home": 0.1811,
+          "ml_ev_away": -0.6631,
+          "spread_ev_home": 0.498,
+          "spread_ev_away": -0.589,
+          "expected_margin": 18.17
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.888,
+          "ml_ev_home": 0.1571,
+          "ml_ev_away": -0.5969,
+          "spread_ev_home": 0.4397,
+          "spread_ev_away": -0.5307,
+          "expected_margin": 17.01
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.8893,
+          "ml_ev_home": 0.1588,
+          "ml_ev_away": -0.6016,
+          "spread_ev_home": 0.4415,
+          "spread_ev_away": -0.5325,
+          "expected_margin": 16.97
+        }
+      }
+    },
+    {
+      "sport": "americanfootball_nfl",
+      "home": "Chicago Bears",
+      "away": "Atlanta Falcons",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -120,
+        "ml_away": 100,
+        "total": 52.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.6486,
+        "away_win_prob": 0.3514,
+        "expected_margin": 2.97,
+        "best_ev": 0.1891,
+        "best_bet": "ml_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.095,
+        "best_model_ev": 0.199,
+        "worst_model_ev": 0.1736
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.6504,
+          "ml_ev_home": 0.1924,
+          "ml_ev_away": -0.3008,
+          "spread_ev_home": 0.1669,
+          "spread_ev_away": -0.2579,
+          "expected_margin": 5.51
+        },
+        "regression-v1": {
+          "home_win_prob": 0.6402,
+          "ml_ev_home": 0.1736,
+          "ml_ev_away": -0.2803,
+          "spread_ev_home": 0.142,
+          "spread_ev_away": -0.233,
+          "expected_margin": 4.95
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.6437,
+          "ml_ev_home": 0.1801,
+          "ml_ev_away": -0.2874,
+          "spread_ev_home": 0.1538,
+          "spread_ev_away": -0.2448,
+          "expected_margin": 5.23
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.654,
+          "ml_ev_home": 0.199,
+          "ml_ev_away": -0.308,
+          "spread_ev_home": 0.1704,
+          "spread_ev_away": -0.2614,
+          "expected_margin": 5.49
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.6521,
+          "ml_ev_home": 0.1955,
+          "ml_ev_away": -0.3042,
+          "spread_ev_home": 0.1687,
+          "spread_ev_away": -0.2597,
+          "expected_margin": 5.48
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.6539,
+          "ml_ev_home": 0.1987,
+          "ml_ev_away": -0.3077,
+          "spread_ev_home": 0.1729,
+          "spread_ev_away": -0.2639,
+          "expected_margin": 5.55
+        }
+      }
+    },
+    {
+      "sport": "americanfootball_nfl",
+      "home": "New York Giants",
+      "away": "New Orleans Saints",
+      "odds": {
+        "spread_home": 1.5,
+        "ml_home": 100,
+        "ml_away": -120,
+        "total": 45.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.3543,
+        "away_win_prob": 0.6457,
+        "expected_margin": -2.91,
+        "best_ev": 0.1837,
+        "best_bet": "ml_away",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.092,
+        "best_model_ev": 0.2575,
+        "worst_model_ev": 0.1111
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.353,
+          "ml_ev_home": -0.294,
+          "ml_ev_away": 0.1862,
+          "spread_ev_home": -0.2508,
+          "spread_ev_away": 0.1598,
+          "expected_margin": -5.25
+        },
+        "regression-v1": {
+          "home_win_prob": 0.3939,
+          "ml_ev_home": -0.2121,
+          "ml_ev_away": 0.1111,
+          "spread_ev_home": -0.1673,
+          "spread_ev_away": 0.0763,
+          "expected_margin": -3.78
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.3565,
+          "ml_ev_home": -0.287,
+          "ml_ev_away": 0.1797,
+          "spread_ev_home": -0.2458,
+          "spread_ev_away": 0.1548,
+          "expected_margin": -5.21
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.3141,
+          "ml_ev_home": -0.3718,
+          "ml_ev_away": 0.2575,
+          "spread_ev_home": -0.3243,
+          "spread_ev_away": 0.2333,
+          "expected_margin": -6.78
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.3558,
+          "ml_ev_home": -0.2884,
+          "ml_ev_away": 0.181,
+          "spread_ev_home": -0.2446,
+          "spread_ev_away": 0.1536,
+          "expected_margin": -5.32
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.3533,
+          "ml_ev_home": -0.2934,
+          "ml_ev_away": 0.1856,
+          "spread_ev_home": -0.2512,
+          "spread_ev_away": 0.1602,
+          "expected_margin": -5.33
+        }
+      }
+    },
+    {
+      "sport": "americanfootball_nfl",
+      "home": "Baltimore Ravens",
+      "away": "Cleveland Browns",
+      "odds": {
+        "spread_home": -3.0,
+        "ml_home": -155,
+        "ml_away": 130,
+        "total": 39.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.8092,
+        "away_win_prob": 0.1908,
+        "expected_margin": 6.18,
+        "best_ev": 0.425,
+        "best_bet": "spread_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.213,
+        "best_model_ev": 0.4905,
+        "worst_model_ev": 0.3471
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.8126,
+          "ml_ev_home": 0.3369,
+          "ml_ev_away": -0.569,
+          "spread_ev_home": 0.4323,
+          "spread_ev_away": -0.5233,
+          "expected_margin": 12.26
+        },
+        "regression-v1": {
+          "home_win_prob": 0.7745,
+          "ml_ev_home": 0.2741,
+          "ml_ev_away": -0.4813,
+          "spread_ev_home": 0.3471,
+          "spread_ev_away": -0.4381,
+          "expected_margin": 10.46
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.8094,
+          "ml_ev_home": 0.3316,
+          "ml_ev_away": -0.5616,
+          "spread_ev_home": 0.428,
+          "spread_ev_away": -0.519,
+          "expected_margin": 12.06
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.839,
+          "ml_ev_home": 0.3803,
+          "ml_ev_away": -0.6297,
+          "spread_ev_home": 0.4905,
+          "spread_ev_away": -0.5815,
+          "expected_margin": 13.4
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.8082,
+          "ml_ev_home": 0.3296,
+          "ml_ev_away": -0.5588,
+          "spread_ev_home": 0.4228,
+          "spread_ev_away": -0.5138,
+          "expected_margin": 12.14
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.8103,
+          "ml_ev_home": 0.3331,
+          "ml_ev_away": -0.5638,
+          "spread_ev_home": 0.4264,
+          "spread_ev_away": -0.5174,
+          "expected_margin": 12.15
+        }
+      }
+    },
+    {
+      "sport": "americanfootball_nfl",
+      "home": "Pittsburgh Steelers",
+      "away": "Tampa Bay Buccaneers",
+      "odds": {
+        "spread_home": -2.5,
+        "ml_home": -140,
+        "ml_away": 118,
+        "total": 39.0,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.7432,
+        "away_win_prob": 0.2568,
+        "expected_margin": 4.86,
+        "best_ev": 0.3019,
+        "best_bet": "spread_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.151,
+        "best_model_ev": 0.3221,
+        "worst_model_ev": 0.2554
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.7511,
+          "ml_ev_home": 0.2877,
+          "ml_ev_away": -0.4575,
+          "spread_ev_home": 0.3161,
+          "spread_ev_away": -0.4071,
+          "expected_margin": 9.43
+        },
+        "regression-v1": {
+          "home_win_prob": 0.721,
+          "ml_ev_home": 0.236,
+          "ml_ev_away": -0.3917,
+          "spread_ev_home": 0.2554,
+          "spread_ev_away": -0.3464,
+          "expected_margin": 8.07
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.7365,
+          "ml_ev_home": 0.2626,
+          "ml_ev_away": -0.4256,
+          "spread_ev_home": 0.2892,
+          "spread_ev_away": -0.3802,
+          "expected_margin": 8.73
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.7518,
+          "ml_ev_home": 0.2888,
+          "ml_ev_away": -0.4589,
+          "spread_ev_home": 0.3221,
+          "spread_ev_away": -0.4131,
+          "expected_margin": 9.36
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.7491,
+          "ml_ev_home": 0.2841,
+          "ml_ev_away": -0.453,
+          "spread_ev_home": 0.3168,
+          "spread_ev_away": -0.4078,
+          "expected_margin": 9.31
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.7527,
+          "ml_ev_home": 0.2904,
+          "ml_ev_away": -0.4609,
+          "spread_ev_home": 0.3197,
+          "spread_ev_away": -0.4107,
+          "expected_margin": 9.36
+        }
+      }
+    },
+    {
+      "sport": "americanfootball_nfl",
+      "home": "Carolina Panthers",
+      "away": "Philadelphia Eagles",
+      "odds": {
+        "spread_home": -3.0,
+        "ml_home": -155,
+        "ml_away": 130,
+        "total": 39.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.8388,
+        "away_win_prob": 0.1612,
+        "expected_margin": 6.78,
+        "best_ev": 0.4916,
+        "best_bet": "spread_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.246,
+        "best_model_ev": 0.6001,
+        "worst_model_ev": 0.3948
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.8371,
+          "ml_ev_home": 0.3772,
+          "ml_ev_away": -0.6253,
+          "spread_ev_home": 0.4872,
+          "spread_ev_away": -0.5782,
+          "expected_margin": 13.83
+        },
+        "regression-v1": {
+          "home_win_prob": 0.7945,
+          "ml_ev_home": 0.3071,
+          "ml_ev_away": -0.5273,
+          "spread_ev_home": 0.3948,
+          "spread_ev_away": -0.4858,
+          "expected_margin": 11.49
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.8436,
+          "ml_ev_home": 0.3878,
+          "ml_ev_away": -0.6402,
+          "spread_ev_home": 0.5024,
+          "spread_ev_away": -0.5934,
+          "expected_margin": 14.09
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.8852,
+          "ml_ev_home": 0.4563,
+          "ml_ev_away": -0.736,
+          "spread_ev_home": 0.6001,
+          "spread_ev_away": -0.6911,
+          "expected_margin": 16.68
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.8356,
+          "ml_ev_home": 0.3747,
+          "ml_ev_away": -0.6219,
+          "spread_ev_home": 0.4815,
+          "spread_ev_away": -0.5725,
+          "expected_margin": 13.68
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.8347,
+          "ml_ev_home": 0.3732,
+          "ml_ev_away": -0.6198,
+          "spread_ev_home": 0.4763,
+          "spread_ev_away": -0.5673,
+          "expected_margin": 13.58
+        }
+      }
+    },
+    {
+      "sport": "americanfootball_nfl",
+      "home": "Los Angeles Rams",
+      "away": "Arizona Cardinals",
+      "odds": {
+        "spread_home": -12.5,
+        "ml_home": -600,
+        "ml_away": 420,
+        "total": 51.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.9451,
+        "away_win_prob": 0.0549,
+        "expected_margin": 8.9,
+        "best_ev": 0.4667,
+        "best_bet": "spread_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.233,
+        "best_model_ev": 0.6275,
+        "worst_model_ev": 0.2776
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.9482,
+          "ml_ev_home": 0.1062,
+          "ml_ev_away": -0.7306,
+          "spread_ev_home": 0.4801,
+          "spread_ev_away": -0.5711,
+          "expected_margin": 22.83
+        },
+        "regression-v1": {
+          "home_win_prob": 0.9062,
+          "ml_ev_home": 0.0573,
+          "ml_ev_away": -0.5124,
+          "spread_ev_home": 0.2776,
+          "spread_ev_away": -0.3686,
+          "expected_margin": 18.51
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.9496,
+          "ml_ev_home": 0.1078,
+          "ml_ev_away": -0.7378,
+          "spread_ev_home": 0.4813,
+          "spread_ev_away": -0.5723,
+          "expected_margin": 22.73
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.9728,
+          "ml_ev_home": 0.135,
+          "ml_ev_away": -0.8588,
+          "spread_ev_home": 0.6275,
+          "spread_ev_away": -0.7185,
+          "expected_margin": 26.4
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.9473,
+          "ml_ev_home": 0.1052,
+          "ml_ev_away": -0.7261,
+          "spread_ev_home": 0.4608,
+          "spread_ev_away": -0.5518,
+          "expected_margin": 22.45
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.9465,
+          "ml_ev_home": 0.1042,
+          "ml_ev_away": -0.7217,
+          "spread_ev_home": 0.4646,
+          "spread_ev_away": -0.5556,
+          "expected_margin": 22.55
+        }
+      }
+    },
+    {
+      "sport": "americanfootball_nfl",
+      "home": "Kansas City Chiefs",
+      "away": "Los Angeles Chargers",
+      "odds": {
+        "spread_home": -7.5,
+        "ml_home": -330,
+        "ml_away": 260,
+        "total": 41.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.8529,
+        "away_win_prob": 0.1471,
+        "expected_margin": 7.06,
+        "best_ev": 0.3273,
+        "best_bet": "spread_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.164,
+        "best_model_ev": 0.4069,
+        "worst_model_ev": 0.2295
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.856,
+          "ml_ev_home": 0.1153,
+          "ml_ev_away": -0.4815,
+          "spread_ev_home": 0.3372,
+          "spread_ev_away": -0.4282,
+          "expected_margin": 14.65
+        },
+        "regression-v1": {
+          "home_win_prob": 0.8183,
+          "ml_ev_home": 0.0663,
+          "ml_ev_away": -0.3459,
+          "spread_ev_home": 0.2295,
+          "spread_ev_away": -0.3205,
+          "expected_margin": 12.51
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.8512,
+          "ml_ev_home": 0.1091,
+          "ml_ev_away": -0.4642,
+          "spread_ev_home": 0.3246,
+          "spread_ev_away": -0.4156,
+          "expected_margin": 14.31
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.8815,
+          "ml_ev_home": 0.1486,
+          "ml_ev_away": -0.5735,
+          "spread_ev_home": 0.4069,
+          "spread_ev_away": -0.4979,
+          "expected_margin": 15.89
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.8563,
+          "ml_ev_home": 0.1157,
+          "ml_ev_away": -0.4825,
+          "spread_ev_home": 0.339,
+          "spread_ev_away": -0.43,
+          "expected_margin": 14.57
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.8554,
+          "ml_ev_home": 0.1146,
+          "ml_ev_away": -0.4795,
+          "spread_ev_home": 0.3308,
+          "spread_ev_away": -0.4218,
+          "expected_margin": 14.49
+        }
+      }
+    },
+    {
+      "sport": "americanfootball_nfl",
+      "home": "Las Vegas Raiders",
+      "away": "Buffalo Bills",
+      "odds": {
+        "spread_home": 6.0,
+        "ml_home": 225,
+        "ml_away": -277,
+        "total": 53.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.0671,
+        "away_win_prob": 0.9329,
+        "expected_margin": -8.66,
+        "best_ev": 0.6427,
+        "best_bet": "spread_away",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.321,
+        "best_model_ev": 0.7367,
+        "worst_model_ev": 0.4868
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.0567,
+          "ml_ev_home": -0.8157,
+          "ml_ev_away": 0.2838,
+          "spread_ev_home": -0.7657,
+          "spread_ev_away": 0.6747,
+          "expected_margin": -22.4
+        },
+        "regression-v1": {
+          "home_win_prob": 0.1169,
+          "ml_ev_home": -0.6199,
+          "ml_ev_away": 0.2019,
+          "spread_ev_home": -0.5778,
+          "spread_ev_away": 0.4868,
+          "expected_margin": -16.67
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.0667,
+          "ml_ev_home": -0.7834,
+          "ml_ev_away": 0.2703,
+          "spread_ev_home": -0.7341,
+          "spread_ev_away": 0.6431,
+          "expected_margin": -21.04
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.0382,
+          "ml_ev_home": -0.876,
+          "ml_ev_away": 0.3091,
+          "spread_ev_home": -0.8277,
+          "spread_ev_away": 0.7367,
+          "expected_margin": -24.77
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.0634,
+          "ml_ev_home": -0.7939,
+          "ml_ev_away": 0.2747,
+          "spread_ev_home": -0.7446,
+          "spread_ev_away": 0.6536,
+          "expected_margin": -21.69
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.0608,
+          "ml_ev_home": -0.8024,
+          "ml_ev_away": 0.2783,
+          "spread_ev_home": -0.7523,
+          "spread_ev_away": 0.6613,
+          "expected_margin": -21.84
+        }
+      }
+    },
+    {
+      "sport": "americanfootball_nfl",
+      "home": "Green Bay Packers",
+      "away": "Dallas Cowboys",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -120,
+        "ml_away": 100,
+        "total": 53.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.6172,
+        "away_win_prob": 0.3828,
+        "expected_margin": 2.34,
+        "best_ev": 0.1316,
+        "best_bet": "ml_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.066,
+        "best_model_ev": 0.1449,
+        "worst_model_ev": 0.1237
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.6129,
+          "ml_ev_home": 0.1237,
+          "ml_ev_away": -0.2258,
+          "spread_ev_home": 0.0913,
+          "spread_ev_away": -0.1823,
+          "expected_margin": 4.09
+        },
+        "regression-v1": {
+          "home_win_prob": 0.613,
+          "ml_ev_home": 0.1238,
+          "ml_ev_away": -0.226,
+          "spread_ev_home": 0.0926,
+          "spread_ev_away": -0.1836,
+          "expected_margin": 4.09
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.6142,
+          "ml_ev_home": 0.126,
+          "ml_ev_away": -0.2284,
+          "spread_ev_home": 0.0932,
+          "spread_ev_away": -0.1842,
+          "expected_margin": 4.11
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.6245,
+          "ml_ev_home": 0.1449,
+          "ml_ev_away": -0.249,
+          "spread_ev_home": 0.1141,
+          "spread_ev_away": -0.2051,
+          "expected_margin": 4.48
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.6189,
+          "ml_ev_home": 0.1347,
+          "ml_ev_away": -0.2378,
+          "spread_ev_home": 0.1032,
+          "spread_ev_away": -0.1942,
+          "expected_margin": 4.32
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.6229,
+          "ml_ev_home": 0.142,
+          "ml_ev_away": -0.2458,
+          "spread_ev_home": 0.107,
+          "spread_ev_away": -0.198,
+          "expected_margin": 4.41
+        }
+      }
+    },
+    {
+      "sport": "icehockey_nhl",
+      "home": "Minnesota Wild",
+      "away": "Columbus Blue Jackets",
+      "odds": {
+        "spread_home": -1.5,
+        "ml_home": -194,
+        "ml_away": 160,
+        "total": 6.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.7353,
+        "away_win_prob": 0.2647,
+        "expected_margin": 4.71,
+        "best_ev": 0.1143,
+        "best_bet": "ml_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.057,
+        "best_model_ev": 0.1368,
+        "worst_model_ev": 0.0703
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.7502,
+          "ml_ev_home": 0.1368,
+          "ml_ev_away": -0.3504,
+          "spread_ev_home": -0.0507,
+          "spread_ev_away": -0.0403,
+          "expected_margin": 1.46
+        },
+        "regression-v1": {
+          "home_win_prob": 0.7062,
+          "ml_ev_home": 0.0703,
+          "ml_ev_away": -0.2362,
+          "spread_ev_home": -0.1443,
+          "spread_ev_away": 0.0533,
+          "expected_margin": 1.18
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.7287,
+          "ml_ev_home": 0.1044,
+          "ml_ev_away": -0.2947,
+          "spread_ev_home": -0.1008,
+          "spread_ev_away": 0.0098,
+          "expected_margin": 1.31
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.744,
+          "ml_ev_home": 0.1274,
+          "ml_ev_away": -0.3343,
+          "spread_ev_home": -0.0629,
+          "spread_ev_away": -0.0281,
+          "expected_margin": 1.4
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.7426,
+          "ml_ev_home": 0.1254,
+          "ml_ev_away": -0.3308,
+          "spread_ev_home": -0.0681,
+          "spread_ev_away": -0.0229,
+          "expected_margin": 1.41
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.7416,
+          "ml_ev_home": 0.1239,
+          "ml_ev_away": -0.3282,
+          "spread_ev_home": -0.0659,
+          "spread_ev_away": -0.0251,
+          "expected_margin": 1.42
+        }
+      }
+    },
+    {
+      "sport": "icehockey_nhl",
+      "home": "Calgary Flames",
+      "away": "Carolina Hurricanes",
+      "odds": {
+        "spread_home": 1.5,
+        "ml_home": 179,
+        "ml_away": -223,
+        "total": 6.0,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.2422,
+        "away_win_prob": 0.7578,
+        "expected_margin": -5.16,
+        "best_ev": 0.0977,
+        "best_bet": "ml_away",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.049,
+        "best_model_ev": 0.1469,
+        "worst_model_ev": 0.0423
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.2359,
+          "ml_ev_home": -0.3417,
+          "ml_ev_away": 0.1067,
+          "spread_ev_home": -0.0816,
+          "spread_ev_away": -0.0094,
+          "expected_margin": -1.55
+        },
+        "regression-v1": {
+          "home_win_prob": 0.2882,
+          "ml_ev_home": -0.1959,
+          "ml_ev_away": 0.031,
+          "spread_ev_home": 0.0423,
+          "spread_ev_away": -0.1333,
+          "expected_margin": -1.22
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.242,
+          "ml_ev_home": -0.3248,
+          "ml_ev_away": 0.0979,
+          "spread_ev_home": -0.0644,
+          "spread_ev_away": -0.0266,
+          "expected_margin": -1.52
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.2082,
+          "ml_ev_home": -0.4192,
+          "ml_ev_away": 0.1469,
+          "spread_ev_home": -0.1473,
+          "spread_ev_away": 0.0563,
+          "expected_margin": -1.76
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.2437,
+          "ml_ev_home": -0.32,
+          "ml_ev_away": 0.0954,
+          "spread_ev_home": -0.0656,
+          "spread_ev_away": -0.0254,
+          "expected_margin": -1.52
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.2367,
+          "ml_ev_home": -0.3397,
+          "ml_ev_away": 0.1056,
+          "spread_ev_home": -0.0744,
+          "spread_ev_away": -0.0166,
+          "expected_margin": -1.55
+        }
+      }
+    },
+    {
+      "sport": "baseball_mlb",
+      "home": "Cleveland Guardians",
+      "away": "Tampa Bay Rays",
+      "odds": {
+        "spread_home": 1.5,
+        "ml_home": 112,
+        "ml_away": -134,
+        "total": 6.5,
+        "book": "consensus"
+      },
+      "blended": {
+        "home_win_prob": 0.3986,
+        "away_win_prob": 0.6014,
+        "expected_margin": -2.03,
+        "best_ev": 0.0584,
+        "best_bet": "spread_home",
+        "robustness": 6,
+        "verdict": "BET",
+        "kelly_half": 0.029,
+        "best_model_ev": 0.1278,
+        "worst_model_ev": 0.0684
+      },
+      "model_predictions": {
+        "recency-v1": {
+          "home_win_prob": 0.3865,
+          "ml_ev_home": -0.1806,
+          "ml_ev_away": 0.0713,
+          "spread_ev_home": 0.0316,
+          "spread_ev_away": -0.1226,
+          "expected_margin": -1.06
+        },
+        "regression-v1": {
+          "home_win_prob": 0.435,
+          "ml_ev_home": -0.0778,
+          "ml_ev_away": -0.0134,
+          "spread_ev_home": 0.1278,
+          "spread_ev_away": -0.2188,
+          "expected_margin": -0.59
+        },
+        "combo-balanced-v1": {
+          "home_win_prob": 0.3882,
+          "ml_ev_home": -0.1771,
+          "ml_ev_away": 0.0684,
+          "spread_ev_home": 0.0369,
+          "spread_ev_away": -0.1279,
+          "expected_margin": -1.05
+        },
+        "injury-rest-v1": {
+          "home_win_prob": 0.3722,
+          "ml_ev_home": -0.211,
+          "ml_ev_away": 0.0964,
+          "spread_ev_home": 0.0117,
+          "spread_ev_away": -0.1027,
+          "expected_margin": -1.17
+        },
+        "pace-adj-v1": {
+          "home_win_prob": 0.4128,
+          "ml_ev_home": -0.1248,
+          "ml_ev_away": 0.0253,
+          "spread_ev_home": 0.0817,
+          "spread_ev_away": -0.1727,
+          "expected_margin": -0.82
+        },
+        "season-avg-v1": {
+          "home_win_prob": 0.4095,
+          "ml_ev_home": -0.1319,
+          "ml_ev_away": 0.0312,
+          "spread_ev_home": 0.085,
+          "spread_ev_away": -0.176,
+          "expected_margin": -0.84
+        }
+      }
+    }
+  ]
+}
