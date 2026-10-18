@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-10-17",
+  "last_updated": "2026-10-18",
   "rolling_7d": {
-    "accuracy": 0.7,
-    "ev_realized": 0.31,
-    "total_games": 60,
-    "total_correct": 42,
-    "note": "Oct 10-16. Yesterday: 1/2 ML (COL correct, ANA wrong). CLE/TB postponed rain."
+    "accuracy": 0.6761,
+    "ev_realized": 0.28,
+    "total_games": 71,
+    "total_correct": 48,
+    "note": "Oct 11-17. Yesterday (Oct 17): 6/11 ML picks. 3 challengers outperformed champion. MIL swept NLCS (no game Oct 17)."
   },
   "rolling_30d": {
-    "accuracy": 0.6392,
-    "ev_realized": 0.27,
-    "total_games": 158,
-    "total_correct": 101,
-    "note": "30 days of data. 158 games evaluated."
+    "accuracy": 0.6331,
+    "ev_realized": 0.26,
+    "total_games": 169,
+    "total_correct": 107,
+    "note": "30 days of data. 169 games evaluated."
   },
   "all_time": {
-    "accuracy": 0.5695,
+    "accuracy": 0.5691,
     "ev_realized": 0.135,
-    "total_games": 590,
-    "total_correct": 336,
+    "total_games": 601,
+    "total_correct": 342,
     "total_bets_recommended": 2946,
     "total_bets_won": 1705
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 590,
-      "lifetime_correct": 336,
-      "lifetime_accuracy": 0.5695,
+      "lifetime_games": 601,
+      "lifetime_correct": 342,
+      "lifetime_accuracy": 0.5691,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 590,
-      "lifetime_correct": 335,
-      "lifetime_accuracy": 0.5678,
-      "weight": 0.7,
+      "lifetime_games": 601,
+      "lifetime_correct": 342,
+      "lifetime_accuracy": 0.5691,
+      "weight": 0.7999999999999999,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 452,
-      "lifetime_correct": 258,
-      "lifetime_accuracy": 0.5708,
-      "weight": 0.8,
+      "lifetime_games": 463,
+      "lifetime_correct": 265,
+      "lifetime_accuracy": 0.5724,
+      "weight": 0.9,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 590,
-      "lifetime_correct": 336,
-      "lifetime_accuracy": 0.5695,
-      "weight": 0.7,
+      "lifetime_games": 601,
+      "lifetime_correct": 343,
+      "lifetime_accuracy": 0.5707,
+      "weight": 0.7999999999999999,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 590,
-      "lifetime_correct": 332,
-      "lifetime_accuracy": 0.5627,
+      "lifetime_games": 601,
+      "lifetime_correct": 338,
+      "lifetime_accuracy": 0.5624,
       "weight": 0.4,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 590,
-      "lifetime_correct": 336,
-      "lifetime_accuracy": 0.5695,
+      "lifetime_games": 601,
+      "lifetime_correct": 342,
+      "lifetime_accuracy": 0.5691,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -94,15 +94,16 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-17",
-    "games_analyzed": 12,
-    "bets_recommended": 12,
+    "date": "2026-10-18",
+    "games_analyzed": 15,
+    "bets_recommended": 15,
     "leans": 0,
     "no_bets": 0,
     "sports": [
+      "americanfootball_nfl",
       "icehockey_nhl",
       "baseball_mlb"
     ],
-    "notes": "Big Saturday: 10 NHL + ALCS G4 (rain makeup) + NLCS G4 (LAD clinch). Yesterday eval: 1/2 ML (COL hit, ANA miss). CLE/TB PPD. combo-balanced-v1 wt 0.7→0.8, injury-rest-v1 wt 0.6→0.7. No promotions (gap 2.5%, need 5%)."
+    "notes": "NFL Week 6 (12 games) + NHL (2) + ALCS G5. Yesterday eval: 6/11 champion ML. Weight updates: regression-v1 wt 0.7 -> 0.8, combo-balanced-v1 wt 0.8 -> 0.9, injury-rest-v1 wt 0.7 -> 0.8. No promotions."
   }
 }
