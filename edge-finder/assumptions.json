@@ -11,8 +11,8 @@
       "regression_to_mean": 0.0,
       "pace_adjustment": "season_average"
     },
-    "lifetime_games": 590,
-    "lifetime_correct": 336,
+    "lifetime_games": 594,
+    "lifetime_correct": 338,
     "rolling_10d_accuracy": 0.65,
     "promoted_on": "2026-10-02"
   },
@@ -30,8 +30,8 @@
         "regression_to_mean": 0.2,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 590,
-      "lifetime_correct": 335,
+      "lifetime_games": 594,
+      "lifetime_correct": 337,
       "promoted_on": "2026-06-26",
       "rolling_10d_accuracy": 0.65
     },
@@ -47,15 +47,15 @@
         "regression_to_mean": 0.1,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 452,
-      "lifetime_correct": 258,
+      "lifetime_games": 456,
+      "lifetime_correct": 260,
       "rolling_10d_accuracy": 0.675,
       "demoted_on": "2026-10-02"
     },
     {
       "id": "injury-rest-v1",
       "description": "Apply estimated impact for known absences and back-to-back games",
-      "weight": 0.7,
+      "weight": 0.8,
       "born": "2026-03-24",
       "grace_until": "2026-03-29",
       "params": {
@@ -65,8 +65,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 590,
-      "lifetime_correct": 336,
+      "lifetime_games": 594,
+      "lifetime_correct": 339,
       "rolling_10d_accuracy": 0.6625
     },
     {
@@ -82,8 +82,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "opponent_adjusted"
       },
-      "lifetime_games": 590,
-      "lifetime_correct": 332,
+      "lifetime_games": 594,
+      "lifetime_correct": 334,
       "rolling_10d_accuracy": 0.65
     },
     {
@@ -98,8 +98,8 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 590,
-      "lifetime_correct": 336,
+      "lifetime_games": 594,
+      "lifetime_correct": 338,
       "rolling_10d_accuracy": 0.65,
       "demoted_on": "2026-09-30"
     }
