@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-10-19",
+  "last_updated": "2026-10-20",
   "rolling_7d": {
-    "accuracy": 0.6875,
+    "accuracy": 0.7,
     "ev_realized": 0.31,
-    "total_games": 64,
-    "total_correct": 44,
-    "note": "Oct 12-18. Added 4 games from Oct 17 eval: 2/4 ML."
+    "total_games": 70,
+    "total_correct": 49,
+    "note": "Oct 13-19. Added 6 games from Oct 19 eval: 5/6 ML."
   },
   "rolling_30d": {
-    "accuracy": 0.6358,
+    "accuracy": 0.6429,
     "ev_realized": 0.27,
-    "total_games": 162,
-    "total_correct": 103,
+    "total_games": 168,
+    "total_correct": 108,
     "note": "30 days of data. 162 games evaluated."
   },
   "all_time": {
-    "accuracy": 0.569,
+    "accuracy": 0.5717,
     "ev_realized": 0.135,
-    "total_games": 594,
-    "total_correct": 338,
+    "total_games": 600,
+    "total_correct": 343,
     "total_bets_recommended": 2946,
     "total_bets_won": 1705
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 594,
-      "lifetime_correct": 338,
-      "lifetime_accuracy": 0.569,
+      "lifetime_games": 600,
+      "lifetime_correct": 343,
+      "lifetime_accuracy": 0.5717,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 594,
-      "lifetime_correct": 337,
-      "lifetime_accuracy": 0.5673,
+      "lifetime_games": 600,
+      "lifetime_correct": 342,
+      "lifetime_accuracy": 0.57,
       "weight": 0.7,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 456,
-      "lifetime_correct": 260,
-      "lifetime_accuracy": 0.5702,
+      "lifetime_games": 462,
+      "lifetime_correct": 265,
+      "lifetime_accuracy": 0.5736,
       "weight": 0.8,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 594,
-      "lifetime_correct": 339,
-      "lifetime_accuracy": 0.5707,
+      "lifetime_games": 600,
+      "lifetime_correct": 344,
+      "lifetime_accuracy": 0.5733,
       "weight": 0.8,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 594,
-      "lifetime_correct": 334,
-      "lifetime_accuracy": 0.5623,
+      "lifetime_games": 600,
+      "lifetime_correct": 339,
+      "lifetime_accuracy": 0.565,
       "weight": 0.4,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 594,
-      "lifetime_correct": 338,
-      "lifetime_accuracy": 0.569,
+      "lifetime_games": 600,
+      "lifetime_correct": 343,
+      "lifetime_accuracy": 0.5717,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -94,16 +94,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-19",
-    "games_analyzed": 6,
-    "bets_recommended": 6,
+    "date": "2026-10-20",
+    "games_analyzed": 14,
+    "bets_recommended": 14,
     "leans": 0,
     "no_bets": 0,
     "sports": [
-      "americanfootball_nfl",
-      "icehockey_nhl",
-      "baseball_mlb"
+      "basketball_nba",
+      "icehockey_nhl"
     ],
-    "notes": "Monday slate: 4 NHL + MNF (WAS@SF) + ALCS G6 (TB@CLE). Oct 17 eval: 2/4 champion ML (4 verified games, 4 skipped). No weight changes. No promotions."
+    "notes": "NBA Opening Night (BOS@DET, PHI@NYK, OKC@SAS) + 11 NHL. Oct 19 eval: champion 5/6 ML (missed PHI upset over COL). No weight changes. No promotions."
   }
 }

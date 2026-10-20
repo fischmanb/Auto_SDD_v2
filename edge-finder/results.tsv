@@ -3563,3 +3563,39 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-17	icehockey_nhl	Toronto Maple Leafs vs New York Islanders	recency-v1	home	0.98	0.6771	away	-3	0	-0.2138	0.2187	ml_home	loss
 2026-10-17	icehockey_nhl	Toronto Maple Leafs vs New York Islanders	regression-v1	home	0.85	0.6499	away	-3	0	-0.2616	0.1698	spread_away	win
 2026-10-17	icehockey_nhl	Toronto Maple Leafs vs New York Islanders	season-avg-v1	home	0.98	0.6722	away	-3	0	-0.2122	0.2100	ml_home	loss
+2026-10-19	icehockey_nhl	Philadelphia Flyers vs Colorado Avalanche	recency-v1	away	-1.95	0.1828	home	1	0	0.1886	0.1886	ml_away	loss
+2026-10-19	icehockey_nhl	Philadelphia Flyers vs Colorado Avalanche	regression-v1	away	-1.54	0.2398	home	1	0	0.1057	0.1057	ml_away	loss
+2026-10-19	icehockey_nhl	Philadelphia Flyers vs Colorado Avalanche	combo-balanced-v1	away	-1.86	0.1956	home	1	0	0.1701	0.1701	ml_away	loss
+2026-10-19	icehockey_nhl	Philadelphia Flyers vs Colorado Avalanche	injury-rest-v1	away	-2.17	0.1567	home	1	0	0.2266	0.2266	ml_away	loss
+2026-10-19	icehockey_nhl	Philadelphia Flyers vs Colorado Avalanche	pace-adj-v1	away	-1.96	0.1827	home	1	0	0.1888	0.1888	ml_away	loss
+2026-10-19	icehockey_nhl	Philadelphia Flyers vs Colorado Avalanche	season-avg-v1	away	-1.97	0.1804	home	1	0	0.1921	0.1921	ml_away	loss
+2026-10-19	icehockey_nhl	New York Rangers vs Anaheim Ducks	recency-v1	home	0.76	0.6373	home	3	1	0.1964	-0.0440	spread_away	loss
+2026-10-19	icehockey_nhl	New York Rangers vs Anaheim Ducks	regression-v1	home	0.66	0.6185	home	3	1	0.2321	-0.0723	spread_away	loss
+2026-10-19	icehockey_nhl	New York Rangers vs Anaheim Ducks	combo-balanced-v1	home	0.6	0.6094	home	3	1	0.2523	-0.0859	spread_away	loss
+2026-10-19	icehockey_nhl	New York Rangers vs Anaheim Ducks	injury-rest-v1	home	0.52	0.5945	home	3	1	0.2765	-0.1082	spread_away	loss
+2026-10-19	icehockey_nhl	New York Rangers vs Anaheim Ducks	pace-adj-v1	home	0.77	0.6369	home	3	1	0.1921	-0.0447	spread_away	loss
+2026-10-19	icehockey_nhl	New York Rangers vs Anaheim Ducks	season-avg-v1	home	0.75	0.635	home	3	1	0.1989	-0.0474	spread_away	loss
+2026-10-19	icehockey_nhl	Toronto Maple Leafs vs San Jose Sharks	recency-v1	home	0.59	0.6075	home	2	1	0.2543	0.0354	spread_away	loss
+2026-10-19	icehockey_nhl	Toronto Maple Leafs vs San Jose Sharks	regression-v1	home	0.57	0.6059	home	2	1	0.2595	0.0327	spread_away	loss
+2026-10-19	icehockey_nhl	Toronto Maple Leafs vs San Jose Sharks	combo-balanced-v1	home	0.58	0.6081	home	2	1	0.2623	0.0363	spread_away	loss
+2026-10-19	icehockey_nhl	Toronto Maple Leafs vs San Jose Sharks	injury-rest-v1	home	0.67	0.6226	home	2	1	0.2287	0.0611	spread_away	loss
+2026-10-19	icehockey_nhl	Toronto Maple Leafs vs San Jose Sharks	pace-adj-v1	home	0.67	0.6208	home	2	1	0.2295	0.0579	spread_away	loss
+2026-10-19	icehockey_nhl	Toronto Maple Leafs vs San Jose Sharks	season-avg-v1	home	0.68	0.6226	home	2	1	0.2224	0.0610	spread_away	loss
+2026-10-19	icehockey_nhl	Utah Mammoth vs Pittsburgh Penguins	recency-v1	home	1.59	0.7692	home	1	1	0.2655	0.2655	ml_home	win
+2026-10-19	icehockey_nhl	Utah Mammoth vs Pittsburgh Penguins	regression-v1	home	1.27	0.7181	home	1	1	0.1814	0.1814	ml_home	win
+2026-10-19	icehockey_nhl	Utah Mammoth vs Pittsburgh Penguins	combo-balanced-v1	home	1.54	0.7606	home	1	1	0.2513	0.2513	ml_home	win
+2026-10-19	icehockey_nhl	Utah Mammoth vs Pittsburgh Penguins	injury-rest-v1	home	1.73	0.7906	home	1	1	0.3006	0.3006	ml_home	win
+2026-10-19	icehockey_nhl	Utah Mammoth vs Pittsburgh Penguins	pace-adj-v1	home	1.49	0.7534	home	1	1	0.2395	0.2395	ml_home	win
+2026-10-19	icehockey_nhl	Utah Mammoth vs Pittsburgh Penguins	season-avg-v1	home	1.51	0.7567	home	1	1	0.2450	0.2450	ml_home	win
+2026-10-19	americanfootball_nfl	San Francisco 49ers vs Washington Commanders	recency-v1	home	17.18	0.8901	home	6	1	0.4498	0.1020	spread_home	loss
+2026-10-19	americanfootball_nfl	San Francisco 49ers vs Washington Commanders	regression-v1	home	14.19	0.8474	home	6	1	0.3127	0.0492	spread_home	loss
+2026-10-19	americanfootball_nfl	San Francisco 49ers vs Washington Commanders	combo-balanced-v1	home	16.91	0.8932	home	6	1	0.4444	0.1059	spread_home	loss
+2026-10-19	americanfootball_nfl	San Francisco 49ers vs Washington Commanders	injury-rest-v1	home	19.54	0.9262	home	6	1	0.5598	0.1468	spread_home	loss
+2026-10-19	americanfootball_nfl	San Francisco 49ers vs Washington Commanders	pace-adj-v1	home	17.02	0.8894	home	6	1	0.4381	0.1012	spread_home	loss
+2026-10-19	americanfootball_nfl	San Francisco 49ers vs Washington Commanders	season-avg-v1	home	17.13	0.8917	home	6	1	0.4519	0.1040	spread_home	loss
+2026-10-19	baseball_mlb	Cleveland Guardians vs Tampa Bay Rays	recency-v1	away	-1.16	0.3745	away	-4	1	0.2509	0.2509	ml_away	win
+2026-10-19	baseball_mlb	Cleveland Guardians vs Tampa Bay Rays	regression-v1	away	-0.72	0.4234	away	-4	1	0.1532	0.1532	ml_away	win
+2026-10-19	baseball_mlb	Cleveland Guardians vs Tampa Bay Rays	combo-balanced-v1	away	-1.16	0.3737	away	-4	1	0.2526	0.2526	ml_away	win
+2026-10-19	baseball_mlb	Cleveland Guardians vs Tampa Bay Rays	injury-rest-v1	away	-1.34	0.3532	away	-4	1	0.2936	0.2936	ml_away	win
+2026-10-19	baseball_mlb	Cleveland Guardians vs Tampa Bay Rays	pace-adj-v1	away	-0.94	0.3974	away	-4	1	0.2052	0.2052	ml_away	win
+2026-10-19	baseball_mlb	Cleveland Guardians vs Tampa Bay Rays	season-avg-v1	away	-0.95	0.3972	away	-4	1	0.2057	0.2057	ml_away	win
