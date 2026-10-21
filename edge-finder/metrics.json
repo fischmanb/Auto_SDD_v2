@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-10-20",
+  "last_updated": "2026-10-21",
   "rolling_7d": {
-    "accuracy": 0.7,
-    "ev_realized": 0.31,
-    "total_games": 70,
-    "total_correct": 49,
-    "note": "Oct 13-19. Added 6 games from Oct 19 eval: 5/6 ML."
+    "accuracy": 0.6667,
+    "ev_realized": 0.348,
+    "total_games": 84,
+    "total_correct": 56,
+    "note": "Updated with Oct 20 eval: 7/14 ML. Rough day \u2014 all models 50%."
   },
   "rolling_30d": {
-    "accuracy": 0.6429,
-    "ev_realized": 0.27,
-    "total_games": 168,
-    "total_correct": 108,
-    "note": "30 days of data. 162 games evaluated."
+    "accuracy": 0.6319,
+    "ev_realized": 0.293,
+    "total_games": 182,
+    "total_correct": 115,
+    "note": "30 days of data. 182 games evaluated."
   },
   "all_time": {
-    "accuracy": 0.5717,
-    "ev_realized": 0.135,
-    "total_games": 600,
-    "total_correct": 343,
-    "total_bets_recommended": 2946,
+    "accuracy": 0.57,
+    "ev_realized": 0.1532,
+    "total_games": 614,
+    "total_correct": 350,
+    "total_bets_recommended": 2958,
     "total_bets_won": 1705
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 600,
-      "lifetime_correct": 343,
-      "lifetime_accuracy": 0.5717,
+      "lifetime_games": 614,
+      "lifetime_correct": 350,
+      "lifetime_accuracy": 0.57,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 600,
-      "lifetime_correct": 342,
-      "lifetime_accuracy": 0.57,
+      "lifetime_games": 614,
+      "lifetime_correct": 349,
+      "lifetime_accuracy": 0.5684,
       "weight": 0.7,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 462,
-      "lifetime_correct": 265,
-      "lifetime_accuracy": 0.5736,
+      "lifetime_games": 476,
+      "lifetime_correct": 272,
+      "lifetime_accuracy": 0.5714,
       "weight": 0.8,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 600,
-      "lifetime_correct": 344,
-      "lifetime_accuracy": 0.5733,
+      "lifetime_games": 614,
+      "lifetime_correct": 351,
+      "lifetime_accuracy": 0.5717,
       "weight": 0.8,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 600,
-      "lifetime_correct": 339,
-      "lifetime_accuracy": 0.565,
+      "lifetime_games": 614,
+      "lifetime_correct": 346,
+      "lifetime_accuracy": 0.5635,
       "weight": 0.4,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 600,
-      "lifetime_correct": 343,
-      "lifetime_accuracy": 0.5717,
+      "lifetime_games": 614,
+      "lifetime_correct": 350,
+      "lifetime_accuracy": 0.57,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -94,15 +94,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-20",
-    "games_analyzed": 14,
-    "bets_recommended": 14,
-    "leans": 0,
+    "date": "2026-10-21",
+    "games_analyzed": 13,
+    "bets_recommended": 12,
+    "leans": 1,
     "no_bets": 0,
     "sports": [
-      "basketball_nba",
-      "icehockey_nhl"
+      "icehockey_nhl",
+      "basketball_nba"
     ],
-    "notes": "NBA Opening Night (BOS@DET, PHI@NYK, OKC@SAS) + 11 NHL. Oct 19 eval: champion 5/6 ML (missed PHI upset over COL). No weight changes. No promotions."
+    "notes": "Oct 20 eval: champion 7/14 ML (50%). Tough night \u2014 7 upsets across NHL/NBA (SJS, LAK, TOR, STL, TBL, DET, PHI all won as underdogs). No weight changes (all models tied). No promotions."
   }
 }
