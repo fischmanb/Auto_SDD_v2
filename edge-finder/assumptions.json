@@ -11,9 +11,9 @@
       "regression_to_mean": 0.0,
       "pace_adjustment": "season_average"
     },
-    "lifetime_games": 614,
-    "lifetime_correct": 350,
-    "rolling_10d_accuracy": 0.6435,
+    "lifetime_games": 627,
+    "lifetime_correct": 358,
+    "rolling_10d_accuracy": 0.6351,
     "promoted_on": "2026-10-02"
   },
   "challengers": [
@@ -30,10 +30,10 @@
         "regression_to_mean": 0.2,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 614,
-      "lifetime_correct": 349,
+      "lifetime_games": 627,
+      "lifetime_correct": 357,
       "promoted_on": "2026-06-26",
-      "rolling_10d_accuracy": 0.6435
+      "rolling_10d_accuracy": 0.6351
     },
     {
       "id": "combo-balanced-v1",
@@ -47,15 +47,15 @@
         "regression_to_mean": 0.1,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 476,
-      "lifetime_correct": 272,
-      "rolling_10d_accuracy": 0.6558,
+      "lifetime_games": 489,
+      "lifetime_correct": 280,
+      "rolling_10d_accuracy": 0.6437,
       "demoted_on": "2026-10-02"
     },
     {
       "id": "injury-rest-v1",
       "description": "Apply estimated impact for known absences and back-to-back games",
-      "weight": 0.8,
+      "weight": 0.9,
       "born": "2026-03-24",
       "grace_until": "2026-03-29",
       "params": {
@@ -65,9 +65,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 614,
-      "lifetime_correct": 351,
-      "rolling_10d_accuracy": 0.6496
+      "lifetime_games": 627,
+      "lifetime_correct": 360,
+      "rolling_10d_accuracy": 0.6624
     },
     {
       "id": "pace-adj-v1",
@@ -82,9 +82,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "opponent_adjusted"
       },
-      "lifetime_games": 614,
-      "lifetime_correct": 346,
-      "rolling_10d_accuracy": 0.6435
+      "lifetime_games": 627,
+      "lifetime_correct": 354,
+      "rolling_10d_accuracy": 0.6351
     },
     {
       "id": "season-avg-v1",
@@ -98,9 +98,9 @@
         "regression_to_mean": 0.0,
         "pace_adjustment": "season_average"
       },
-      "lifetime_games": 614,
-      "lifetime_correct": 350,
-      "rolling_10d_accuracy": 0.6435,
+      "lifetime_games": 627,
+      "lifetime_correct": 358,
+      "rolling_10d_accuracy": 0.6351,
       "demoted_on": "2026-09-30"
     }
   ],

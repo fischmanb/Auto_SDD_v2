@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-10-21",
+  "last_updated": "2026-10-22",
   "rolling_7d": {
-    "accuracy": 0.6667,
-    "ev_realized": 0.348,
-    "total_games": 84,
-    "total_correct": 56,
-    "note": "Updated with Oct 20 eval: 7/14 ML. Rough day \u2014 all models 50%."
+    "accuracy": 0.6598,
+    "ev_realized": 0.4015,
+    "total_games": 97,
+    "total_correct": 64,
+    "note": "Updated with Oct 21 eval: 8/13 ML (62%). 5 upsets across NHL/NBA (PHI beat BUF, ATL beat ORL, WAS beat MIL, CHA beat BKN, MIN beat MIA). injury-rest-v1 sole model to predict WAS upset."
   },
   "rolling_30d": {
-    "accuracy": 0.6319,
-    "ev_realized": 0.293,
-    "total_games": 182,
-    "total_correct": 115,
-    "note": "30 days of data. 182 games evaluated."
+    "accuracy": 0.6308,
+    "ev_realized": 0.3252,
+    "total_games": 195,
+    "total_correct": 123,
+    "note": "30 days of data. 195 games evaluated."
   },
   "all_time": {
-    "accuracy": 0.57,
-    "ev_realized": 0.1532,
-    "total_games": 614,
-    "total_correct": 350,
-    "total_bets_recommended": 2958,
+    "accuracy": 0.571,
+    "ev_realized": 0.1763,
+    "total_games": 627,
+    "total_correct": 358,
+    "total_bets_recommended": 2971,
     "total_bets_won": 1705
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 614,
-      "lifetime_correct": 350,
-      "lifetime_accuracy": 0.57,
+      "lifetime_games": 627,
+      "lifetime_correct": 358,
+      "lifetime_accuracy": 0.571,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 614,
-      "lifetime_correct": 349,
-      "lifetime_accuracy": 0.5684,
+      "lifetime_games": 627,
+      "lifetime_correct": 357,
+      "lifetime_accuracy": 0.5694,
       "weight": 0.7,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 476,
-      "lifetime_correct": 272,
-      "lifetime_accuracy": 0.5714,
+      "lifetime_games": 489,
+      "lifetime_correct": 280,
+      "lifetime_accuracy": 0.5726,
       "weight": 0.8,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 614,
-      "lifetime_correct": 351,
-      "lifetime_accuracy": 0.5717,
-      "weight": 0.8,
+      "lifetime_games": 627,
+      "lifetime_correct": 360,
+      "lifetime_accuracy": 0.5742,
+      "weight": 0.9,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 614,
-      "lifetime_correct": 346,
-      "lifetime_accuracy": 0.5635,
+      "lifetime_games": 627,
+      "lifetime_correct": 354,
+      "lifetime_accuracy": 0.5646,
       "weight": 0.4,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 614,
-      "lifetime_correct": 350,
-      "lifetime_accuracy": 0.57,
+      "lifetime_games": 627,
+      "lifetime_correct": 358,
+      "lifetime_accuracy": 0.571,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -94,15 +94,16 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-21",
-    "games_analyzed": 13,
-    "bets_recommended": 12,
-    "leans": 1,
-    "no_bets": 0,
+    "date": "2026-10-22",
+    "games_analyzed": 14,
+    "bets_recommended": 13,
+    "leans": 0,
+    "no_bets": 1,
     "sports": [
+      "americanfootball_nfl",
       "icehockey_nhl",
       "basketball_nba"
     ],
-    "notes": "Oct 20 eval: champion 7/14 ML (50%). Tough night \u2014 7 upsets across NHL/NBA (SJS, LAK, TOR, STL, TBL, DET, PHI all won as underdogs). No weight changes (all models tied). No promotions."
+    "notes": "Oct 21 eval: champion 8/13 ML (62%). injury-rest-v1 best at 9/13 (69%) \u2014 only model to call WAS upset over MIL. injury-rest weight 0.8 \u2192 0.9. No promotions."
   }
 }
