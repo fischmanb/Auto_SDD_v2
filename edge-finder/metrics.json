@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-10-23",
+  "last_updated": "2026-10-24",
   "rolling_7d": {
-    "accuracy": 0.6667,
+    "accuracy": 0.6746,
     "ev_realized": 0.4641,
-    "total_games": 111,
-    "total_correct": 74,
-    "note": "Updated with Oct 22 eval: 10/14 ML. NHL home teams dominated (9/11 won including 3 OT/SO). SJ upset OTT 6-2, DET beat VAN 5-2 (9th straight VAN loss). NBA: CLE won at PHI 114-106, OKC beat DEN 96-84 at home."
+    "total_games": 126,
+    "total_correct": 85,
+    "note": "Updated with Oct 23 eval: 11/15 ML. Big NBA upset night \u2014 CHI beat MIL, DAL beat IND as underdogs, DET upset MIA, MEM edged GSW. NHL: MTL 4-1 CHI, COL 6-3 TB. MLB WS G1: MIL 3-2 TB."
   },
   "rolling_30d": {
-    "accuracy": 0.6364,
+    "accuracy": 0.6429,
     "ev_realized": 0.3641,
-    "total_games": 209,
-    "total_correct": 133,
+    "total_games": 224,
+    "total_correct": 144,
     "note": "30+ days of data. 209 games evaluated."
   },
   "all_time": {
-    "accuracy": 0.5741,
+    "accuracy": 0.5777,
     "ev_realized": 0.2032,
-    "total_games": 641,
-    "total_correct": 368,
+    "total_games": 656,
+    "total_correct": 379,
     "total_bets_recommended": 2983,
     "total_bets_won": 1705
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 641,
-      "lifetime_correct": 368,
-      "lifetime_accuracy": 0.5741,
+      "lifetime_games": 656,
+      "lifetime_correct": 379,
+      "lifetime_accuracy": 0.5777,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 641,
-      "lifetime_correct": 366,
-      "lifetime_accuracy": 0.571,
-      "weight": 0.6,
+      "lifetime_games": 656,
+      "lifetime_correct": 376,
+      "lifetime_accuracy": 0.5732,
+      "weight": 0.5,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 503,
-      "lifetime_correct": 290,
-      "lifetime_accuracy": 0.5765,
-      "weight": 0.8,
-      "role": "challenger"
-    },
-    "injury-rest-v1": {
-      "lifetime_games": 641,
-      "lifetime_correct": 370,
-      "lifetime_accuracy": 0.5772,
+      "lifetime_games": 518,
+      "lifetime_correct": 302,
+      "lifetime_accuracy": 0.583,
       "weight": 0.9,
       "role": "challenger"
     },
+    "injury-rest-v1": {
+      "lifetime_games": 656,
+      "lifetime_correct": 382,
+      "lifetime_accuracy": 0.5823,
+      "weight": 1.0,
+      "role": "challenger"
+    },
     "pace-adj-v1": {
-      "lifetime_games": 641,
-      "lifetime_correct": 363,
-      "lifetime_accuracy": 0.5663,
+      "lifetime_games": 656,
+      "lifetime_correct": 374,
+      "lifetime_accuracy": 0.5701,
       "weight": 0.30000000000000004,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 641,
-      "lifetime_correct": 368,
-      "lifetime_accuracy": 0.5741,
+      "lifetime_games": 656,
+      "lifetime_correct": 379,
+      "lifetime_accuracy": 0.5777,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -94,16 +94,16 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-23",
-    "games_analyzed": 15,
-    "bets_recommended": 12,
+    "date": "2026-10-24",
+    "games_analyzed": 20,
+    "bets_recommended": 19,
     "leans": 1,
-    "no_bets": 2,
+    "no_bets": 0,
     "sports": [
-      "baseball_mlb",
       "icehockey_nhl",
+      "baseball_mlb",
       "basketball_nba"
     ],
-    "notes": "Oct 22 eval: champion 10/14 ML (71%). Tonight: 12 NBA + 2 NHL + MLB WS G1 = 15 games. First MLB game in Edge-Finder since WS started."
+    "notes": "Oct 23 eval: champion recency-v1 11/15 ML (73.3%). Tonight: 8 NBA + 11 NHL + 1 MLB WS G2 = 20 games. Massive B2B night \u2014 11 of 16 NBA teams on B2B."
   }
 }
