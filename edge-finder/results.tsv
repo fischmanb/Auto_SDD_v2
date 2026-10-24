@@ -3845,3 +3845,93 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-22	basketball_nba	Oklahoma City Thunder vs Denver Nuggets	injury-rest-v1	home	11.18	0.7366	home	12	1	0.0908	-0.0179	spread_home	win
 2026-10-22	basketball_nba	Oklahoma City Thunder vs Denver Nuggets	pace-adj-v1	home	11.99	0.752	home	12	1	0.1257	0.0026	spread_home	win
 2026-10-22	basketball_nba	Oklahoma City Thunder vs Denver Nuggets	season-avg-v1	home	11.93	0.7524	home	12	1	0.1229	0.0032	spread_home	win
+2026-10-23	baseball_mlb	Tampa Bay Rays @ Milwaukee Brewers	recency-v1	home	0.59	0.5661	home	1	1	-0.2283	-0.0845	spread_away	win
+2026-10-23	baseball_mlb	Tampa Bay Rays @ Milwaukee Brewers	regression-v1	home	0.57	0.5637	home	1	1	-0.2280	-0.0883	spread_away	win
+2026-10-23	baseball_mlb	Tampa Bay Rays @ Milwaukee Brewers	combo-balanced-v1	home	0.76	0.5843	home	1	1	-0.1981	-0.0550	spread_away	win
+2026-10-23	baseball_mlb	Tampa Bay Rays @ Milwaukee Brewers	injury-rest-v1	home	0.96	0.6088	home	1	1	-0.1508	-0.0154	spread_away	win
+2026-10-23	baseball_mlb	Tampa Bay Rays @ Milwaukee Brewers	pace-adj-v1	home	0.59	0.5687	home	1	1	-0.2278	-0.0803	spread_away	win
+2026-10-23	baseball_mlb	Tampa Bay Rays @ Milwaukee Brewers	season-avg-v1	home	0.65	0.5714	home	1	1	-0.2162	-0.0759	spread_away	win
+2026-10-23	icehockey_nhl	Montreal Canadiens @ Chicago Blackhawks	recency-v1	away	-0.68	0.6226	away	-3	1	0.2253	-0.1547	spread_home	loss
+2026-10-23	icehockey_nhl	Montreal Canadiens @ Chicago Blackhawks	regression-v1	away	-0.50	0.5907	away	-3	1	0.2809	-0.0831	spread_home	loss
+2026-10-23	icehockey_nhl	Montreal Canadiens @ Chicago Blackhawks	combo-balanced-v1	away	-0.59	0.6080	away	-3	1	0.2512	-0.1220	spread_home	loss
+2026-10-23	icehockey_nhl	Montreal Canadiens @ Chicago Blackhawks	injury-rest-v1	away	-0.64	0.6176	away	-3	1	0.2397	-0.1434	spread_home	loss
+2026-10-23	icehockey_nhl	Montreal Canadiens @ Chicago Blackhawks	pace-adj-v1	away	-0.67	0.6211	away	-3	1	0.2275	-0.1513	spread_home	loss
+2026-10-23	icehockey_nhl	Montreal Canadiens @ Chicago Blackhawks	season-avg-v1	away	-0.66	0.6193	away	-3	1	0.2299	-0.1473	spread_home	loss
+2026-10-23	icehockey_nhl	Tampa Bay Lightning @ Colorado Avalanche	recency-v1	home	0.41	0.5726	home	3	1	-0.4007	0.0199	spread_away	loss
+2026-10-23	icehockey_nhl	Tampa Bay Lightning @ Colorado Avalanche	regression-v1	home	0.38	0.5679	home	3	1	-0.4075	0.0116	spread_away	loss
+2026-10-23	icehockey_nhl	Tampa Bay Lightning @ Colorado Avalanche	combo-balanced-v1	home	0.40	0.5727	home	3	1	-0.4013	0.0202	spread_away	loss
+2026-10-23	icehockey_nhl	Tampa Bay Lightning @ Colorado Avalanche	injury-rest-v1	home	0.42	0.5749	home	3	1	-0.3974	0.0241	spread_away	loss
+2026-10-23	icehockey_nhl	Tampa Bay Lightning @ Colorado Avalanche	pace-adj-v1	home	0.42	0.5761	home	3	1	-0.3949	0.0261	spread_away	loss
+2026-10-23	icehockey_nhl	Tampa Bay Lightning @ Colorado Avalanche	season-avg-v1	home	0.41	0.5740	home	3	1	-0.3971	0.0224	spread_away	loss
+2026-10-23	basketball_nba	Chicago Bulls @ Milwaukee Bucks	recency-v1	home	7.28	0.6612	away	-7	0	0.3202	0.2970	spread_home	loss
+2026-10-23	basketball_nba	Chicago Bulls @ Milwaukee Bucks	regression-v1	home	6.31	0.6390	away	-7	0	0.2774	0.2535	spread_home	loss
+2026-10-23	basketball_nba	Chicago Bulls @ Milwaukee Bucks	combo-balanced-v1	home	6.09	0.6350	away	-7	0	0.2735	0.2455	spread_home	loss
+2026-10-23	basketball_nba	Chicago Bulls @ Milwaukee Bucks	injury-rest-v1	home	5.23	0.6181	away	-7	0	0.2434	0.2123	spread_home	loss
+2026-10-23	basketball_nba	Chicago Bulls @ Milwaukee Bucks	pace-adj-v1	home	7.03	0.6566	away	-7	0	0.3087	0.2879	spread_home	loss
+2026-10-23	basketball_nba	Chicago Bulls @ Milwaukee Bucks	season-avg-v1	home	7.09	0.6574	away	-7	0	0.3136	0.2896	spread_home	loss
+2026-10-23	basketball_nba	New York Knicks @ Boston Celtics	recency-v1	home	6.00	0.6321	home	4	1	0.1036	0.0969	spread_home	win
+2026-10-23	basketball_nba	New York Knicks @ Boston Celtics	regression-v1	home	5.51	0.6224	home	4	1	0.0849	0.0800	spread_home	win
+2026-10-23	basketball_nba	New York Knicks @ Boston Celtics	combo-balanced-v1	home	5.67	0.6264	home	4	1	0.0937	0.0870	spread_home	win
+2026-10-23	basketball_nba	New York Knicks @ Boston Celtics	injury-rest-v1	home	6.07	0.6357	home	4	1	0.1073	0.1032	spread_home	win
+2026-10-23	basketball_nba	New York Knicks @ Boston Celtics	pace-adj-v1	home	6.00	0.6312	home	4	1	0.1024	0.0953	spread_home	win
+2026-10-23	basketball_nba	New York Knicks @ Boston Celtics	season-avg-v1	home	6.11	0.6351	home	4	1	0.1086	0.1021	spread_home	win
+2026-10-23	basketball_nba	Atlanta Hawks @ Charlotte Hornets	recency-v1	away	-2.82	0.5621	away	-47	1	-0.0126	0.0073	ml_home	loss
+2026-10-23	basketball_nba	Atlanta Hawks @ Charlotte Hornets	regression-v1	away	-1.58	0.5366	away	-47	1	0.0333	0.0658	ml_home	loss
+2026-10-23	basketball_nba	Atlanta Hawks @ Charlotte Hornets	combo-balanced-v1	away	-3.22	0.5731	away	-47	1	-0.0376	-0.0181	ml_home	loss
+2026-10-23	basketball_nba	Atlanta Hawks @ Charlotte Hornets	injury-rest-v1	away	-4.66	0.6022	away	-47	1	-0.0946	-0.0850	spread_away	win
+2026-10-23	basketball_nba	Atlanta Hawks @ Charlotte Hornets	pace-adj-v1	away	-2.73	0.5603	away	-47	1	-0.0129	0.0114	ml_home	loss
+2026-10-23	basketball_nba	Atlanta Hawks @ Charlotte Hornets	season-avg-v1	away	-2.83	0.5641	away	-47	1	-0.0172	0.0026	ml_home	loss
+2026-10-23	basketball_nba	Toronto Raptors @ Washington Wizards	recency-v1	away	-3.20	0.5703	away	-10	1	0.0979	0.3535	ml_home	loss
+2026-10-23	basketball_nba	Toronto Raptors @ Washington Wizards	regression-v1	away	-1.86	0.5428	away	-10	1	0.1522	0.4401	ml_home	loss
+2026-10-23	basketball_nba	Toronto Raptors @ Washington Wizards	combo-balanced-v1	away	-3.48	0.5773	away	-10	1	0.0866	0.3316	ml_home	loss
+2026-10-23	basketball_nba	Toronto Raptors @ Washington Wizards	injury-rest-v1	away	-4.87	0.6079	away	-10	1	0.0214	0.2352	ml_home	loss
+2026-10-23	basketball_nba	Toronto Raptors @ Washington Wizards	pace-adj-v1	away	-2.94	0.5691	away	-10	1	0.1026	0.3575	ml_home	loss
+2026-10-23	basketball_nba	Toronto Raptors @ Washington Wizards	season-avg-v1	away	-3.13	0.5694	away	-10	1	0.0979	0.3565	ml_home	loss
+2026-10-23	basketball_nba	Dallas Mavericks @ Indiana Pacers	recency-v1	home	8.84	0.6912	away	-16	0	0.0934	0.0053	spread_home	loss
+2026-10-23	basketball_nba	Dallas Mavericks @ Indiana Pacers	regression-v1	home	7.10	0.6548	away	-16	0	0.0216	-0.0476	spread_home	loss
+2026-10-23	basketball_nba	Dallas Mavericks @ Indiana Pacers	combo-balanced-v1	home	9.75	0.7123	away	-16	0	0.1392	0.0360	spread_home	loss
+2026-10-23	basketball_nba	Dallas Mavericks @ Indiana Pacers	injury-rest-v1	home	11.81	0.7509	away	-16	0	0.2231	0.0922	spread_home	loss
+2026-10-23	basketball_nba	Dallas Mavericks @ Indiana Pacers	pace-adj-v1	home	8.19	0.6809	away	-16	0	0.0736	-0.0096	spread_home	loss
+2026-10-23	basketball_nba	Dallas Mavericks @ Indiana Pacers	season-avg-v1	home	8.16	0.6748	away	-16	0	0.0650	-0.0184	spread_home	loss
+2026-10-23	basketball_nba	Minnesota Timberwolves @ Orlando Magic	recency-v1	home	0.23	0.5062	away	-22	0	-0.0977	-0.0418	spread_away	win
+2026-10-23	basketball_nba	Minnesota Timberwolves @ Orlando Magic	regression-v1	home	0.96	0.5222	away	-22	0	-0.0686	-0.0116	ml_home	loss
+2026-10-23	basketball_nba	Minnesota Timberwolves @ Orlando Magic	combo-balanced-v1	away	-0.51	0.5123	away	-22	1	-0.1322	-0.0768	spread_away	win
+2026-10-23	basketball_nba	Minnesota Timberwolves @ Orlando Magic	injury-rest-v1	away	-1.27	0.5285	away	-22	1	-0.1624	-0.1075	spread_away	win
+2026-10-23	basketball_nba	Minnesota Timberwolves @ Orlando Magic	pace-adj-v1	home	0.55	0.5114	away	-22	0	-0.0873	-0.0320	spread_away	win
+2026-10-23	basketball_nba	Minnesota Timberwolves @ Orlando Magic	season-avg-v1	home	0.61	0.5154	away	-22	0	-0.0818	-0.0243	spread_away	win
+2026-10-23	basketball_nba	Detroit Pistons @ Miami Heat	recency-v1	home	6.25	0.6366	away	-17	0	0.1556	0.1459	spread_home	loss
+2026-10-23	basketball_nba	Detroit Pistons @ Miami Heat	regression-v1	home	6.17	0.6373	away	-17	0	0.1566	0.1472	spread_home	loss
+2026-10-23	basketball_nba	Detroit Pistons @ Miami Heat	combo-balanced-v1	home	6.34	0.6407	away	-17	0	0.1601	0.1532	spread_home	loss
+2026-10-23	basketball_nba	Detroit Pistons @ Miami Heat	injury-rest-v1	home	6.92	0.6532	away	-17	0	0.1860	0.1757	spread_home	loss
+2026-10-23	basketball_nba	Detroit Pistons @ Miami Heat	pace-adj-v1	home	7.04	0.6549	away	-17	0	0.1868	0.1787	spread_home	loss
+2026-10-23	basketball_nba	Detroit Pistons @ Miami Heat	season-avg-v1	home	7.14	0.6553	away	-17	0	0.1947	0.1796	spread_home	loss
+2026-10-23	basketball_nba	Houston Rockets @ San Antonio Spurs	recency-v1	away	-1.16	0.5260	away	-4	1	-0.3261	-0.2891	ml_away	win
+2026-10-23	basketball_nba	Houston Rockets @ San Antonio Spurs	regression-v1	away	-0.39	0.5076	away	-4	1	-0.2939	-0.2615	ml_away	win
+2026-10-23	basketball_nba	Houston Rockets @ San Antonio Spurs	combo-balanced-v1	away	-0.69	0.5159	away	-4	1	-0.3094	-0.2738	ml_away	win
+2026-10-23	basketball_nba	Houston Rockets @ San Antonio Spurs	injury-rest-v1	away	-1.20	0.5281	away	-4	1	-0.3298	-0.2922	ml_away	win
+2026-10-23	basketball_nba	Houston Rockets @ San Antonio Spurs	pace-adj-v1	away	-1.03	0.5238	away	-4	1	-0.3194	-0.2857	ml_away	win
+2026-10-23	basketball_nba	Houston Rockets @ San Antonio Spurs	season-avg-v1	away	-1.15	0.5262	away	-4	1	-0.3274	-0.2892	ml_away	win
+2026-10-23	basketball_nba	New Orleans Pelicans @ Utah Jazz	recency-v1	home	0.61	0.5117	home	1	1	-0.1290	-0.1092	ml_away	loss
+2026-10-23	basketball_nba	New Orleans Pelicans @ Utah Jazz	regression-v1	home	1.37	0.5314	home	1	1	-0.0931	-0.0750	ml_away	loss
+2026-10-23	basketball_nba	New Orleans Pelicans @ Utah Jazz	combo-balanced-v1	home	1.80	0.5392	home	1	1	-0.0772	-0.0614	ml_away	loss
+2026-10-23	basketball_nba	New Orleans Pelicans @ Utah Jazz	injury-rest-v1	home	2.85	0.5624	home	1	1	-0.0280	-0.0210	ml_home	win
+2026-10-23	basketball_nba	New Orleans Pelicans @ Utah Jazz	pace-adj-v1	home	1.07	0.5260	home	1	1	-0.1071	-0.0844	ml_away	loss
+2026-10-23	basketball_nba	New Orleans Pelicans @ Utah Jazz	season-avg-v1	home	0.94	0.5217	home	1	1	-0.1116	-0.0918	ml_away	loss
+2026-10-23	basketball_nba	Memphis Grizzlies @ Golden State Warriors	recency-v1	away	-1.23	0.5276	away	-3	1	-0.2886	-0.2652	ml_away	win
+2026-10-23	basketball_nba	Memphis Grizzlies @ Golden State Warriors	regression-v1	home	0.11	0.5023	away	-3	0	-0.2303	-0.2187	ml_away	win
+2026-10-23	basketball_nba	Memphis Grizzlies @ Golden State Warriors	combo-balanced-v1	away	-0.46	0.5103	away	-3	1	-0.2585	-0.2382	ml_away	win
+2026-10-23	basketball_nba	Memphis Grizzlies @ Golden State Warriors	injury-rest-v1	away	-0.56	0.5128	away	-3	1	-0.2614	-0.2422	ml_away	win
+2026-10-23	basketball_nba	Memphis Grizzlies @ Golden State Warriors	pace-adj-v1	away	-0.58	0.5139	away	-3	1	-0.2594	-0.2439	ml_away	win
+2026-10-23	basketball_nba	Memphis Grizzlies @ Golden State Warriors	season-avg-v1	away	-0.58	0.5118	away	-3	1	-0.2581	-0.2406	ml_away	win
+2026-10-23	basketball_nba	Los Angeles Clippers @ Los Angeles Lakers	recency-v1	home	11.29	0.7352	home	8	1	0.0343	-0.0767	ml_away	loss
+2026-10-23	basketball_nba	Los Angeles Clippers @ Los Angeles Lakers	regression-v1	home	9.84	0.7108	home	8	1	-0.0334	-0.1074	ml_away	loss
+2026-10-23	basketball_nba	Los Angeles Clippers @ Los Angeles Lakers	combo-balanced-v1	home	11.35	0.7407	home	8	1	0.0380	-0.0698	ml_away	loss
+2026-10-23	basketball_nba	Los Angeles Clippers @ Los Angeles Lakers	injury-rest-v1	home	13.35	0.7748	home	8	1	0.1158	-0.0271	spread_home	loss
+2026-10-23	basketball_nba	Los Angeles Clippers @ Los Angeles Lakers	pace-adj-v1	home	11.42	0.7409	home	8	1	0.0353	-0.0696	ml_away	loss
+2026-10-23	basketball_nba	Los Angeles Clippers @ Los Angeles Lakers	season-avg-v1	home	11.52	0.7425	home	8	1	0.0407	-0.0676	ml_away	loss
+2026-10-23	basketball_nba	Portland Trail Blazers @ Sacramento Kings	recency-v1	away	-11.30	0.7378	away	-8	1	-0.1651	0.0224	spread_away	loss
+2026-10-23	basketball_nba	Portland Trail Blazers @ Sacramento Kings	regression-v1	away	-7.92	0.6732	away	-8	1	-0.0187	0.2744	ml_home	loss
+2026-10-23	basketball_nba	Portland Trail Blazers @ Sacramento Kings	combo-balanced-v1	away	-11.67	0.7462	away	-8	1	-0.1752	-0.0103	spread_away	loss
+2026-10-23	basketball_nba	Portland Trail Blazers @ Sacramento Kings	injury-rest-v1	away	-14.48	0.7936	away	-8	1	-0.2971	-0.1949	spread_away	loss
+2026-10-23	basketball_nba	Portland Trail Blazers @ Sacramento Kings	pace-adj-v1	away	-10.82	0.7294	away	-8	1	-0.1460	0.0553	ml_home	loss
+2026-10-23	basketball_nba	Portland Trail Blazers @ Sacramento Kings	season-avg-v1	away	-10.84	0.7303	away	-8	1	-0.1461	0.0519	spread_away	loss
