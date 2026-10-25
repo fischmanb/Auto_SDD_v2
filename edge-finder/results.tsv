@@ -3935,3 +3935,23 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-23	basketball_nba	Portland Trail Blazers @ Sacramento Kings	injury-rest-v1	away	-14.48	0.7936	away	-8	1	-0.2971	-0.1949	spread_away	loss
 2026-10-23	basketball_nba	Portland Trail Blazers @ Sacramento Kings	pace-adj-v1	away	-10.82	0.7294	away	-8	1	-0.1460	0.0553	ml_home	loss
 2026-10-23	basketball_nba	Portland Trail Blazers @ Sacramento Kings	season-avg-v1	away	-10.84	0.7303	away	-8	1	-0.1461	0.0519	spread_away	loss
+2026-10-24	baseball_mlb	Milwaukee Brewers vs Tampa Bay Rays	home	5	4	True	0.5794	True	0.565	True	0.5917	True	0.6143	True	0.5773	True	0.5779
+2026-10-24	icehockey_nhl	Philadelphia Flyers vs Anaheim Ducks	away	4	5	False	0.5434	False	0.5501	False	0.5421	False	0.5498	False	0.5456	False	0.5487
+2026-10-24	icehockey_nhl	New Jersey Devils vs Los Angeles Kings	home	3	1	True	0.6061	True	0.5947	True	0.5999	True	0.6046	True	0.6058	True	0.6095
+2026-10-24	icehockey_nhl	Pittsburgh Penguins vs Nashville Predators	home	3	2	True	0.7672	True	0.7183	True	0.7621	True	0.7847	True	0.7594	True	0.7543
+2026-10-24	icehockey_nhl	Ottawa Senators vs New York Rangers	home	7	4	True	0.5251	True	0.523	True	0.5217	True	0.5201	True	0.5182	True	0.5228
+2026-10-24	icehockey_nhl	St. Louis Blues vs Carolina Hurricanes	away	0	4	True	0.4872	True	0.4941	True	0.4973	True	0.4783	True	0.481	True	0.4829
+2026-10-24	icehockey_nhl	Washington Capitals vs Buffalo Sabres	home	4	3	True	0.6613	True	0.6359	True	0.6486	True	0.6521	True	0.6602	True	0.6555
+2026-10-24	icehockey_nhl	Boston Bruins vs San Jose Sharks	home	6	4	True	0.8426	True	0.7953	True	0.8356	True	0.862	True	0.8374	True	0.8393
+2026-10-24	icehockey_nhl	Edmonton Oilers vs Toronto Maple Leafs	away	2	7	False	0.5391	False	0.5442	False	0.5634	False	0.5823	False	0.5427	False	0.5422
+2026-10-24	icehockey_nhl	Columbus Blue Jackets vs Vegas Golden Knights	home	2	1	False	0.4291	False	0.4497	False	0.4187	False	0.3859	False	0.4273	False	0.425
+2026-10-24	icehockey_nhl	Seattle Kraken vs Minnesota Wild	away	2	4	True	0.4398	True	0.4675	True	0.4487	True	0.4481	True	0.4488	True	0.4496
+2026-10-24	icehockey_nhl	Utah Hockey Club vs Tampa Bay Lightning	home	5	4	True	0.55	True	0.5478	True	0.5768	True	0.6012	True	0.5458	True	0.5451
+2026-10-24	basketball_nba	Charlotte Hornets vs Miami Heat	home	115	110	False	0.3364	False	0.3765	False	0.3349	False	0.2967	False	0.3399	False	0.3354
+2026-10-24	basketball_nba	Cleveland Cavaliers vs Brooklyn Nets	home	125	121	True	0.864	True	0.813	True	0.8631	True	0.8992	True	0.8514	True	0.854
+2026-10-24	basketball_nba	Philadelphia 76ers vs Milwaukee Bucks	home	127	116	True	0.65	True	0.636	True	0.7075	True	0.7716	True	0.6495	True	0.6549
+2026-10-24	basketball_nba	Chicago Bulls vs Washington Wizards	away	120	124	False	0.6111	False	0.5928	False	0.6249	False	0.6414	False	0.5988	False	0.6003
+2026-10-24	basketball_nba	Dallas Mavericks vs San Antonio Spurs	away	106	122	True	0.4279	True	0.4501	True	0.4015	True	0.3408	True	0.4232	True	0.4218
+2026-10-24	basketball_nba	Atlanta Hawks vs Houston Rockets	away	114	121	True	0.4132	True	0.4453	True	0.4308	True	0.414	True	0.4095	True	0.4095
+2026-10-24	basketball_nba	Denver Nuggets vs New Orleans Pelicans	home	141	135	True	0.7095	True	0.6879	True	0.7741	True	0.8473	True	0.7094	True	0.7147
+2026-10-24	basketball_nba	Phoenix Suns vs Golden State Warriors	home	131	122	True	0.6474	True	0.6232	True	0.679	True	0.7256	True	0.6359	True	0.6355
