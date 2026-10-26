@@ -3955,3 +3955,26 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-24	basketball_nba	Atlanta Hawks vs Houston Rockets	away	114	121	True	0.4132	True	0.4453	True	0.4308	True	0.414	True	0.4095	True	0.4095
 2026-10-24	basketball_nba	Denver Nuggets vs New Orleans Pelicans	home	141	135	True	0.7095	True	0.6879	True	0.7741	True	0.8473	True	0.7094	True	0.7147
 2026-10-24	basketball_nba	Phoenix Suns vs Golden State Warriors	home	131	122	True	0.6474	True	0.6232	True	0.679	True	0.7256	True	0.6359	True	0.6355
+2026-10-25	basketball_nba	Utah Jazz vs Los Angeles Lakers	away	123	132	True	0.2671	True	0.3198	True	0.274	True	0.2342	True	0.2696	True	0.2663
+2026-10-25	basketball_nba	Oklahoma City Thunder vs Los Angeles Clippers	home	108	101	True	0.9403	True	0.9	True	0.9409	True	0.9687	True	0.9366	True	0.9391
+2026-10-25	basketball_nba	Minnesota Timberwolves vs Toronto Raptors	home	117	94	True	0.6899	True	0.6692	True	0.6976	True	0.7232	True	0.6865	True	0.6866
+2026-10-25	basketball_nba	New York Knicks vs Orlando Magic	away	102	111	False	0.6547	False	0.6444	False	0.6655	False	0.6949	False	0.657	False	0.6577
+2026-10-25	basketball_nba	Detroit Pistons vs Philadelphia 76ers	home	106	93	False	0.277	False	0.3317	False	0.3284	False	0.325	False	0.2769	False	0.2763
+2026-10-25	basketball_nba	Brooklyn Nets vs Indiana Pacers	away	109	136	True	0.2407	True	0.3002	True	0.2499	True	0.2087	True	0.2386	True	0.2422
+2026-10-25	basketball_nba	Sacramento Kings vs Memphis Grizzlies	away	112	123	True	0.4713	True	0.4917	True	0.4803	True	0.4732	True	0.4763	True	0.4763
+2026-10-25	icehockey_nhl	Chicago Blackhawks vs Florida Panthers	away	2	3	True	0.2022	True	0.2563	True	0.2134	True	0.1712	True	0.2044	True	0.2023
+2026-10-25	icehockey_nhl	Winnipeg Jets vs Montreal Canadiens	away	1	2	False	0.805	False	0.7639	False	0.8014	False	0.8377	False	0.8046	False	0.8062
+2026-10-25	icehockey_nhl	Nashville Predators vs Colorado Avalanche	home	6	2	False	0.2308	False	0.2816	False	0.2156	False	0.1647	False	0.2277	False	0.2295
+2026-10-25	icehockey_nhl	Vancouver Canucks vs Minnesota Wild	away	2	4	True	0.4007	True	0.4263	True	0.4181	True	0.4107	True	0.3988	True	0.3992
+2026-10-25	americanfootball_nfl	New Orleans Saints vs Pittsburgh Steelers	away	10	16	True	0.3266	True	0.3689	True	0.3069	True	0.2556	True	0.3253	True	0.3275
+2026-10-25	americanfootball_nfl	Detroit Lions vs Green Bay Packers	home	20	17	True	0.6143	True	0.609	True	0.6123	True	0.6164	True	0.6156	True	0.6153
+2026-10-25	americanfootball_nfl	New York Jets vs Miami Dolphins	away	25	28	False	0.6644	False	0.6455	False	0.6747	False	0.7031	False	0.663	False	0.6644
+2026-10-25	americanfootball_nfl	Houston Texans vs New York Giants	away	21	27	False	0.8568	False	0.8137	False	0.8478	False	0.8767	False	0.8523	False	0.8556
+2026-10-25	americanfootball_nfl	Atlanta Falcons vs San Francisco 49ers	home	29	20	False	0.4867	True	0.5036	True	0.5172	True	0.5263	False	0.4826	False	0.4894
+2026-10-25	americanfootball_nfl	Baltimore Ravens vs Cincinnati Bengals	away	13	35	False	0.6466	False	0.632	False	0.6588	False	0.6826	False	0.6386	False	0.6436
+2026-10-25	americanfootball_nfl	Tennessee Titans vs Cleveland Browns	away	24	27	True	0.4486	True	0.4743	True	0.4397	True	0.4086	True	0.4481	True	0.4505
+2026-10-25	americanfootball_nfl	Minnesota Vikings vs Indianapolis Colts	home	16	10	True	0.7352	True	0.7081	True	0.7391	True	0.7671	True	0.7372	True	0.7353
+2026-10-25	americanfootball_nfl	Carolina Panthers vs Tampa Bay Buccaneers	away	13	43	False	0.5669	False	0.5688	False	0.5696	False	0.5704	False	0.5714	False	0.5683
+2026-10-25	americanfootball_nfl	Arizona Cardinals vs Denver Broncos	away	16	30	True	0.4263	True	0.4483	True	0.4126	True	0.3833	True	0.4235	True	0.4233
+2026-10-25	americanfootball_nfl	Las Vegas Raiders vs Los Angeles Rams	away	21	35	True	0.3419	True	0.3818	True	0.3412	True	0.3035	True	0.3374	True	0.3393
+2026-10-25	americanfootball_nfl	Seattle Seahawks vs Kansas City Chiefs	home	20	3	False	0.4553	False	0.4791	False	0.4468	False	0.414	False	0.459	False	0.4599
