@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-10-26",
+  "last_updated": "2026-10-27",
   "rolling_7d": {
-    "accuracy": 0.6686,
-    "ev_realized": 0.4641,
-    "total_games": 169,
-    "total_correct": 113,
-    "note": "Updated with Oct 25 eval: 13/23 ML. NBA: LAL beat UTA (Luka 52), OKC 6-0, ORL upset NYK, DET 4-0, IND 136-109 BKN, MEM beat SAC. NHL: FLA 3-2 CHI (Eller late), MTL 2-1 WPG Heritage Classic, NSH 6-2 COL surprise, MIN 4-2 VAN. NFL: SEA 20-3 KC upset (first KC loss), CIN 35-13 BAL, NYG 27-21 HOU OT upset, TB 43-13 CAR, ATL beat undefeated SF 29-20."
+    "accuracy": 0.6667,
+    "ev_realized": 0.4909,
+    "total_games": 183,
+    "total_correct": 122,
+    "note": "Updated with Oct 26 eval: 9/14 ML. NBA: CLE OT win, GSW 134-114 upset at DEN, MIL upset IND. NHL: LAK 6-3 NYR, CGY 5-2 TOR, DET SO win at EDM. NFL MNF: DAL 38-21 PHI. MLB WS G3: MIL 10-1 TB (up 3-0)."
   },
   "rolling_30d": {
-    "accuracy": 0.6442,
-    "ev_realized": 0.3641,
-    "total_games": 267,
-    "total_correct": 172,
-    "note": "30+ days of data. 209 games evaluated."
+    "accuracy": 0.6441,
+    "ev_realized": 0.392,
+    "total_games": 281,
+    "total_correct": 181,
+    "note": "30+ days of data. 281 games evaluated."
   },
   "all_time": {
-    "accuracy": 0.5823,
+    "accuracy": 0.5835,
     "ev_realized": 0.2032,
-    "total_games": 699,
-    "total_correct": 407,
+    "total_games": 713,
+    "total_correct": 416,
     "total_bets_recommended": 2983,
     "total_bets_won": 1705
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 699,
-      "lifetime_correct": 407,
-      "lifetime_accuracy": 0.5823,
+      "lifetime_games": 713,
+      "lifetime_correct": 416,
+      "lifetime_accuracy": 0.5835,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 699,
-      "lifetime_correct": 405,
-      "lifetime_accuracy": 0.5794,
+      "lifetime_games": 713,
+      "lifetime_correct": 414,
+      "lifetime_accuracy": 0.5806,
       "weight": 0.6,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 561,
-      "lifetime_correct": 331,
-      "lifetime_accuracy": 0.59,
+      "lifetime_games": 575,
+      "lifetime_correct": 340,
+      "lifetime_accuracy": 0.5913,
       "weight": 1.0,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 699,
-      "lifetime_correct": 411,
-      "lifetime_accuracy": 0.588,
+      "lifetime_games": 713,
+      "lifetime_correct": 421,
+      "lifetime_accuracy": 0.5905,
       "weight": 1.0,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 699,
-      "lifetime_correct": 402,
-      "lifetime_accuracy": 0.5751,
+      "lifetime_games": 713,
+      "lifetime_correct": 411,
+      "lifetime_accuracy": 0.5764,
       "weight": 0.30000000000000004,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 699,
-      "lifetime_correct": 407,
-      "lifetime_accuracy": 0.5823,
+      "lifetime_games": 713,
+      "lifetime_correct": 416,
+      "lifetime_accuracy": 0.5835,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -94,17 +94,16 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-26",
+    "date": "2026-10-27",
     "games_analyzed": 14,
-    "bets_recommended": 12,
+    "bets_recommended": 14,
     "leans": 0,
-    "no_bets": 2,
+    "no_bets": 0,
     "sports": [
-      "americanfootball_nfl",
       "baseball_mlb",
       "basketball_nba",
       "icehockey_nhl"
     ],
-    "notes": "Oct 25 eval: champion recency-v1 13/23 ML (56.5%). Tonight: 9 NBA + 3 NHL + 1 NFL MNF + 1 MLB WS G3 = 14 games. Upsets dominated Oct 25: SEA crushed KC, CIN routed BAL, NYG upset HOU in OT, ATL handed SF first loss. Road teams won 15 of 23 evaluated games."
+    "notes": "Oct 26 eval: champion recency-v1 9/14 ML (64.3%). Tonight: 4 NBA + 9 NHL + 1 MLB WS G4 = 14 games. Key: BOS on B2B. LAK on B2B (NHL). MIL can clinch WS."
   }
 }
