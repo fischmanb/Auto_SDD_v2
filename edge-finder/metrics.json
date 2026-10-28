@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-10-27",
+  "last_updated": "2026-10-28",
   "rolling_7d": {
-    "accuracy": 0.6667,
-    "ev_realized": 0.4909,
-    "total_games": 183,
-    "total_correct": 122,
-    "note": "Updated with Oct 26 eval: 9/14 ML. NBA: CLE OT win, GSW 134-114 upset at DEN, MIL upset IND. NHL: LAK 6-3 NYR, CGY 5-2 TOR, DET SO win at EDM. NFL MNF: DAL 38-21 PHI. MLB WS G3: MIL 10-1 TB (up 3-0)."
+    "accuracy": 0.6447,
+    "ev_realized": 0.4516,
+    "total_games": 197,
+    "total_correct": 127,
+    "note": "Updated with Oct 27 eval: 5/14 ML (35.7%). Brutal upset night. NHL road teams 7-2. NYK ended DET's 5-0 run. POR beat LAL. TB forces WS G5 in 12 inn."
   },
   "rolling_30d": {
-    "accuracy": 0.6441,
-    "ev_realized": 0.392,
-    "total_games": 281,
-    "total_correct": 181,
+    "accuracy": 0.6305,
+    "ev_realized": 0.3802,
+    "total_games": 295,
+    "total_correct": 186,
     "note": "30+ days of data. 281 games evaluated."
   },
   "all_time": {
-    "accuracy": 0.5835,
+    "accuracy": 0.5791,
     "ev_realized": 0.2032,
-    "total_games": 713,
-    "total_correct": 416,
-    "total_bets_recommended": 2983,
+    "total_games": 727,
+    "total_correct": 421,
+    "total_bets_recommended": 2999,
     "total_bets_won": 1705
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 713,
-      "lifetime_correct": 416,
-      "lifetime_accuracy": 0.5835,
+      "lifetime_games": 727,
+      "lifetime_correct": 421,
+      "lifetime_accuracy": 0.5791,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 713,
-      "lifetime_correct": 414,
-      "lifetime_accuracy": 0.5806,
+      "lifetime_games": 727,
+      "lifetime_correct": 419,
+      "lifetime_accuracy": 0.5763,
       "weight": 0.6,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 575,
-      "lifetime_correct": 340,
-      "lifetime_accuracy": 0.5913,
+      "lifetime_games": 589,
+      "lifetime_correct": 345,
+      "lifetime_accuracy": 0.5857,
       "weight": 1.0,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 713,
-      "lifetime_correct": 421,
-      "lifetime_accuracy": 0.5905,
+      "lifetime_games": 727,
+      "lifetime_correct": 427,
+      "lifetime_accuracy": 0.5873,
       "weight": 1.0,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 713,
-      "lifetime_correct": 411,
-      "lifetime_accuracy": 0.5764,
+      "lifetime_games": 727,
+      "lifetime_correct": 416,
+      "lifetime_accuracy": 0.5722,
       "weight": 0.30000000000000004,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 713,
-      "lifetime_correct": 416,
-      "lifetime_accuracy": 0.5835,
+      "lifetime_games": 727,
+      "lifetime_correct": 421,
+      "lifetime_accuracy": 0.5791,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -94,16 +94,16 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-27",
-    "games_analyzed": 14,
-    "bets_recommended": 14,
-    "leans": 0,
+    "date": "2026-10-28",
+    "games_analyzed": 17,
+    "bets_recommended": 16,
+    "leans": 1,
     "no_bets": 0,
     "sports": [
       "baseball_mlb",
       "basketball_nba",
       "icehockey_nhl"
     ],
-    "notes": "Oct 26 eval: champion recency-v1 9/14 ML (64.3%). Tonight: 4 NBA + 9 NHL + 1 MLB WS G4 = 14 games. Key: BOS on B2B. LAK on B2B (NHL). MIL can clinch WS."
+    "notes": "Oct 27 eval: champion recency-v1 5/14 (35.7%). Tonight: 12 NBA + 4 NHL + 1 MLB WS G5 = 17 games. Key: OKC 7-0, HOU 6-1, SAS 6-1 (B2B). MIL can clinch WS."
   }
 }
