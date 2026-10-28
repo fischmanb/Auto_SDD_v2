@@ -3992,3 +3992,17 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-26	icehockey_nhl	Edmonton Oilers vs Detroit Red Wings	away	3	4	False	0.551	False	0.5489	False	0.5737	False	0.5938	False	0.5518	False	0.5514
 2026-10-26	americanfootball_nfl	Philadelphia Eagles vs Dallas Cowboys	away	21	38	True	0.3763	True	0.4147	True	0.3352	True	0.2675	True	0.3783	True	0.3812
 2026-10-26	baseball_mlb	Tampa Bay Rays vs Milwaukee Brewers	away	1	10	True	0.3834	True	0.4269	True	0.3827	True	0.3684	True	0.4055	True	0.4082
+2026-10-27	basketball_nba	Boston Celtics vs Brooklyn Nets	home	125	124	True	0.9439	True	0.8936	True	0.9191	True	0.9317	True	0.934	True	0.9351
+2026-10-27	basketball_nba	New York Knicks vs Detroit Pistons	home	111	97	False	0.177	False	0.2507	False	0.1792	False	0.1382	False	0.196	False	0.187
+2026-10-27	basketball_nba	San Antonio Spurs vs Sacramento Kings	home	130	103	True	0.9703	True	0.9329	True	0.9599	True	0.9734	True	0.9686	True	0.9666
+2026-10-27	basketball_nba	Los Angeles Lakers vs Portland Trail Blazers	away	129	136	False	0.8624	False	0.8097	False	0.8355	False	0.8475	False	0.8475	False	0.8516
+2026-10-27	icehockey_nhl	Philadelphia Flyers vs Columbus Blue Jackets	away	3	4	True	0.3936	True	0.4354	True	0.4084	True	0.4053	True	0.4007	True	0.4023
+2026-10-27	icehockey_nhl	Chicago Blackhawks vs Los Angeles Kings	home	2	1	False	0.2622	False	0.3183	False	0.279	False	0.2477	False	0.2713	False	0.2744
+2026-10-27	icehockey_nhl	Vegas Golden Knights vs Ottawa Senators	home	4	1	True	0.6726	True	0.6384	True	0.6599	True	0.6603	True	0.6601	True	0.6606
+2026-10-27	icehockey_nhl	Anaheim Ducks vs Vancouver Canucks	away	5	6	False	0.666	False	0.6368	False	0.6719	False	0.695	False	0.6549	False	0.6572
+2026-10-27	icehockey_nhl	San Jose Sharks vs Buffalo Sabres	away	0	2	True	0.3843	True	0.416	True	0.3993	True	0.3897	True	0.3928	True	0.3898
+2026-10-27	icehockey_nhl	Winnipeg Jets vs Florida Panthers	away	1	5	False	0.5978	False	0.5949	False	0.5999	False	0.604	False	0.6041	False	0.6021
+2026-10-27	icehockey_nhl	Dallas Stars vs New Jersey Devils	away	1	5	False	0.6678	False	0.6385	False	0.6768	False	0.6983	False	0.6578	False	0.6611
+2026-10-27	icehockey_nhl	St. Louis Blues vs Montreal Canadiens	away	0	2	False	0.5427	False	0.5413	False	0.5231	True	0.4989	False	0.5404	False	0.5416
+2026-10-27	icehockey_nhl	Nashville Predators vs New York Islanders	away	3	4	False	0.6976	False	0.6627	False	0.6977	False	0.7229	False	0.6885	False	0.6881
+2026-10-27	baseball_mlb	Tampa Bay Rays vs Milwaukee Brewers	home	4	3	False	0.2685	False	0.3445	False	0.2847	False	0.2706	False	0.3083	False	0.304
