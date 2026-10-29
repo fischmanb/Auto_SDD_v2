@@ -94,16 +94,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-28",
-    "games_analyzed": 17,
-    "bets_recommended": 16,
-    "leans": 1,
+    "date": "2026-10-29",
+    "games_analyzed": 14,
+    "bets_recommended": 14,
+    "leans": 0,
     "no_bets": 0,
     "sports": [
-      "baseball_mlb",
-      "basketball_nba",
-      "icehockey_nhl"
+      "icehockey_nhl",
+      "basketball_nba"
     ],
-    "notes": "Oct 27 eval: champion recency-v1 5/14 (35.7%). Tonight: 12 NBA + 4 NHL + 1 MLB WS G5 = 17 games. Key: OKC 7-0, HOU 6-1, SAS 6-1 (B2B). MIL can clinch WS."
+    "notes": "Oct 28 eval: 12/17 (70.6%). Tonight: 3 NBA + 11 NHL = 14 games. No MLB (WS over). Both CLE/ATL on B2B. NOP 0-5 still winless."
   }
 }
