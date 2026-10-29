@@ -4006,3 +4006,20 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-27	icehockey_nhl	St. Louis Blues vs Montreal Canadiens	away	0	2	False	0.5427	False	0.5413	False	0.5231	True	0.4989	False	0.5404	False	0.5416
 2026-10-27	icehockey_nhl	Nashville Predators vs New York Islanders	away	3	4	False	0.6976	False	0.6627	False	0.6977	False	0.7229	False	0.6885	False	0.6881
 2026-10-27	baseball_mlb	Tampa Bay Rays vs Milwaukee Brewers	home	4	3	False	0.2685	False	0.3445	False	0.2847	False	0.2706	False	0.3083	False	0.304
+2026-10-28	basketball_nba	Atlanta Hawks vs Miami Heat	away	117	129	False	0.8090	False	0.7693	False	0.8076	False	0.8386	False	0.8112	False	0.8077
+2026-10-28	basketball_nba	Cleveland Cavaliers vs Washington Wizards	home	121	111	True	0.8732	True	0.8278	True	0.8633	True	0.8946	True	0.8715	True	0.8732
+2026-10-28	basketball_nba	Detroit Pistons vs Charlotte Hornets	home	97	89	True	0.7956	True	0.7540	True	0.7502	True	0.7473	True	0.7905	True	0.7932
+2026-10-28	basketball_nba	Indiana Pacers vs Philadelphia 76ers	away	109	114	True	0.4763	True	0.4913	True	0.4784	True	0.4692	True	0.4730	True	0.4726
+2026-10-28	basketball_nba	Toronto Raptors vs Orlando Magic	home	129	99	True	0.6021	True	0.5986	True	0.5965	True	0.6003	True	0.5991	True	0.6058
+2026-10-28	basketball_nba	New Orleans Pelicans vs Denver Nuggets	away	91	104	False	0.6980	False	0.6720	False	0.6697	False	0.6602	False	0.7006	False	0.6973
+2026-10-28	basketball_nba	Minnesota Timberwolves vs Golden State Warriors	away	114	119	False	0.6325	False	0.6202	False	0.6273	False	0.6323	False	0.6297	False	0.6329
+2026-10-28	basketball_nba	Chicago Bulls vs New York Knicks	away	127	133	True	0.4559	True	0.4781	True	0.4991	False	0.5125	True	0.4574	True	0.4547
+2026-10-28	basketball_nba	Milwaukee Bucks vs Houston Rockets	away	100	132	True	0.3044	True	0.3519	True	0.3309	True	0.3031	True	0.3048	True	0.3050
+2026-10-28	basketball_nba	Utah Jazz vs San Antonio Spurs	away	111	117	True	0.0840	True	0.1442	True	0.1051	True	0.0763	True	0.0883	True	0.0863
+2026-10-28	basketball_nba	Dallas Mavericks vs Oklahoma City Thunder	home	120	96	False	0.3222	False	0.3709	False	0.3284	False	0.2878	False	0.3224	False	0.3257
+2026-10-28	basketball_nba	Los Angeles Clippers vs Los Angeles Lakers	away	87	103	True	0.2778	True	0.3331	True	0.2939	True	0.2560	True	0.2771	True	0.2795
+2026-10-28	icehockey_nhl	Washington Capitals vs Philadelphia Flyers	home	5	2	True	0.7831	True	0.7395	True	0.8000	True	0.8504	True	0.7827	True	0.7855
+2026-10-28	icehockey_nhl	Edmonton Oilers vs Calgary Flames	home	4	0	True	0.8688	True	0.8142	True	0.8557	True	0.8869	True	0.8667	True	0.8685
+2026-10-28	icehockey_nhl	Colorado Avalanche vs New Jersey Devils	home	5	2	False	0.4735	True	0.5005	True	0.5381	True	0.5838	False	0.4777	False	0.4839
+2026-10-28	icehockey_nhl	Seattle Kraken vs Toronto Maple Leafs	home	5	4	False	0.4625	False	0.4768	False	0.4745	False	0.4616	False	0.4583	False	0.4635
+2026-10-28	baseball_mlb	Tampa Bay Rays vs Milwaukee Brewers	away	1	4	True	0.4288	True	0.4514	True	0.4229	True	0.3937	True	0.4318	True	0.4316
