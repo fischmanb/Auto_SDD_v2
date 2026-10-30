@@ -94,15 +94,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-29",
-    "games_analyzed": 14,
-    "bets_recommended": 14,
-    "leans": 0,
-    "no_bets": 0,
+    "date": "2026-10-30",
+    "games_analyzed": 13,
+    "bets_recommended": 7,
+    "leans": 2,
+    "no_bets": 4,
     "sports": [
-      "icehockey_nhl",
-      "basketball_nba"
+      "basketball_nba",
+      "icehockey_nhl"
     ],
-    "notes": "Oct 28 eval: 12/17 (70.6%). Tonight: 3 NBA + 11 NHL = 14 games. No MLB (WS over). Both CLE/ATL on B2B. NOP 0-5 still winless."
+    "notes": "Oct 29 eval: 7/14 ML (50.0%). Rough night. Tonight: 10 NBA + 3 NHL = 13 games. NBA Cup opening night. Key: HOU 5-0, WPG 7-game skid, NJD Hellebuyck debut potential."
   }
 }
