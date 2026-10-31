@@ -4037,3 +4037,16 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-29	icehockey_nhl	San Jose Sharks vs Vancouver Canucks	home	3	2	False	0.3358	False	0.3749	False	0.3552	False	0.3345	False	0.3370	False	0.3350
 2026-10-29	icehockey_nhl	Anaheim Ducks vs Buffalo Sabres	away	6	7	True	0.4456	True	0.4625	True	0.4520	True	0.4418	True	0.4464	True	0.4433
 2026-10-29	icehockey_nhl	Los Angeles Kings vs Ottawa Senators	home	6	5	True	0.5485	True	0.5435	True	0.5690	True	0.5902	True	0.5486	True	0.5463
+2026-10-30	basketball_nba	Washington Wizards vs Charlotte Hornets	home	95	79	True	0.5025	True	0.5138	True	0.5094	True	0.5047	True	0.5037	True	0.5054
+2026-10-30	basketball_nba	Boston Celtics vs Chicago Bulls	home	125	111	True	0.9541	True	0.9068	True	0.9406	True	0.9571	True	0.9472	True	0.9477
+2026-10-30	basketball_nba	Brooklyn Nets vs Detroit Pistons	away	94	110	True	0.2341	True	0.2876	True	0.2430	True	0.1985	True	0.2388	True	0.2290
+2026-10-30	basketball_nba	Toronto Raptors vs Orlando Magic	away	114	121	False	0.5137	False	0.5196	False	0.5364	False	0.5509	False	0.5096	False	0.5063
+2026-10-30	basketball_nba	Philadelphia 76ers vs New York Knicks	home	98	93	True	0.5881	True	0.5874	True	0.5633	True	0.5444	True	0.5895	True	0.5887
+2026-10-30	basketball_nba	Miami Heat vs Indiana Pacers	home	145	125	True	0.5989	True	0.5846	True	0.5934	True	0.5852	True	0.5923	True	0.5870
+2026-10-30	basketball_nba	Minnesota Timberwolves vs Los Angeles Clippers	home	127	101	True	0.8633	True	0.8101	True	0.8633	True	0.9013	True	0.8521	True	0.8591
+2026-10-30	basketball_nba	Dallas Mavericks vs Houston Rockets	home	116	111	False	0.3228	False	0.3651	False	0.3419	False	0.3205	False	0.3170	False	0.3188
+2026-10-30	basketball_nba	Phoenix Suns vs Denver Nuggets	away	120	127	False	0.5920	False	0.5794	False	0.5865	False	0.5848	False	0.5904	False	0.5841
+2026-10-30	basketball_nba	Golden State Warriors vs Los Angeles Lakers	home	112	95	False	0.4647	False	0.4863	False	0.4756	False	0.4731	False	0.4721	False	0.4709
+2026-10-30	icehockey_nhl	Vegas Golden Knights vs New Jersey Devils	away	2	5	False	0.5727	False	0.5741	False	0.5725	False	0.5775	False	0.5768	False	0.5717
+2026-10-30	icehockey_nhl	Florida Panthers vs Winnipeg Jets	home	5	2	True	0.7734	True	0.7281	True	0.7714	True	0.7912	True	0.7590	True	0.7616
+2026-10-30	icehockey_nhl	Calgary Flames vs Seattle Kraken	home	6	2	True	0.6760	True	0.6434	True	0.6644	True	0.6688	True	0.6669	True	0.6725

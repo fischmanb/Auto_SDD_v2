@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-10-30",
+  "last_updated": "2026-10-31",
   "rolling_7d": {
-    "accuracy": 0.6404,
+    "accuracy": 0.639,
     "ev_realized": 0.4516,
-    "total_games": 228,
-    "total_correct": 146,
-    "note": "Updated with Oct 29 eval: 7/14 ML (50.0%). Rough night. All NBA wrong. NHL upsets: SJS stunned VAN, MTL beat DAL 5-2, STL beat BOS."
+    "total_games": 241,
+    "total_correct": 154,
+    "note": "Updated with Oct 30 eval: 8/13 ML (61.5%). Bounce back from Oct 29. All 7 BET recs won! Upsets: DAL beat HOU (Kyrie 35 + Flagg 33), GSW came back from 23 down vs LAL."
   },
   "rolling_30d": {
-    "accuracy": 0.6288,
+    "accuracy": 0.6283,
     "ev_realized": 0.3802,
-    "total_games": 326,
-    "total_correct": 205,
+    "total_games": 339,
+    "total_correct": 213,
     "note": "30+ days of data. 312 games evaluated."
   },
   "all_time": {
-    "accuracy": 0.5792,
+    "accuracy": 0.5798,
     "ev_realized": 0.2032,
-    "total_games": 758,
-    "total_correct": 439,
+    "total_games": 771,
+    "total_correct": 447,
     "total_bets_recommended": 2999,
     "total_bets_won": 1705
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 758,
-      "lifetime_correct": 439,
-      "lifetime_accuracy": 0.5792,
+      "lifetime_games": 771,
+      "lifetime_correct": 447,
+      "lifetime_accuracy": 0.5798,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 758,
-      "lifetime_correct": 438,
-      "lifetime_accuracy": 0.5778,
+      "lifetime_games": 771,
+      "lifetime_correct": 446,
+      "lifetime_accuracy": 0.5785,
       "weight": 0.7,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 620,
-      "lifetime_correct": 364,
-      "lifetime_accuracy": 0.5871,
+      "lifetime_games": 633,
+      "lifetime_correct": 372,
+      "lifetime_accuracy": 0.5877,
       "weight": 1.0,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 758,
-      "lifetime_correct": 445,
-      "lifetime_accuracy": 0.5871,
+      "lifetime_games": 771,
+      "lifetime_correct": 453,
+      "lifetime_accuracy": 0.5875,
       "weight": 1.0,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 758,
-      "lifetime_correct": 434,
-      "lifetime_accuracy": 0.5726,
+      "lifetime_games": 771,
+      "lifetime_correct": 442,
+      "lifetime_accuracy": 0.5733,
       "weight": 0.30000000000000004,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 758,
-      "lifetime_correct": 439,
-      "lifetime_accuracy": 0.5792,
+      "lifetime_games": 771,
+      "lifetime_correct": 447,
+      "lifetime_accuracy": 0.5798,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -94,15 +94,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-30",
-    "games_analyzed": 13,
-    "bets_recommended": 7,
-    "leans": 2,
-    "no_bets": 4,
+    "date": "2026-10-31",
+    "games_analyzed": 15,
+    "bets_recommended": 14,
+    "leans": 1,
+    "no_bets": 0,
     "sports": [
-      "basketball_nba",
-      "icehockey_nhl"
+      "icehockey_nhl",
+      "basketball_nba"
     ],
-    "notes": "Oct 29 eval: 7/14 ML (50.0%). Rough night. Tonight: 10 NBA + 3 NHL = 13 games. NBA Cup opening night. Key: HOU 5-0, WPG 7-game skid, NJD Hellebuyck debut potential."
+    "notes": "Oct 30 eval: 8/13 ML (61.5%). 7/7 BET recs won! Tonight: 7 NBA + 8 NHL = 15 games. Halloween Saturday slate. Key: CLE vs MIL, HOU vs OKC elite, SAS Wemby vs MIN B2B, COL vs CGY B2B."
   }
 }
