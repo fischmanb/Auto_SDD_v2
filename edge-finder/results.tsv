@@ -4050,3 +4050,18 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-30	icehockey_nhl	Vegas Golden Knights vs New Jersey Devils	away	2	5	False	0.5727	False	0.5741	False	0.5725	False	0.5775	False	0.5768	False	0.5717
 2026-10-30	icehockey_nhl	Florida Panthers vs Winnipeg Jets	home	5	2	True	0.7734	True	0.7281	True	0.7714	True	0.7912	True	0.7590	True	0.7616
 2026-10-30	icehockey_nhl	Calgary Flames vs Seattle Kraken	home	6	2	True	0.6760	True	0.6434	True	0.6644	True	0.6688	True	0.6669	True	0.6725
+2026-10-31	basketball_nba	Portland Trail Blazers vs Utah Jazz	home	112	90	True	0.6372	True	0.6226	True	0.6464	True	0.6794	True	0.6356	True	0.6382
+2026-10-31	basketball_nba	Philadelphia 76ers vs Charlotte Hornets	home	109	104	True	0.8499	True	0.7961	True	0.8374	True	0.8628	True	0.8384	True	0.8379
+2026-10-31	basketball_nba	Atlanta Hawks vs New Orleans Pelicans	away	99	121	False	0.7838	False	0.7462	False	0.7950	False	0.8412	False	0.7829	False	0.7846
+2026-10-31	basketball_nba	Cleveland Cavaliers vs Milwaukee Bucks	home	136	111	True	0.7499	True	0.7167	True	0.7543	True	0.7872	True	0.7581	True	0.7534
+2026-10-31	basketball_nba	San Antonio Spurs vs Minnesota Timberwolves	home	121	111	False	0.4800	True	0.5066	True	0.5450	True	0.5877	False	0.4851	False	0.4889
+2026-10-31	basketball_nba	Memphis Grizzlies vs Sacramento Kings	home	136	105	True	0.8455	True	0.7926	True	0.8340	True	0.8610	True	0.8377	True	0.8364
+2026-10-31	basketball_nba	Houston Rockets vs Oklahoma City Thunder	home	119	98	True	0.5065	True	0.5404	True	0.5242	True	0.5322	True	0.5281	True	0.5308
+2026-10-31	icehockey_nhl	San Jose Sharks vs Ottawa Senators	away	1	5	True	0.3596	True	0.3898	True	0.3769	True	0.3622	True	0.3560	True	0.3583
+2026-10-31	icehockey_nhl	Boston Bruins vs Chicago Blackhawks	home	5	4	True	0.8470	True	0.7987	True	0.8366	True	0.8665	True	0.8394	True	0.8408
+2026-10-31	icehockey_nhl	Nashville Predators vs Tampa Bay Lightning	home	5	4	False	0.3267	False	0.3705	False	0.3288	False	0.2942	False	0.3295	False	0.3311
+2026-10-31	icehockey_nhl	New York Islanders vs Edmonton Oilers	away	0	4	True	0.3807	True	0.4074	True	0.3721	True	0.3417	True	0.3785	True	0.3786
+2026-10-31	icehockey_nhl	Montreal Canadiens vs Pittsburgh Penguins	home	5	4	True	0.6839	True	0.6493	True	0.6859	True	0.7124	True	0.6721	True	0.6736
+2026-10-31	icehockey_nhl	Vancouver Canucks vs Toronto Maple Leafs	away	2	4	True	0.2652	True	0.3187	True	0.2714	True	0.2390	True	0.2696	True	0.2747
+2026-10-31	icehockey_nhl	Colorado Avalanche vs Calgary Flames	home	5	2	True	0.6752	True	0.6486	True	0.6845	True	0.7176	True	0.6769	True	0.6701
+2026-10-31	icehockey_nhl	Dallas Stars vs Columbus Blue Jackets	home	3	1	True	0.6637	True	0.6470	True	0.6770	True	0.7049	True	0.6737	True	0.6727

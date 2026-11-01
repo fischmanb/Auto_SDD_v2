@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-10-31",
+  "last_updated": "2026-11-01",
   "rolling_7d": {
-    "accuracy": 0.639,
-    "ev_realized": 0.4516,
-    "total_games": 241,
-    "total_correct": 154,
-    "note": "Updated with Oct 30 eval: 8/13 ML (61.5%). Bounce back from Oct 29. All 7 BET recs won! Upsets: DAL beat HOU (Kyrie 35 + Flagg 33), GSW came back from 23 down vs LAL."
+    "accuracy": 0.5909,
+    "ev_realized": 0.1286,
+    "total_games": 110,
+    "total_correct": 65,
+    "note": "Updated with Oct 31 eval: 13/15 ML (86.7%). Upsets: NOP blew out ATL (121-99), NSH beat TBL in SO. Wemby 43 for SAS. MEM stays unbeaten at 6-0."
   },
   "rolling_30d": {
-    "accuracy": 0.6283,
-    "ev_realized": 0.3802,
-    "total_games": 339,
-    "total_correct": 213,
-    "note": "30+ days of data. 312 games evaluated."
+    "accuracy": 0.622,
+    "ev_realized": 0.1881,
+    "total_games": 336,
+    "total_correct": 209,
+    "note": "30+ days of NBA+NHL data."
   },
   "all_time": {
-    "accuracy": 0.5798,
+    "accuracy": 0.584,
     "ev_realized": 0.2032,
-    "total_games": 771,
-    "total_correct": 447,
+    "total_games": 786,
+    "total_correct": 459,
     "total_bets_recommended": 2999,
     "total_bets_won": 1705
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 771,
-      "lifetime_correct": 447,
-      "lifetime_accuracy": 0.5798,
+      "lifetime_games": 786,
+      "lifetime_correct": 459,
+      "lifetime_accuracy": 0.584,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 771,
-      "lifetime_correct": 446,
-      "lifetime_accuracy": 0.5785,
-      "weight": 0.7,
+      "lifetime_games": 786,
+      "lifetime_correct": 459,
+      "lifetime_accuracy": 0.584,
+      "weight": 0.7999999999999999,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 633,
-      "lifetime_correct": 372,
-      "lifetime_accuracy": 0.5877,
+      "lifetime_games": 648,
+      "lifetime_correct": 385,
+      "lifetime_accuracy": 0.5941,
       "weight": 1.0,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 771,
-      "lifetime_correct": 453,
-      "lifetime_accuracy": 0.5875,
+      "lifetime_games": 786,
+      "lifetime_correct": 466,
+      "lifetime_accuracy": 0.5929,
       "weight": 1.0,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 771,
-      "lifetime_correct": 442,
-      "lifetime_accuracy": 0.5733,
+      "lifetime_games": 786,
+      "lifetime_correct": 454,
+      "lifetime_accuracy": 0.5776,
       "weight": 0.30000000000000004,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 771,
-      "lifetime_correct": 447,
-      "lifetime_accuracy": 0.5798,
+      "lifetime_games": 786,
+      "lifetime_correct": 459,
+      "lifetime_accuracy": 0.584,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -94,15 +94,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-10-31",
-    "games_analyzed": 15,
-    "bets_recommended": 14,
-    "leans": 1,
+    "date": "2026-11-01",
+    "games_analyzed": 9,
+    "bets_recommended": 9,
+    "leans": 0,
     "no_bets": 0,
     "sports": [
-      "icehockey_nhl",
-      "basketball_nba"
+      "basketball_nba",
+      "icehockey_nhl"
     ],
-    "notes": "Oct 30 eval: 8/13 ML (61.5%). 7/7 BET recs won! Tonight: 7 NBA + 8 NHL = 15 games. Halloween Saturday slate. Key: CLE vs MIL, HOU vs OKC elite, SAS Wemby vs MIN B2B, COL vs CGY B2B."
+    "notes": "Oct 31 eval: 13/15 ML (86.7%). Tonight: 4 NBA + 5 NHL = 9 games. Sunday thin slate. Key: EDM B2B at NYR, OTT B2B at ANA, Curry status for GSW."
   }
 }
