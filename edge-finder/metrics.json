@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-11-01",
+  "last_updated": "2026-11-02",
   "rolling_7d": {
-    "accuracy": 0.5909,
-    "ev_realized": 0.1286,
-    "total_games": 110,
-    "total_correct": 65,
-    "note": "Updated with Oct 31 eval: 13/15 ML (86.7%). Upsets: NOP blew out ATL (121-99), NSH beat TBL in SO. Wemby 43 for SAS. MEM stays unbeaten at 6-0."
+    "accuracy": 0.5905,
+    "ev_realized": 0.1299,
+    "total_games": 105,
+    "total_correct": 62,
+    "note": "Updated with Nov 1 eval: 5/9 ML (55.6%). BKN upset at IND, ANA comeback vs OTT. MEM still unbeaten at 7-0."
   },
   "rolling_30d": {
-    "accuracy": 0.622,
-    "ev_realized": 0.1881,
-    "total_games": 336,
-    "total_correct": 209,
+    "accuracy": 0.6081,
+    "ev_realized": 0.2128,
+    "total_games": 148,
+    "total_correct": 90,
     "note": "30+ days of NBA+NHL data."
   },
   "all_time": {
-    "accuracy": 0.584,
+    "accuracy": 0.5836,
     "ev_realized": 0.2032,
-    "total_games": 786,
-    "total_correct": 459,
+    "total_games": 795,
+    "total_correct": 464,
     "total_bets_recommended": 2999,
     "total_bets_won": 1705
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 786,
-      "lifetime_correct": 459,
-      "lifetime_accuracy": 0.584,
+      "lifetime_games": 795,
+      "lifetime_correct": 464,
+      "lifetime_accuracy": 0.5836,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 786,
-      "lifetime_correct": 459,
-      "lifetime_accuracy": 0.584,
+      "lifetime_games": 795,
+      "lifetime_correct": 464,
+      "lifetime_accuracy": 0.5836,
       "weight": 0.7999999999999999,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 648,
-      "lifetime_correct": 385,
-      "lifetime_accuracy": 0.5941,
+      "lifetime_games": 657,
+      "lifetime_correct": 390,
+      "lifetime_accuracy": 0.5936,
       "weight": 1.0,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 786,
-      "lifetime_correct": 466,
-      "lifetime_accuracy": 0.5929,
+      "lifetime_games": 795,
+      "lifetime_correct": 471,
+      "lifetime_accuracy": 0.5925,
       "weight": 1.0,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 786,
-      "lifetime_correct": 454,
-      "lifetime_accuracy": 0.5776,
+      "lifetime_games": 795,
+      "lifetime_correct": 459,
+      "lifetime_accuracy": 0.5774,
       "weight": 0.30000000000000004,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 786,
-      "lifetime_correct": 459,
-      "lifetime_accuracy": 0.584,
+      "lifetime_games": 795,
+      "lifetime_correct": 464,
+      "lifetime_accuracy": 0.5836,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -94,15 +94,16 @@
     }
   ],
   "today_summary": {
-    "date": "2026-11-01",
-    "games_analyzed": 9,
-    "bets_recommended": 9,
+    "date": "2026-11-02",
+    "games_analyzed": 19,
+    "bets_recommended": 17,
     "leans": 0,
-    "no_bets": 0,
+    "no_bets": 2,
     "sports": [
       "basketball_nba",
+      "americanfootball_nfl",
       "icehockey_nhl"
     ],
-    "notes": "Oct 31 eval: 13/15 ML (86.7%). Tonight: 4 NBA + 5 NHL = 9 games. Sunday thin slate. Key: EDM B2B at NYR, OTT B2B at ANA, Curry status for GSW."
+    "notes": "Nov 1 eval: 5/9 ML (55.6%). Tonight: 14 NBA + 4 NHL + 1 NFL MNF = 19 games. Huge Monday slate. BKN B2B at NYK, BOS B2B at HOU, LAL B2B vs MIA."
   }
 }
