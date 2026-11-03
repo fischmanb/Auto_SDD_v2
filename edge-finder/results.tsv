@@ -4065,3 +4065,12 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-10-31	icehockey_nhl	Vancouver Canucks vs Toronto Maple Leafs	away	2	4	True	0.2652	True	0.3187	True	0.2714	True	0.2390	True	0.2696	True	0.2747
 2026-10-31	icehockey_nhl	Colorado Avalanche vs Calgary Flames	home	5	2	True	0.6752	True	0.6486	True	0.6845	True	0.7176	True	0.6769	True	0.6701
 2026-10-31	icehockey_nhl	Dallas Stars vs Columbus Blue Jackets	home	3	1	True	0.6637	True	0.6470	True	0.6770	True	0.7049	True	0.6737	True	0.6727
+2026-11-01	basketball_nba	Orlando Magic vs Boston Celtics	away	97	108	True	0.3337	True	0.3841	True	0.3607	True	0.3409	True	0.3474	True	0.3408
+2026-11-01	basketball_nba	Indiana Pacers vs Brooklyn Nets	home	90	98	False	0.7805	False	0.7359	False	0.7585	False	0.7725	False	0.7794	False	0.774
+2026-11-01	basketball_nba	Golden State Warriors vs Los Angeles Clippers	home	124	112	True	0.6684	True	0.6537	True	0.6463	True	0.634	True	0.6679	True	0.6719
+2026-11-01	basketball_nba	Los Angeles Lakers vs Toronto Raptors	home	131	125	True	0.7621	True	0.7258	True	0.75	True	0.7629	True	0.7613	True	0.7607
+2026-11-01	icehockey_nhl	Carolina Hurricanes vs Winnipeg Jets	home	7	0	True	0.5328	True	0.5298	True	0.5297	True	0.5282	True	0.5329	True	0.5336
+2026-11-01	icehockey_nhl	Washington Capitals vs Minnesota Wild	home	1	5	False	0.5627	False	0.5587	False	0.5624	False	0.5647	False	0.5647	False	0.562
+2026-11-01	icehockey_nhl	Philadelphia Flyers vs Utah Hockey Club	away	6	3	False	0.426	False	0.4578	False	0.4167	False	0.3931	False	0.4383	False	0.4343
+2026-11-01	icehockey_nhl	New York Rangers vs Edmonton Oilers	away	1	4	True	0.339	True	0.3775	True	0.3856	True	0.3959	True	0.3405	True	0.3443
+2026-11-01	icehockey_nhl	Anaheim Ducks vs Ottawa Senators	away	6	3	False	0.3126	False	0.3557	False	0.3591	False	0.37	False	0.3161	False	0.3166
