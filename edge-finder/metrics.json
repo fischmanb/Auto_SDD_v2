@@ -95,11 +95,11 @@
   ],
   "today_summary": {
     "date": "2026-11-03",
-    "games_analyzed": 0,
-    "bets_recommended": 0,
-    "leans": 0,
+    "games_analyzed": 11,
+    "bets_recommended": 10,
+    "leans": 1,
     "no_bets": 0,
-    "sports": [],
-    "notes": "Nov 1 eval: 5/9 ML (55.6%). No NBA today (Election Day). 11 NHL games tonight. Predictions pending."
+    "sports": ["icehockey_nhl"],
+    "notes": "No NBA (Election Day). 11 NHL games, 10 BET + 1 LEAN. B2B: DET, VGK, COL. Key storylines: McDavid 15-game point streak at NJD, CAR Kochetkov 10-W streak, WPG 9-game L streak."
   }
 }
