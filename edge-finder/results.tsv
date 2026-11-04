@@ -4074,3 +4074,14 @@ date	sport	game	model_id	predicted_winner	predicted_margin	predicted_win_prob	ac
 2026-11-01	icehockey_nhl	Philadelphia Flyers vs Utah Hockey Club	away	6	3	False	0.426	False	0.4578	False	0.4167	False	0.3931	False	0.4383	False	0.4343
 2026-11-01	icehockey_nhl	New York Rangers vs Edmonton Oilers	away	1	4	True	0.339	True	0.3775	True	0.3856	True	0.3959	True	0.3405	True	0.3443
 2026-11-01	icehockey_nhl	Anaheim Ducks vs Ottawa Senators	away	6	3	False	0.3126	False	0.3557	False	0.3591	False	0.37	False	0.3161	False	0.3166
+2026-11-03	icehockey_nhl	New Jersey Devils vs Edmonton Oilers	home	4	3	False	0.4175	False	0.4379	False	0.4079	False	0.3789	False	0.4162	False	0.4193
+2026-11-03	icehockey_nhl	Tampa Bay Lightning vs Detroit Red Wings	home	4	2	True	0.7153	True	0.6812	True	0.7211	True	0.7618	True	0.7165	True	0.7137
+2026-11-03	icehockey_nhl	Nashville Predators vs Carolina Hurricanes	home	4	1	False	0.1809	False	0.2518	False	0.1876	False	0.1427	False	0.1904	False	0.1946
+2026-11-03	icehockey_nhl	Pittsburgh Penguins vs Vegas Golden Knights	away	2	3	True	0.4408	True	0.4576	True	0.4572	True	0.4520	True	0.4353	True	0.4349
+2026-11-03	icehockey_nhl	Toronto Maple Leafs vs Utah Hockey Club	away	2	3	True	0.4896	False	0.5019	True	0.4718	True	0.4487	True	0.4887	True	0.4893
+2026-11-03	icehockey_nhl	Washington Capitals vs Dallas Stars	away	5	6	False	0.5262	False	0.5388	False	0.5342	False	0.5375	False	0.5369	False	0.5341
+2026-11-03	icehockey_nhl	Montreal Canadiens vs Winnipeg Jets	away	4	5	False	0.7370	False	0.6816	False	0.7275	False	0.7547	False	0.7200	False	0.7210
+2026-11-03	icehockey_nhl	New York Rangers vs St. Louis Blues	home	3	1	True	0.5248	True	0.5266	True	0.5267	True	0.5274	True	0.5263	True	0.5235
+2026-11-03	icehockey_nhl	Columbus Blue Jackets vs Colorado Avalanche	home	7	2	False	0.2003	False	0.2674	False	0.2219	False	0.1900	False	0.2115	False	0.2134
+2026-11-03	icehockey_nhl	Philadelphia Flyers vs Minnesota Wild	away	2	4	True	0.3611	True	0.3976	True	0.3636	True	0.3288	True	0.3646	True	0.3644
+2026-11-03	icehockey_nhl	Vancouver Canucks vs Anaheim Ducks	away	4	5	False	0.5452	False	0.5538	False	0.5443	False	0.5534	False	0.5506	False	0.5494

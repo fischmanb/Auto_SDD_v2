@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-11-03",
+  "last_updated": "2026-11-04",
   "rolling_7d": {
-    "accuracy": 0.5938,
-    "ev_realized": 0.0842,
-    "total_games": 96,
-    "total_correct": 57,
-    "note": "Updated with Nov 1 eval: 5/9 ML (55.6%). 4 upsets: BKN beat IND, MIN routed WSH 5-1, PHI beat UTA 6-3, ANA beat OTT 6-3. Kochetkov shutout streak at 10 for CAR."
+    "accuracy": 0.6076,
+    "ev_realized": 0.1605,
+    "total_games": 79,
+    "total_correct": 48,
+    "note": "Updated with Nov 3 eval: 5/11 ML (45.5%). Upset night: NJD beat EDM in SO, NSH crushed CAR, WPG rallied at MTL in OT, CBJ routed COL 7-2, ANA won at VAN (Gauthier hat trick)."
   },
   "rolling_30d": {
-    "accuracy": 0.6101,
-    "ev_realized": 0.1655,
-    "total_games": 345,
-    "total_correct": 214,
-    "note": "30+ days of NBA+NHL data. Nov 1 added."
+    "accuracy": 0.6146,
+    "ev_realized": 0.174,
+    "total_games": 314,
+    "total_correct": 193,
+    "note": "30+ days of NBA+NHL data. Nov 3 added."
   },
   "all_time": {
-    "accuracy": 0.5836,
+    "accuracy": 0.5819,
     "ev_realized": 0.1985,
-    "total_games": 795,
-    "total_correct": 464,
+    "total_games": 806,
+    "total_correct": 469,
     "total_bets_recommended": 3008,
     "total_bets_won": 1710
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 795,
-      "lifetime_correct": 464,
-      "lifetime_accuracy": 0.5836,
+      "lifetime_games": 806,
+      "lifetime_correct": 469,
+      "lifetime_accuracy": 0.5819,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 795,
-      "lifetime_correct": 464,
-      "lifetime_accuracy": 0.5836,
-      "weight": 0.8,
+      "lifetime_games": 806,
+      "lifetime_correct": 468,
+      "lifetime_accuracy": 0.5806,
+      "weight": 0.7,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 657,
-      "lifetime_correct": 390,
-      "lifetime_accuracy": 0.5936,
+      "lifetime_games": 668,
+      "lifetime_correct": 395,
+      "lifetime_accuracy": 0.5913,
       "weight": 1.0,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 795,
-      "lifetime_correct": 471,
-      "lifetime_accuracy": 0.5925,
+      "lifetime_games": 806,
+      "lifetime_correct": 476,
+      "lifetime_accuracy": 0.5906,
       "weight": 1.0,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 795,
-      "lifetime_correct": 459,
-      "lifetime_accuracy": 0.5774,
-      "weight": 0.3,
+      "lifetime_games": 806,
+      "lifetime_correct": 464,
+      "lifetime_accuracy": 0.5757,
+      "weight": 0.30000000000000004,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 795,
-      "lifetime_correct": 464,
-      "lifetime_accuracy": 0.5836,
+      "lifetime_games": 806,
+      "lifetime_correct": 469,
+      "lifetime_accuracy": 0.5819,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -94,12 +94,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-11-03",
-    "games_analyzed": 11,
-    "bets_recommended": 10,
+    "date": "2026-11-04",
+    "games_analyzed": 18,
+    "bets_recommended": 16,
     "leans": 1,
-    "no_bets": 0,
-    "sports": ["icehockey_nhl"],
-    "notes": "No NBA (Election Day). 11 NHL games, 10 BET + 1 LEAN. B2B: DET, VGK, COL. Key storylines: McDavid 15-game point streak at NJD, CAR Kochetkov 10-W streak, WPG 9-game L streak."
+    "no_bets": 1,
+    "sports": [
+      "icehockey_nhl",
+      "basketball_nba"
+    ],
+    "notes": "Nov 3 eval: 5/11 ML (45.5%). Tonight: 14 NBA + 4 NHL = 18 games. NBA returns post-Election Day. Key: PHI (7-1) at DET (6-1), SAS -11.5 vs DAL, LAL -11.5 at SAC, MIL at BOS, CLE at OKC."
   }
 }
