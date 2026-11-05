@@ -1,67 +1,67 @@
 {
-  "last_updated": "2026-11-04",
+  "last_updated": "2026-11-05",
   "rolling_7d": {
-    "accuracy": 0.6076,
-    "ev_realized": 0.1605,
-    "total_games": 79,
-    "total_correct": 48,
-    "note": "Updated with Nov 3 eval: 5/11 ML (45.5%). Upset night: NJD beat EDM in SO, NSH crushed CAR, WPG rallied at MTL in OT, CBJ routed COL 7-2, ANA won at VAN (Gauthier hat trick)."
+    "accuracy": 0.625,
+    "ev_realized": 0.1937,
+    "total_games": 80,
+    "total_correct": 50,
+    "note": "Updated with Nov 4 eval: 13/18 ML (72.2%). 5 upsets: BKN beat CHA, IND beat MEM, MIN beat HOU, POR beat PHX, MIA beat LAC."
   },
   "rolling_30d": {
-    "accuracy": 0.6146,
-    "ev_realized": 0.174,
-    "total_games": 314,
-    "total_correct": 193,
-    "note": "30+ days of NBA+NHL data. Nov 3 added."
+    "accuracy": 0.6277,
+    "ev_realized": 0.1989,
+    "total_games": 325,
+    "total_correct": 204,
+    "note": "30+ days of NBA+NHL data. Nov 4 added."
   },
   "all_time": {
-    "accuracy": 0.5819,
-    "ev_realized": 0.1985,
-    "total_games": 806,
-    "total_correct": 469,
-    "total_bets_recommended": 3008,
+    "accuracy": 0.585,
+    "ev_realized": 0.1173,
+    "total_games": 824,
+    "total_correct": 482,
+    "total_bets_recommended": 3020,
     "total_bets_won": 1710
   },
   "variant_performance": {
     "recency-v1": {
-      "lifetime_games": 806,
-      "lifetime_correct": 469,
-      "lifetime_accuracy": 0.5819,
+      "lifetime_games": 824,
+      "lifetime_correct": 482,
+      "lifetime_accuracy": 0.585,
       "weight": 1.0,
       "role": "champion"
     },
     "regression-v1": {
-      "lifetime_games": 806,
-      "lifetime_correct": 468,
-      "lifetime_accuracy": 0.5806,
+      "lifetime_games": 824,
+      "lifetime_correct": 481,
+      "lifetime_accuracy": 0.5837,
       "weight": 0.7,
       "role": "challenger"
     },
     "combo-balanced-v1": {
-      "lifetime_games": 668,
-      "lifetime_correct": 395,
-      "lifetime_accuracy": 0.5913,
+      "lifetime_games": 686,
+      "lifetime_correct": 408,
+      "lifetime_accuracy": 0.5948,
       "weight": 1.0,
       "role": "challenger"
     },
     "injury-rest-v1": {
-      "lifetime_games": 806,
-      "lifetime_correct": 476,
-      "lifetime_accuracy": 0.5906,
+      "lifetime_games": 824,
+      "lifetime_correct": 489,
+      "lifetime_accuracy": 0.5934,
       "weight": 1.0,
       "role": "challenger"
     },
     "pace-adj-v1": {
-      "lifetime_games": 806,
-      "lifetime_correct": 464,
-      "lifetime_accuracy": 0.5757,
+      "lifetime_games": 824,
+      "lifetime_correct": 477,
+      "lifetime_accuracy": 0.5789,
       "weight": 0.30000000000000004,
       "role": "challenger"
     },
     "season-avg-v1": {
-      "lifetime_games": 806,
-      "lifetime_correct": 469,
-      "lifetime_accuracy": 0.5819,
+      "lifetime_games": 824,
+      "lifetime_correct": 482,
+      "lifetime_accuracy": 0.585,
       "weight": 0.7,
       "role": "challenger"
     }
@@ -94,15 +94,15 @@
     }
   ],
   "today_summary": {
-    "date": "2026-11-04",
-    "games_analyzed": 18,
-    "bets_recommended": 16,
-    "leans": 1,
+    "date": "2026-11-05",
+    "games_analyzed": 13,
+    "bets_recommended": 12,
+    "leans": 0,
     "no_bets": 1,
     "sports": [
-      "icehockey_nhl",
-      "basketball_nba"
+      "basketball_nba",
+      "icehockey_nhl"
     ],
-    "notes": "Nov 3 eval: 5/11 ML (45.5%). Tonight: 14 NBA + 4 NHL = 18 games. NBA returns post-Election Day. Key: PHI (7-1) at DET (6-1), SAS -11.5 vs DAL, LAL -11.5 at SAC, MIL at BOS, CLE at OKC."
+    "notes": "Nov 4 eval: 13/18 ML (72.2%). Tonight: 2 NBA + 11 NHL = 13 games. Light NBA night. Heavy NHL schedule."
   }
 }
